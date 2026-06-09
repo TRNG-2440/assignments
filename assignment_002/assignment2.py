@@ -107,7 +107,7 @@ def main():
             if outer_input == "0" or outer_input.lower() == EXIT.lower():
                 break
 
-            if (outer_input in MENU):
+            if outer_input in MENU:
                 while True:
                     #Inner Loop
                     try:
