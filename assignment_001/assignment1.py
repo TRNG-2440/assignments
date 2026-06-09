@@ -38,7 +38,7 @@ def do_game(max_guesses: int=MAX_GUESSES) -> None:
     """
     random_number: int = random.randint(1, 20)
     guess_count: int = 0
-    while (guess_count < max_guesses):
+    while guess_count < max_guesses:
         guess: int = -1
         instr: str = ""
         while(True):
@@ -49,10 +49,10 @@ def do_game(max_guesses: int=MAX_GUESSES) -> None:
                 break
             except Exception:
                 print(f"Invalid int {instr}")
-        if (guess > random_number):
+        if guess > random_number:
             print("Too high!")
             print(f"Number of guesses remaining: {max_guesses - guess_count}")
-        elif (guess < random_number):
+        elif guess < random_number:
             print("Too low!")
             print(f"Number of guesses remaining: {max_guesses - guess_count}")
         else:
