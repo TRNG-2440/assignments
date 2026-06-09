@@ -47,8 +47,8 @@ def do_game(max_guesses: int=MAX_GUESSES) -> None:
                 guess = int(instr)
                 guess_count += 1
                 break
-            except Exception:
-                print(f"Invalid int {instr}")
+            except Exception as e:
+                print(f"Invalid int {instr} {e}")
         if guess > random_number:
             print("Too high!")
             print(f"Number of guesses remaining: {max_guesses - guess_count}")
