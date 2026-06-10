@@ -254,8 +254,9 @@ def view_contacts(contacts: list[tuple[str, str, str]]) -> None:
         print(DIVIDER)
         return
     print(MINOR_DIVIDER)
-    for i in range(0, len(contacts)):
-        contact: tuple[str, str, str] = contacts[i]
+    sorted_contacts: list[tuple[str, str, str]] = sorted(contacts, key = lambda item: item[0])
+    for i in range(0, len(sorted_contacts)):
+        contact: tuple[str, str, str] = sorted_contacts[i]
         print_contact(contact, str(i+1) + ".")
         print(MINOR_DIVIDER)
 
