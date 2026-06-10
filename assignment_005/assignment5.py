@@ -152,6 +152,7 @@ MENU: list[str] = [
     "View all contacts",
     "Search for a contact",
     "Delete a contact",
+    "Edit a contact"
 ]
 
 DIVIDER: str = "════════════════════════════════════════"
@@ -189,6 +190,8 @@ def main() -> None:
                     search_contact(contacts)
                 case 4:
                     delete_contact(contacts)
+                case 5:
+                    edit_contact(contacts)
                 case 0:
                     print("Goodbye!")
                     return
@@ -316,6 +319,53 @@ def delete_contact(contacts: list[tuple[str, str, str]]):
 
         except ValueError:
             pass
+
+
+def edit_contact(contacts: list[tuple[str, str, str]]) -> None:
+    """
+    Prompts the user to edit a contact
+    :param contacts:
+    :return:
+    """
+
+    if len(contacts) == 0:
+        print(NO_CONTACTS)
+        print("")
+        print(DIVIDER)
+        return
+    print(MINOR_DIVIDER)
+    for i in range(0, len(contacts)):
+        contact: tuple[str, str, str] = contacts[i]
+        print_contact(contact, str(i+1) + ".")
+        print(MINOR_DIVIDER)
+
+    while True:
+        try:
+            selection: int = int(input("Choose a contact to edit: "))
+
+            if selection > len(contacts) or selection < 1:
+                raise ValueError
+
+            selection -= 1
+            to_edit: tuple[str, str, str] = contacts.pop(selection)
+            new_name: str = input(f"Edit name ({to_edit[0]}): ")
+            new_phone: str = input(f"Edit phone ({to_edit[1]}): ")
+            new_email: str = input(f"Edit email ({to_edit[2]}): ")
+
+            new_item: tuple[str, str, str] = (new_name, new_phone, new_email)
+            contacts.insert(selection, new_item)
+
+            print(f"Edited Contact ({to_edit[0]}):")
+            print(MINOR_DIVIDER)
+            print_contact(new_item)
+            print(MINOR_DIVIDER)
+            print("")
+            print(DIVIDER)
+            break
+
+        except ValueError:
+            pass
+
 
 def print_contact(contact: tuple[str, str, str], prefix = "") -> None:
     """
