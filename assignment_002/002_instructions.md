@@ -1,17 +1,19 @@
 # Activity 2 — Console Menu Selection System
 
-## Objective:
+## Objective
 
 Practice nested while loops, match statements, if-else, break, continue, and formatted output using only what you have learned so far
 
-## Instructions:
+## Instructions
 
 * Create a while True outer loop for the top-level category menu
 * Inside the outer loop, use print() statements to display a menu with 3 categories and an option to exit the program. For example:
+
 1. Electronics
 2. Clothing
 3. Food
 4. Exit
+
 * Use input() to collect the user's category selection
 * Use a match statement or if-elif-else to handle the category selection:
 
@@ -25,6 +27,7 @@ Inside each inner while True loop, use print() statements to display at least 2 
 1. Laptop
 2. Phone
 3. Back
+
 * Use input() to collect the user's item selection
 * Use a match statement or if-elif-else to handle the item selection:
 
