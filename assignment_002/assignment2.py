@@ -15,13 +15,13 @@ def main():
         print()
         match category:
             case 1:
-                case1()
+                case_1()
                 
             case 2:
-                case2()
+                case_2()
               
             case 3:
-                case3()   
+                case_3()   
                       
             case 4:
                 print("Exiting program")
@@ -31,7 +31,7 @@ def main():
                 continue
 
 
-def case1():
+def case_1():
     """Electronics category"""
     while True:
         print("Electronics Menu")
@@ -63,7 +63,7 @@ def case1():
             case _:
                 print(f"Invalid input.\n")
                 continue
-def case2():
+def case_2():
     """Clothing category"""
     while True:
         print("Clothing Menu")
@@ -94,7 +94,7 @@ def case2():
             case _:
                 print(f"Invalid input.\n")
                 continue
-def case3():
+def case_3():
     """Food category"""
     while True:
         print("Food Menu")
