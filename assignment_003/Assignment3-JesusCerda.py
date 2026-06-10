@@ -41,7 +41,6 @@ def markTaskComplete():
         print("  No pending tasks yet.\n")
         return
     
-    
     printOptions(pending_tasks)
     user_input = input("Enter task number to complete: ")-1
     
@@ -58,7 +57,6 @@ def markTaskComplete():
     task_name = pending_tasks[user_input]
     pending_tasks.remove[user_input]
     print(f"'{task_name}' marked as complete.\n")
-
 
 def removeCompletedTask():
     print("\nCompleted Tasks: ")
@@ -82,6 +80,10 @@ def removeCompletedTask():
     completed_tasks.remove[user_input]
     print(f"'{task_name}' removed from task list.\n")
 
+def clearAllCompleted():
+    completed_tasks.clear()
+    print("The completed task list is clear!")
+
 
 main_menu = ["Add a task", "View all tasks", "Mark a task as complete", "Remove a completed task", "Exit"]
 
@@ -93,4 +95,5 @@ printOptions(main_menu)
 # While true loop to activate menu
 while True:
     user_input = input( "--------------------------------------------" \
+                       f" Pending Tasks{pending_tasks.count}      Completed Tasks {completed_tasks.count}    " \
                         " Select an option! Just enter the number: ")
