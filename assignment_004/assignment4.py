@@ -215,7 +215,19 @@ def analyse_sentence(word_count: dict[str, int]) -> None:
     """
     sentence: str = input("Enter a sentence: ")
 
-    words: list[str] = sentence.split()
+    #clean of punctuation
+    words: list[str] = sentence\
+                .replace('.', '')\
+                .replace('!', '')\
+                .replace('?', '')\
+                .replace(',', '')\
+                .replace('"', '')\
+                .replace(';', '')\
+                .replace(':', '')\
+                .replace('/', '')\
+                .replace('\\', '')\
+                .split()
+
     for word in words:
         word_count[word.lower()] = word_count.get(word.lower(), 0) + 1
 
