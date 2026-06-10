@@ -1,6 +1,8 @@
 # Python Coding Activity 1 — Number Guessing Game
+
 Objective: Practice while loops, if-else statements, input(), and random
 Instructions:
+
 - Import the random module
 - Generate a random number between 1 and 20 using random.randint()
 - Set a maximum guess limit of 8 guesses
@@ -16,6 +18,7 @@ Instructions:
 - After the loop ends, if the user never guessed correctly, print "No more guesses!" and reveal the number
 
 Requirements checklist:
+
 - random.randint() to generate the number
 - while loop with a guess counter
 - int(input()) to collect and cast user input
