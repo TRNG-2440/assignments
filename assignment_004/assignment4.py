@@ -250,8 +250,11 @@ def view_word_counts(word_count: dict[str, int]) -> None:
         return
     print("Word Counts: ")
     print(MINOR_DIVIDER)
-    #TODO sort by v
-    for k, v in word_count.items():
+
+    #dictionary sorting https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
+    sorted_word_count: list[tuple[str, int]] = sorted(word_count.items(), key=lambda item: item[1], reverse=True)
+
+    for k, v in sorted_word_count:
         print(f"\t{v} - {k}")
     print(MINOR_DIVIDER)
     print(f"\tTotal unique words: {len(word_count)}")
