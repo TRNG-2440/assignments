@@ -223,11 +223,15 @@ def add_task(pending_tasks: list[str]) -> None:
     :param pending_tasks:
     :return:
     """
-    new_task:str = input("Enter task: ")
-    pending_tasks.append(new_task)
-    print(f"Task successfully added!: {new_task}")
-    print("")
-    print(DIVIDER)
+    while True:
+        new_task:str = input("Enter task: ")
+        if not new_task:
+            continue
+        pending_tasks.append(new_task)
+        print(f"Task successfully added!: {new_task}")
+        print("")
+        print(DIVIDER)
+        break
 
 
 def view_tasks(pending_tasks: list[str], completed_tasks: list[str]) -> None:
