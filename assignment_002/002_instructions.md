@@ -16,8 +16,7 @@ Practice nested while loops, match statements, if-else, break, continue, and for
 * Use a match statement or if-elif-else to handle the category selection:
 
   * A valid category selection should enter an inner while True loop for the item menu
-  * An exit selection should break out of the outer loop and end the program
-    * For example, in this case selecting '4. Exit' should end the program
+  * 0 / exit should break out of the outer loop and end the program
   * Any invalid input should continue and reprint the category menu
 
 Inside each inner while True loop, use print() statements to display at least 2 items for that category, plus an option to go back. For example:
@@ -29,7 +28,7 @@ Inside each inner while True loop, use print() statements to display at least 2 
 * Use a match statement or if-elif-else to handle the item selection:
 
   * A valid item selection should print the item's details using print() and f-strings — each item should display a name, price, quantity, and inventory hardcoded as variables or directly in the print statement
-  * The 'back' option (3. Back) should break out of the inner loop and return to the category menu
+  * 0 / back should break out of the inner loop and return to the category menu
   * Any invalid input should continue and reprint the item menu
 
 Requirements checklist:
