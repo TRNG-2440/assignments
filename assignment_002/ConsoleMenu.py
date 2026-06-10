@@ -30,14 +30,19 @@ def FoodMenu():
 # Source code
 while(True):
 
+# Display Menu
   Menu()
+  
   selection = input(f'Input Selection: ')
 
+  # Display list based on user's selection
   match selection:
 
     case "1":
 
       while(True):
+      
+      # Display electronics menu
         ElectronicsMenu()
 
         while(True):
@@ -93,6 +98,8 @@ while(True):
     case "2":
 
       while(True):
+      
+       # Display clothing menu
         ClothingMenu()
 
         while(True):
@@ -147,6 +154,12 @@ while(True):
               isTerminate = True
               break 
 
+            case _:
+                # Alert user that invalid entry was enter
+                print('\nInvalid entry - please re-enter option')
+
+                break 
+
           if(isTerminate == True):
             break
 
@@ -155,6 +168,8 @@ while(True):
     case "3":
 
       while(True):
+      
+       # Display food menu
         FoodMenu()
 
         while(True):
@@ -207,7 +222,14 @@ while(True):
             case "6": 
               print('\nRedirecting back to main menu\n')
               isTerminate = True
-              break 
+
+              break
+              
+            case _:
+                # Alert user that invalid entry was enter
+                print('\nInvalid entry - please re-enter option')
+
+                break 
 
         if(isTerminate == True):
           break
@@ -216,11 +238,14 @@ while(True):
 
     case "4":
 
+    # Alert user that program is exiting
       print('\nExiting\n')
       
       break
 
     case _:
+    
+    # Alert user that invalid entry was enter
       print('\nInvalid entry - please re-enter option')
 
    
