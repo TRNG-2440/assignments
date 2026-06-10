@@ -142,7 +142,7 @@ Once the core program is working, try adding:
 MENU: list[str] = [
     "Analyse a sentence",
     "View word counts",
-    "View most frequent word",
+    "View most frequent words",
     "Clear results",
 ]
 
@@ -176,7 +176,7 @@ def main() -> None:
                 case 2:
                     view_word_counts(word_count)
                 case 3:
-                    view_most_frequent_word(word_count)
+                    view_most_frequent_words(word_count)
                 case 4:
                     clear_results(word_count)
                 case 0:
@@ -255,7 +255,7 @@ def view_word_counts(word_count: dict[str, int]) -> None:
     print("")
     print(DIVIDER)
 
-def view_most_frequent_word(word_count: dict[str, int]) -> None:
+def view_most_frequent_words(word_count: dict[str, int], num_to_show: int = 3) -> None:
     """
     Views the most frequent word
     :param word_count:
@@ -269,9 +269,11 @@ def view_most_frequent_word(word_count: dict[str, int]) -> None:
 
     #dictionary sorting https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
     sorted_word_count: list[tuple[str, int]] = sorted(word_count.items(), key=lambda item: item[1], reverse=True)
-    top_word: tuple[str, int] = sorted_word_count[0]
-    #https://www.geeksforgeeks.org/python/ternary-operator-in-python/
-    print(f"Most frequent word: `{top_word[0]}` ({top_word[1]} time{"" if top_word[1] == 1 else "s"})")
+    print("Most frequent words: ")
+    for i in range(0, num_to_show):
+        current_word: tuple[str, int] = sorted_word_count[i]
+        #https://www.geeksforgeeks.org/python/ternary-operator-in-python/
+        print(f"`{current_word[0]}` ({current_word[1]} time{"" if current_word[1] == 1 else "s"})")
     print("")
     print(DIVIDER)
 
