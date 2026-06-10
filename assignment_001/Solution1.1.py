@@ -1,0 +1,26 @@
+import random
+
+my_num = random.randint(1, 20)
+
+max_guesses = 8
+
+guess_count = 0
+
+while guess_count < max_guesses:
+    user_guess = int(input("Enter a guess: "))
+    guess_count += 1
+    if user_guess == my_num:
+        print("Correct!")
+        break
+    elif user_guess > my_num:
+        print("Too high!")
+        print(f"You have {max_guesses - guess_count} guesses left.")
+    else:
+        print("Too low!")
+        print(f"You have {max_guesses - guess_count} guesses left.")
+    
+    if guess_count == max_guesses:
+        print(f"No more guesses! The number was {my_num}")
+
+        # This is to restore this code
+        
