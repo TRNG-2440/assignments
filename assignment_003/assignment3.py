@@ -184,7 +184,7 @@ def main() -> None:
                 case 3:
                     complete_task(pending_tasks, completed_tasks)
                 case 4:
-                    remove_compeleted_task(completed_tasks)
+                    remove_completed_task(completed_tasks)
                 case 5:
                     clear_completed_tasks(completed_tasks)
                 case 6:
@@ -235,17 +235,18 @@ def add_task(pending_tasks: list[str]) -> None:
 
 
 def view_tasks(pending_tasks: list[str], completed_tasks: list[str]) -> None:
-   """
-   Show all tasks
-   :param pending_tasks:
-   :param completed_tasks:
-   :return:
-   """
-   print_task_list("pending", pending_tasks)
-   print("")
-   print_task_list("completed", completed_tasks)
-   print("")
-   print(DIVIDER)
+    """
+    Show all tasks
+    :param pending_tasks:
+    :param completed_tasks:
+    :return:
+    """
+    print(f"Pending ({len(pending_tasks)}) Completed ({completed_tasks})")
+    print_task_list("pending", pending_tasks)
+    print("")
+    print_task_list("completed", completed_tasks)
+    print("")
+    print(DIVIDER)
 
 def complete_task(pending_tasks: list[str], completed_tasks: list[str]) -> None:
     """
@@ -275,7 +276,7 @@ def complete_task(pending_tasks: list[str], completed_tasks: list[str]) -> None:
         except ValueError:
             print("")
 
-def remove_compeleted_task(completed_tasks: list[str]) -> None:
+def remove_completed_task(completed_tasks: list[str]) -> None:
     """
     Prompts and removes a completed task
     :param pending_tasks:
@@ -322,8 +323,10 @@ def print_task_list(task_type: str, tasks: list[str]) -> None:
     :param tasks:
     :return:
     """
-    print(f"{task_type.capitalize()} Tasks:")
-    if len(tasks) == 0:
+
+    length: int = len(tasks)
+    print(f"{task_type.capitalize()} Tasks ({length}):")
+    if length == 0:
         print(f"\tNo {task_type} tasks yet.")
         return
 
