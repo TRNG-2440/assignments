@@ -11,7 +11,7 @@ class InventoryItem():
         return self.name
     
     def prettyStr(self):
-        return f"\n{self.name: <15} ${self.price: >7.2f} {self.qty: >5} {self.inv: >5}"
+        return f"\nname: {self.name: >20}  ${self.price: >7.2f}   qty:{self.qty: >4}   inv:{self.inv: >4}"
 
 def print_menu(items):
     print()
