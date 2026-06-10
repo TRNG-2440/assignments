@@ -158,6 +158,7 @@ MENU: list[str] = [
 DIVIDER: str = "════════════════════════════════════════"
 MINOR_DIVIDER: str = "────────────────────────────────────────"
 NO_CONTACTS: str = "There are no contacts currently."
+INVALID_NAME: str = "There is already a contact with that name, choose a different one."
 
 
 def main() -> None:
@@ -226,8 +227,12 @@ def add_contact(contacts: list[tuple[str, str, str]]) -> None:
     :param contacts:
     :return:
     """
-    #TODO no duplicate names
-    name: str = input("Enter name: ")
+    while True:
+        name: str = input("Enter name: ")
+        if not has_name(contacts, name):
+            break
+        print(INVALID_NAME)
+
     phone: str = input("Enter phone: ")
     email: str = input("Enter email: ")
     new_contact: tuple[str, str, str] = (name, phone, email)
@@ -348,7 +353,13 @@ def edit_contact(contacts: list[tuple[str, str, str]]) -> None:
 
             selection -= 1
             to_edit: tuple[str, str, str] = contacts.pop(selection)
-            new_name: str = input(f"Edit name ({to_edit[0]}): ")
+
+            while True:
+                new_name: str = input(f"Edit name ({to_edit[0]}): ")
+                if not has_name(contacts, new_name):
+                    break
+                print(INVALID_NAME)
+
             new_phone: str = input(f"Edit phone ({to_edit[1]}): ")
             new_email: str = input(f"Edit email ({to_edit[2]}): ")
 
@@ -365,6 +376,19 @@ def edit_contact(contacts: list[tuple[str, str, str]]) -> None:
 
         except ValueError:
             pass
+
+def has_name(contacts: list[tuple[str, str, str]], name: str) -> bool:
+    """
+
+    :param contacts:
+    :param name:
+    :return: True if name is in contacts
+    """
+    for contact in contacts:
+        contact_name: str = contact[0]
+        if name.lower() == contact_name.lower():
+            return True
+    return False
 
 
 def print_contact(contact: tuple[str, str, str], prefix = "") -> None:
