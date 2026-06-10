@@ -43,6 +43,8 @@ def TaskManager(option, map, isMenu):
         case "0":
           isTerminated = True
           print("\nProgram has been terminated.\n")
+
+          print("\nGoodbye!\n")
           break
 
         case "1":
@@ -58,7 +60,7 @@ def TaskManager(option, map, isMenu):
             else: 
               isEmpty = False
               map[task] = "Incomplete"
-              print(f'\n{task} has been successfully added')
+              print(f'\nTask successfully added: {task}')
             
           break
         
