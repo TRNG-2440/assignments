@@ -150,6 +150,7 @@ MENU: list[str] = [
     "View all tasks",
     "Mark a task as complete",
     "Remove a completed task",
+    "Clear all Completed tasks",
     "Exit",
 ]
 
@@ -185,6 +186,8 @@ def main() -> None:
                 case 4:
                     remove_compeleted_task(completed_tasks)
                 case 5:
+                    clear_completed_tasks(completed_tasks)
+                case 6:
                     print("Goodbye!")
                     return
 
@@ -294,6 +297,19 @@ def remove_compeleted_task(completed_tasks: list[str]) -> None:
             break
         except ValueError:
             print("")
+
+def clear_completed_tasks(completed_tasks: list[str]) -> None:
+    """
+    clears the completed task list
+    :param completed_tasks:
+    :return:
+    """
+
+    completed_tasks.clear()
+    print("Cleared all completed tasks!")
+    print("")
+    print(DIVIDER)
+
 
 def print_task_list(task_type: str, tasks: list[str]) -> None:
     """
