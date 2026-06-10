@@ -144,14 +144,6 @@ def TaskManager(option, map, isMenu):
     if(isTerminated):
       break
 
-       
-
-
-
-          
-    
-
-
 # Display menu      
 Menu()
 
