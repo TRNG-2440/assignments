@@ -14,7 +14,7 @@ class Task:
         return self.name
     
     def describe(self):
-        return f"\tName: {self.name}\n\tDescription:{self.desc}\n\tStatus: {self.status}"
+        return f"\tName: {self.name}\n\tDescription: {self.desc}\n\tStatus: {self.status}"
 
 class TaskList:
     def __init__(self):
@@ -49,7 +49,7 @@ class TaskList:
             print(f"Completed {temp}")
     def remove_completed(self):
         if not len(self.completed):
-            print("nothing too remove")
+            print("nothing to remove")
             return None
         print_menu(*self.completed)
         s = get_selection(len(self.completed))
