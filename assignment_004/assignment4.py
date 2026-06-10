@@ -143,6 +143,7 @@ MENU: list[str] = [
     "Analyse a sentence",
     "View word counts",
     "View most frequent words",
+    "Search frequent words",
     "Clear results",
 ]
 
@@ -178,6 +179,8 @@ def main() -> None:
                 case 3:
                     view_most_frequent_words(word_count)
                 case 4:
+                    search_word_count(word_count)
+                case 5:
                     clear_results(word_count)
                 case 0:
                     print("Goodbye!")
@@ -264,6 +267,7 @@ def view_most_frequent_words(word_count: dict[str, int], num_to_show: int = 3) -
 
     if len(word_count) == 0:
         print(NO_WORDS)
+        print("")
         print(DIVIDER)
         return
 
@@ -276,6 +280,32 @@ def view_most_frequent_words(word_count: dict[str, int], num_to_show: int = 3) -
         print(f"`{current_word[0]}` ({current_word[1]} time{"" if current_word[1] == 1 else "s"})")
     print("")
     print(DIVIDER)
+
+def search_word_count(word_count: dict[str, int]) -> None:
+    """
+    Prompts for and searches for a word in the word count
+    :param word_count: 
+    :return: 
+    """
+
+    if len(word_count) == 0:
+        print(NO_WORDS)
+        print("")
+        print(DIVIDER)
+        return
+
+    word: str = input("Enter a word to lookup: ")
+
+    if word.lower() not in word_count:
+        print(f"{word} is never seen")
+        print("")
+        print(DIVIDER)
+        return
+
+    print(f"`{word}` ({word_count[word]} time{"" if word_count[word] == 1 else "s"})")
+    print("")
+    print(DIVIDER)
+
 
 def clear_results(word_count: dict[str, int]) -> None:
     """
