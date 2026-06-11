@@ -77,8 +77,8 @@ def get_selection(lim:int = 0) -> int:
         try:
             sel = int(input(f"select a number between 1-{lim}: "))
         except ValueError:
-            print("select a number")
-            pass
+            print("bad value")
+            continue
         except Exception as e:
             raise e
 
