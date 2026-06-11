@@ -42,45 +42,29 @@ def AnalyzeSentence() -> list:
 # ------------------------------------------------------------------------
 
 # Determine the number of words within a sentence
-def WordCount(wordList) -> None:
+def WordCount(word_count) -> None:
 
   # Add space
   print()
-
 
   print("\n------------------------------"\
   "\n     Word Counts"\
   "\n------------------------------")
 
-  # Declare dictionary to keep track of each word
-  wordDictionary = dict()
-
-  # Determine
-  for w in wordList:
-    wordDictionary[w] = wordDictionary.get(w, 0) + 1
-
   # Determine word count for each word
-  for w in wordDictionary:
-    print(f'{w} : {wordDictionary[w]}')
+  for w in word_count:
+    print(f'{w} : {word_count[w]}')
 
 # ------------------------------------------------------------------------
   
 # Determine most frequent word
-def MostFrequentWord(wordList) -> str:
-
-# Declare dictionary to keep track of each word
-  wordDictionary = dict()
-
-  # Determine word count for each word
-  for w in wordList:
-    wordDictionary[w] = wordDictionary.get(w, 0) + 1
-
+def MostFrequentWord(word_count) -> str:
 
   # Retreive word with most frequent count
-  maxWord = max(wordDictionary, key=wordDictionary.get)
+  maxWord = max(word_count, key=word_count.get)
 
   # Retreive most frequent count
-  maxCount = wordDictionary[maxWord]
+  maxCount = word_count[maxWord]
 
   # Return most frequent word
   return f'\nMost frequent word: "{maxWord}" ({maxCount} time{"s" if maxCount > 1 else ""})'
@@ -88,16 +72,22 @@ def MostFrequentWord(wordList) -> str:
 # ------------------------------------------------------------------------
 
 # Reset program
-def ClearWord(wordList) -> None:
+def ClearWord(wordList,word_count) -> None:
+
   wordList.clear()
+
+  word_count.clear()
 
 # ------------------------------------------------------------------------
 
 # Main menthod
 def main():
 
-  # Declare global variable that collects words
-  wordList = []  
+  # Declare variable that collects words
+  wordList = [] 
+
+  # Declare dictionary to keep track of each word
+  word_count = dict()
 
   while(True):
 
@@ -124,20 +114,27 @@ def main():
             # Implement sentence algorithm
             wordList = AnalyzeSentence()
 
+            # Determine
+            for w in wordList:
+              word_count[w] = word_count.get(w, 0) + 1 
+
             # Print confirmation message
             print('\nSentence has been sucessfully analyzed')
 
         case "2":
 
-            WordCount(wordList)
+            # Count word
+            WordCount(word_count)
 
         case "3":
 
-            print(MostFrequentWord(wordList))
+            # Print the most frequent word
+            print(MostFrequentWord(word_count))
 
         case "4":
 
-            wordList.clear()
+            # Clear list and dictionary
+            ClearWord(wordList,word_count)
 
             print('\nList successfully cleared\n')
 
