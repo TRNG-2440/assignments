@@ -42,7 +42,7 @@ def main():
                           continue
 
             except Exception as e:
-                print(f"Exception: {e}")  
+                #print(f"Exception: {e}")  
                 print("Invalid Selection. Please try again.") 
                 continue
 
@@ -57,7 +57,7 @@ def add_task(pending_list):
             print("Task successfully added to Pending Task List!")
             return
         except Exception as e:
-             print(f"Exception: {e}")
+             #print(f"Exception: {e}")
              print("Please enter a valid task description(ie. 'Do Laundry')")
              continue
   
@@ -112,7 +112,7 @@ def mark_complete(pending_list, completed_list):
                 print(f"Successfully added '{removed_task}' to Completed Task List")
                 return
             except Exception as e:
-                 print(f"Exception: {e}")
+                 #print(f"Exception: {e}")
                  print(f"Please enter a valid number between 1 and {count}")
                  continue
         else:
