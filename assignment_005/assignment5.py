@@ -2,79 +2,106 @@
 
 A console-based contact management system that allows users to:
 - Add, view, search, delete, and update contacts
-- Store contacts as tuples within a list
+- Store contacts as Contact objects within a list
 - Sort contacts alphabetically
 
-Contact data is stored as immutable tuples (name, phone, email) within a list.
-Users interact through a menu-driven command-line interface.
+Contacts are stored as Contact objects (each containing name, phone, and email fields)
+within a list. Users interact through a menu-driven command-line interface.
 """
-from typing import Iterator, List, Optional, Tuple
+
+from typing import Iterator, List, Optional
+
 
 class Contact:
     """Represents a single contact with name, phone, and email.
-    
-    This class wraps a tuple of contact information and provides
-    iteration and indexing capabilities.
+
+    This class stores contact information as individual attributes and provides
+    iteration and string representation capabilities.
     """
+
     def __init__(self, name: str, phone: str, email: str) -> None:
         """Initialize a Contact with name, phone, and email.
-        
+
         Args:
             name: The contact's full name.
             phone: The contact's phone number.
             email: The contact's email address.
         """
-        self.contact: Tuple[str, str, str] = (name, phone, email)
+        self.name = name
+        self.phone = phone
+        self.email = email
 
     def __iter__(self) -> Iterator[str]:
         """Enable iteration over contact fields (name, phone, email).
-        
-        Returns:
-            An iterator over the tuple values.
-        """
-        return iter(self.contact)
 
-    def __getitem__(self, key) -> Tuple[str, str, str]:
-        """Enable indexing to access the contact tuple.
-        
-        Args:
-            key: The index to access.
-            
         Returns:
-            The contact tuple.
+            An iterator over the instance attribute values.
         """
-        return self.contact
+        # vars(self) returns a dictionary of all instance attributes
+        yield from vars(self).values()
+
+    def __repr__(self) -> str:
+        """Return a developer-friendly string representation of the Contact.
+
+        Returns:
+            A string in the format: Contact(name='...', phone='...', email='...')
+        """
+        return (
+            f"Contact(name='{self.name}', phone='{self.phone}', email='{self.email}')"
+        )
 
 
 class ContactBook:
     """Manages a collection of contacts.
-    
+
     Provides methods to add, view, search, delete, and update contacts
     stored as Contact objects in a list.
     """
+
     def __init__(self) -> None:
         """Initialize an empty ContactBook with no contacts."""
         self.contacts: List[Contact] = []
 
+    def _display_contact(
+        self, contact: "Contact", include_index: bool = False, index: int = 0
+    ) -> None:
+        """Display a single contact's details in formatted output.
+
+        Args:
+            contact: The Contact object to display.
+            include_index: If True, display the contact with an index number.
+            index: The 1-based index to display (only used if include_index is True).
+        """
+        print("────────────────────────────────────────")
+        if include_index:
+            print(f"{index}. Name: {contact.name}")
+            print(f"   Phone: {contact.phone}")
+            print(f"   Email: {contact.email}")
+        else:
+            print(f"Name: {contact.name}")
+            print(f"Phone: {contact.phone}")
+            print(f"Email: {contact.email}")
+        print("────────────────────────────────────────")
+
     def check_if_name_exists(self, name_to_search: str) -> bool:
         """Check if a contact with the given name already exists.
-        
+
         Args:
             name_to_search: The name to search for (case-insensitive).
-            
+
         Returns:
             True if a contact with this name exists, False otherwise.
         """
-        for name, phone, email in self.contacts:
-            if name.lower() == name_to_search.lower():
+        for contact in self.contacts:
+            if contact.name.lower() == name_to_search.lower():
                 return True
         return False
 
     def add_contact(self, name: str, phone: str, email: str) -> None:
         """Add a new contact to the contact book.
-        
+
         Prevents duplicate names (case-insensitive) and validates input.
-        
+
         Args:
             name: The contact's name.
             phone: The contact's phone number.
@@ -94,7 +121,7 @@ class ContactBook:
 
     def view_contacts(self, sort_by_name=False, reverse=False) -> None:
         """Display all contacts in a formatted list.
-        
+
         Args:
             sort_by_name: If True, sort contacts alphabetically by name (default: False).
             reverse: If True, sort in reverse alphabetical order (default: False).
@@ -105,25 +132,21 @@ class ContactBook:
         if sort_by_name:
             contacts = sorted(
                 self.contacts,
-                key=lambda contact: contact.contact[0].lower(),
+                key=lambda contact: contact.name.lower(),
                 reverse=reverse,
             )
         if contacts:
             print("All Contacts:")
-            print("────────────────────────────────────────")
             # Display each contact with formatting
-            for idx, (name, phone, email) in enumerate(contacts):
-                print(f"{idx + 1}. Name: {name}")
-                print(f"   Phone: {phone}")
-                print(f"   Email: {email}")
-                print("────────────────────────────────────────")
+            for idx, contact in enumerate(contacts):
+                self._display_contact(contact, include_index=True, index=idx + 1)
             print()
         else:
             print("No contacts added yet.")
 
     def search_contact(self, name_to_search: str) -> None:
         """Search for contacts by name (case-insensitive, partial match).
-        
+
         Args:
             name_to_search: The name or partial name to search for.
         """
@@ -131,15 +154,11 @@ class ContactBook:
         filtered_contacts = [
             contact
             for contact in self.contacts
-            if name_to_search.lower() in contact.contact[0].lower()
+            if name_to_search.lower() in contact.name.lower()
         ]
         # Display each matching contact
-        for name, phone, email in filtered_contacts:
-            print("────────────────────────────────────────")
-            print(f"Name: {name}")
-            print(f"Phone: {phone}")
-            print(f"Email: {email}")
-            print("────────────────────────────────────────")
+        for contact in filtered_contacts:
+            self._display_contact(contact)
         print()
 
         # Notify if no matches found
@@ -148,14 +167,14 @@ class ContactBook:
 
     def delete_contact(self, contact_id: Optional[int]) -> None:
         """Delete a contact by its ID.
-        
+
         Args:
             contact_id: The 1-based index of the contact to delete.
         """
         # Validate that the contact ID is within range
         if contact_id and 1 <= contact_id <= len(self.contacts):
             contact: Contact = self.contacts.pop(contact_id - 1)
-            print(f"Successfully deleted contact: {contact[0]}")
+            print(f"Successfully deleted contact: {contact.name}")
         else:
             print("Invalid contact id! Try again..")
 
@@ -163,10 +182,10 @@ class ContactBook:
         self, contact_id: Optional[int], name: str, phone: str, email: str
     ) -> None:
         """Update an existing contact's information.
-        
-        Since tuples are immutable, the old contact is removed and a new one is added.
+
+        The old contact is removed and a new one is added with updated values.
         Fields left blank retain their original values.
-        
+
         Args:
             contact_id: The 1-based index of the contact to update.
             name: The new name (or empty string to keep existing).
@@ -175,16 +194,18 @@ class ContactBook:
         """
         # Validate that the contact ID is within range
         if contact_id and 1 <= contact_id <= len(self.contacts):
-            if self.check_if_name_exists(name.strip()):
+            if name.strip().lower() != self.contacts[
+                contact_id - 1
+            ].name and self.check_if_name_exists(name.strip()):
                 print(f"Contact with name: {name.strip()} already exists!")
             else:
                 # Remove the old contact
                 contact: Contact = self.contacts.pop(contact_id - 1)
 
                 # Use new values if provided, otherwise keep old values
-                updated_name: str = name if name.strip() else contact.contact[0]
-                updated_phone: str = phone if phone.strip() else contact.contact[1]
-                updated_email: str = email if email.strip() else contact.contact[2]
+                updated_name: str = name if name.strip() else contact.name
+                updated_phone: str = phone if phone.strip() else contact.phone
+                updated_email: str = email if email.strip() else contact.email
 
                 # Create and add the updated contact
                 updated_contact: Contact = Contact(
@@ -192,22 +213,23 @@ class ContactBook:
                 )
 
                 self.contacts.append(updated_contact)
+                print(f"Updated contact: {updated_name}")
         else:
             print("Invalid contact id! Try again..")
 
-
-def print_menu():
-    """Display the main menu options to the user."""
-    print("════════════════════════════════════════")
-    print("            CONTACT BOOK                ")
-    print("════════════════════════════════════════")
-    print("1. Add a contact")
-    print("2. View all contacts")
-    print("3. Search for a contact")
-    print("4. Delete a contact")
-    print("5. View contacts sorted by name")
-    print("6. Edit a contact")
-    print("0. Exit")
+    @staticmethod
+    def print_menu():
+        """Display the main menu options to the user."""
+        print("════════════════════════════════════════")
+        print("            CONTACT BOOK                ")
+        print("════════════════════════════════════════")
+        print("1. Add a contact")
+        print("2. View all contacts")
+        print("3. Search for a contact")
+        print("4. Delete a contact")
+        print("5. View contacts sorted by name")
+        print("6. Edit a contact")
+        print("0. Exit")
 
 
 def try_cast_to_int(prompt: str) -> Optional[int]:
@@ -230,7 +252,7 @@ def try_cast_to_int(prompt: str) -> Optional[int]:
 if __name__ == "__main__":
     # Initialize the contact book and display the main menu
     contact_book: ContactBook = ContactBook()
-    print_menu()
+    contact_book.print_menu()
 
     # Main program loop - continue until user selects option 0 (exit)
     while True:
