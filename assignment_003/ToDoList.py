@@ -36,71 +36,66 @@ def TaskManager(option, map, isMenu):
 
     isTerminated = False
 
-    while(True):
+    match(option):
 
-      match(option):
-
-        case "0":
-          isTerminated = True
-          print("\nProgram has been terminated.\n")
-
-          print("\nGoodbye!\n")
-          break
-
-        case "1":
-
-          isEmpty = True
-
-          while isEmpty:
-            task = input('\nInput a task: ')
-
-            if not task:
-              print('\nError - task is empty. Please re-enter task')
-
-            else: 
-              isEmpty = False
-              map[task] = "Incomplete"
-              print(f'\nTask successfully added: {task}')
-            
-          break
+      case "0":
         
-        case "2":
+        print("\nProgram has been terminated.")
 
-          if(map):
-            print("\n------------------------------"\
-            "\n         View Tasks"\
-            "\n------------------------------")
-            for i, (key, value) in enumerate(map.items()):
-              print(f'{i+1}. {key} | {value}')
+        print("\nGoodbye!\n")
+
+        break
+
+      case "1":
+
+        isEmpty = True
+
+        while isEmpty:
+          task = input('\nInput a task: ')
+
+          if not task:
+            print('\nError - task is empty. Please re-enter task')
+
+          else: 
+            isEmpty = False
+            map[task] = "Incomplete"
+            print(f'\nTask successfully added: {task}')
+        
+      case "2":
+
+        if(map):
+          print("\n------------------------------"\
+          "\n         View Tasks"\
+          "\n------------------------------")
+          for i, (key, value) in enumerate(map.items()):
+            print(f'{i+1}. {key} | {value}')
           
-          else:
-            print("\nList is empty.  Please add a task.")
-          
-          break
+        else:
+          print("\nList is empty.  Please add a task.")
 
-        case "3":
+      case "3":
 
-          if(map):
-            task = input("\nMark task as complete: ")
+        if(map):
+          task = input("\nMark task as complete: ")
 
-            while(True):
-              if map.get(task):
-                map[task] = "Complete"
-                print(f'\n{task} has been marked as complete!\n')
-                break
+          while(True):
+            if map.get(task):
+              map[task] = "Complete"
+              print(f'\n{task} has been marked as complete!\n')
+              break
 
-              else:
-                print("\nInvalid input - please re-enter\n")
-                task = input("\nMark task as complete: ")
+            else:
+              print("\nInvalid input - please re-enter\n")
+              task = input("\nMark task as complete: ")
 
-          else:
-            print("\nList is empty.  Please add a task.")
+        else:
+          print("\nList is empty.  Please add a task.")
 
-          break
+   
 
-        case "4":
+      case "4":
 
-          if(map):
+        if(map):
             task = input("\nRemove task: ")
 
             while(True):
@@ -108,35 +103,35 @@ def TaskManager(option, map, isMenu):
                 map.pop(task)
                 print(f'\n{task} has been sucessfully removed')
                 break
+          
 
               else:
                 print(f'\n{task} was not found\n')
                 break
             
+        else:
+          print("\nList is empty.  Please add a task.")
+
+        
+      case "5":
+
+        if(map):
+          select = input('\nAre you sure to clear list (Y/N)? ')
+          
+          if select.lower() == 'y':
+            map.clear()
+
+          else:
+            print("\nList has not been cleared\n")
+
+          while(select.lower() != 'y' or select.lower() != 'n'):
+            print("\nInvalid input - Please enter\n")
+            select = input('\nAre you sure to clear list (Y/N)? ')
+            
           else:
             print("\nList is empty.  Please add a task.")
 
-          break
-        
-        case "5":
-
-          if(map):
-            select = input('\nAre you sure to clear list (Y/N)? ')
-          
-            if select.lower() == 'y':
-              map.clear()
-
-            else:
-              print("\nList has not been cleared\n")
-
-            while(select.lower() != 'y' or select.lower() != 'n'):
-              print("\nInvalid input - Please enter\n")
-              select = input('\nAre you sure to clear list (Y/N)? ')
-            
-            else:
-              print("\nList is empty.  Please add a task.")
-
-        case _:
+      case _:
     
           # Alert user that invalid entry was enter
           print('\nInvalid entry - please re-enter option') 
