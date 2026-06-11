@@ -1,0 +1,88 @@
+def CleanWords(sentence):
+    new_sentence = ""
+    for ch in sentence:
+        if ch.isalpha() or ch == " ":
+            new_sentence += ch
+    print(new_sentence)
+    return new_sentence
+
+def CountWords(lst):
+    word_count = {}
+    for word in lst:
+        word_count[word] = word_count.get(word, 0) + 1
+    return word_count
+
+def FreqSort(dct):
+    sort_by_freq = sorted(dct.items(), key=lambda w: w[1])
+    sort_by_freq.reverse()
+    return sort_by_freq
+
+def FreqCounter():
+    word_count = {}
+    words_list = []
+
+    while True:
+        print("--------------------------------------")
+        print("                 MENU                 ")
+        print("--------------------------------------")
+        print("1. Analyse a sentence")
+        print("2. View word counts alphabetically")
+        print("3. View word counts by frequency")
+        print("4. View most frequent word")
+        print("5. Word search")
+        print("6. Clear results")
+        print("0. Exit")
+        inp = input("Choose an option to continue: ")
+        
+        match inp:
+            case "1" | "1. Analyse a sentence":
+                print("--------------------------------------")
+                inp1 = input("Give me a sentence: ").lower()
+                
+                # cleaning word_count
+                inp1 = CleanWords(inp1)
+                inp_split = inp1.split()
+                words_list = words_list + inp_split
+                word_count = CountWords(words_list)
+                
+                print(f"{len(inp_split)} words were processed.")
+            case "2" | "2. View word counts alphabetically":
+                print("--------------------------------------")
+                if not word_count: print("No words have been analyzed yet.")
+                else:
+                    print("WORDS:")
+                    for key, value in sorted(word_count.items()):
+                        print(f"{key}: {value}")
+                    print(f"{len(word_count)} unique words.")    
+            case "3" | "3. View word counts by frequency":
+                print("--------------------------------------")
+                if not word_count: print("No words have been analyzed yet.")
+                else:
+                    print("WORDS:")
+                    new_count = FreqSort(word_count)
+                    for key, value in new_count:
+                        print(f"{key}: {value}")
+                    print(f"{len(word_count)} unique words.")    
+            case "4" | "4. View most frequent word":
+                print("--------------------------------------")
+                if not word_count: print("No words have been analyzed yet.")
+                else:
+                    print(f"\"{FreqSort(word_count)[:3]}\" have the highest word counts.")
+            case "5" | "5. Word search":
+                print("--------------------------------------")
+                if not word_count: print("No words have been analyzed yet.")
+                else:
+                    inp4 = input("Enter a word to search for its frequency: ").lower()
+                    if inp4 not in word_count: print("Word does not exist in word_count.")
+                    else: print(f"\"{inp4}\" has appeared {word_count[inp4]} times in word_count.")
+            case "6" | "6. Clear results":
+                print("--------------------------------------")
+                word_count = {}
+                print("word_count has been cleared.")
+            case "0" | "0. Exit":
+                print("--------------------------------------")
+                print("Exiting menu.")
+                print("--------------------------------------")
+                break
+    
+FreqCounter()
