@@ -37,9 +37,36 @@ while main_menu:
                 print("Word Counts:")
                 print("────────────────────────────────────────")
                 for word, count in word_counts.items():
-                    print(f"{word} | {count}")
+                    print(f"{word:<10} | {count}")
                 print("-────────────────────────────────────────")
                 print("Total unique words:", len(word_counts))
                 print()
                 print("════════════════════════════════════════")
                 continue
+        case 3:
+            if not word_counts:
+                print("No sentence analysed yet.")
+                print()
+                continue
+            else:
+                for word, count in word_counts.items():
+                    if count == max(word_counts.values()):
+                        print(f"Most frequent word: \"{word}\"  ({count} times)")
+                print()
+                print("════════════════════════════════════════")
+                continue
+        case 4:
+            word_counts.clear()
+            print("Results cleared successfully!")
+            print()
+            print("════════════════════════════════════════")
+            continue
+        case 0:
+            print("Goodbye!")
+            break
+        case _:
+            print("Invalid choice. Please try again.")
+            print()
+            print("════════════════════════════════════════")
+            continue
+    
