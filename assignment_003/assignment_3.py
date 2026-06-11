@@ -75,6 +75,7 @@ def view_tasks(pending_list, completed_list):
             count+=1
             print(f"{count:>5}. {pending}")
     else:
+        print()
         print("Pending Task List is Empty!")
 
     if completed_list:
@@ -84,6 +85,7 @@ def view_tasks(pending_list, completed_list):
             count+=1
             print(f"{count:>5}. {completed}")
     else:
+        print()
         print("Completed Task List is Empty!")
     return
     
@@ -107,7 +109,7 @@ def mark_complete(pending_list, completed_list):
                 #zero indexed so -1
                 removed_task = pending_list.pop(task_num-1) #returns value of removed
                 completed_list.append(removed_task) # adding to completed_list
-                print("Successfully added '{removed_task}' to Completed Task List")
+                print(f"Successfully added '{removed_task}' to Completed Task List")
                 return
             except Exception as e:
                  print(f"Exception: {e}")
@@ -137,8 +139,8 @@ def remove_completed(completed_list):
                 print(f"Task: '{removed_task}' was removed from the Completed Task List")
                 return
             except Exception as e:
-                 print(f"Exception: {e}")
-                 print(f"Please enter a valid task number between 1 and {count}.")
+                 #print(f"Exception: {e}")  # for testing
+                 print(f"Please enter a valid task number between 1 and {count}.\n")
                  continue
         
         else:
