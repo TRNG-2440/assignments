@@ -99,18 +99,18 @@ class TodoList:
         self.completed_tasks = []
         print("Cleared all completed tasks")
 
-
-def print_menu() -> None:
-    """Display the main menu options for the to-do list application."""
-    print("════════════════════════════════════════")
-    print("         TO-DO LIST MANAGER             ")
-    print("════════════════════════════════════════")
-    print("1. Add a task")
-    print("2. View all tasks")
-    print("3. Mark a task as complete")
-    print("4. Remove a completed task")
-    print("5. Clear all completed tasks")
-    print("0. Exit")
+    @staticmethod
+    def print_menu() -> None:
+        """Display the main menu options for the to-do list application."""
+        print("════════════════════════════════════════")
+        print("         TO-DO LIST MANAGER             ")
+        print("════════════════════════════════════════")
+        print("1. Add a task")
+        print("2. View all tasks")
+        print("3. Mark a task as complete")
+        print("4. Remove a completed task")
+        print("5. Clear all completed tasks")
+        print("0. Exit")
 
 
 def try_cast_to_int(prompt: str) -> Optional[int]:
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     manager: TodoList = TodoList()
 
     # Display the menu once at startup
-    print_menu()
+    manager.print_menu()
 
     while True:
         print("════════════════════════════════════════")

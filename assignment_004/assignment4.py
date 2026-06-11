@@ -5,24 +5,24 @@ from typing import Dict, List, Optional, Tuple
 
 class WordCounter:
     """A console-based word frequency counter that analyzes sentences and tracks word occurrences.
-    
+
     This class maintains a dictionary of words and their frequencies, providing methods
     to analyze sentences, view statistics, search for words, and manage the data.
     """
-    
+
     def __init__(self) -> None:
         """Initialize the WordCounter with an empty word count dictionary."""
         self.word_count: Dict[str, int] = {}
 
     def analyze(self, sentence: str) -> None:
         """Analyze a sentence and update word frequency counts.
-        
+
         Processes the input sentence by:
         - Removing punctuation
         - Converting to lowercase
         - Splitting into individual words
         - Updating the word count dictionary
-        
+
         Args:
             sentence: The input sentence to analyze
         """
@@ -43,7 +43,7 @@ class WordCounter:
 
     def view_word_counts(self, sort_by_frequency=False) -> None:
         """Display all words and their counts in a formatted table.
-        
+
         Args:
             sort_by_frequency: If True, sort by frequency (ascending);
                              if False (default), sort alphabetically
@@ -68,7 +68,7 @@ class WordCounter:
 
     def top_n_words(self, n: int) -> None:
         """Display the top N most frequent words.
-        
+
         Args:
             n: The number of top words to display
         """
@@ -91,7 +91,7 @@ class WordCounter:
 
     def word_search(self, word: str) -> None:
         """Search for a word and display how many times it appears.
-        
+
         Args:
             word: The word to search for (case-insensitive)
         """
@@ -101,20 +101,20 @@ class WordCounter:
         else:
             print(f"{word} appears 0 times.")
 
-
-def print_menu() -> None:
-    """Display the main menu options to the user."""
-    print("════════════════════════════════════════")
-    print("       WORD FREQUENCY COUNTER           ")
-    print("════════════════════════════════════════")
-    print("1. analyse a sentence")
-    print("2. View word counts")
-    print("3. View most frequent word")
-    print("4. Clear results")
-    print("5. Top 3 most frequent words")
-    print("6. Word search")
-    print("7. Display word count by frequency")
-    print("0. Exit")
+    @staticmethod
+    def print_menu() -> None:
+        """Display the main menu options to the user."""
+        print("════════════════════════════════════════")
+        print("       WORD FREQUENCY COUNTER           ")
+        print("════════════════════════════════════════")
+        print("1. analyse a sentence")
+        print("2. View word counts")
+        print("3. View most frequent word")
+        print("4. Clear results")
+        print("5. Top 3 most frequent words")
+        print("6. Word search")
+        print("7. Display word count by frequency")
+        print("0. Exit")
 
 
 def try_cast_to_int(prompt: str) -> Optional[int]:
@@ -137,7 +137,7 @@ def try_cast_to_int(prompt: str) -> Optional[int]:
 if __name__ == "__main__":
     # Initialize the word counter and display the main menu
     word_counter = WordCounter()
-    print_menu()
+    word_counter.print_menu()
 
     # Main program loop - continue until user selects option 0 (exit)
     while True:
