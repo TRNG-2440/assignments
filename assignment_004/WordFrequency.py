@@ -99,74 +99,52 @@ def main():
   # Declare global variable that collects words
   wordList = []  
 
-  # Traverse through items
   while(True):
 
     # Display main menu
     Menu()
 
-    # Declare bool variable to determine if program terminates
-    isTerminated = False
-
     # Prompt user
     option = input('Input Option: ')
 
-    while(True):
-
-      match(option):
+    match(option):
 
         case "0":
 
-          # Terminate program
-          isTerminated = True
+            # Print exit message
+            print("\nProgram has been terminated.\n")
 
-          # Print exit message
-          print("\nProgram has been terminated.\n")
+            print("Goodbye!\n")
 
-          print("Goodbye!\n")
-
-          break
+            # Terminate program
+            break
 
         case "1":
 
-          # Implement sentence algorithm
-          wordList = AnalyzeSentence()
+            # Implement sentence algorithm
+            wordList = AnalyzeSentence()
 
-          # Print confirmation message
-          print('\nSentence has been sucessfully analyzed')
-
-          break
+            # Print confirmation message
+            print('\nSentence has been sucessfully analyzed')
 
         case "2":
 
-          WordCount(wordList)
-
-          break
+            WordCount(wordList)
 
         case "3":
 
-          print(MostFrequentWord(wordList))
-
-          break
+            print(MostFrequentWord(wordList))
 
         case "4":
 
-          wordList.clear()
+            wordList.clear()
 
-          print('\nList successfully cleared\n')
-
-          break
+            print('\nList successfully cleared\n')
 
         case _:
 
-          # Alert user that invalid entry was enter
-          print('\nInvalid entry - please re-enter option') 
-
-          break
-
-    # Break from loop if program is terminated
-    if(isTerminated):
-      break
+            # Alert user that invalid entry was entered
+            print('\nInvalid entry - please re-enter option')
 
 
 main()
