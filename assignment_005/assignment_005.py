@@ -38,8 +38,8 @@ while True:
                 for contact in contacts:
                     if contact.name.lower() == name.lower():
                         duplicate = True
-                    if duplicate:
-                        print(f"Contact with {name} already exists. Please enter a different name.")
+                if duplicate:
+                    print(f"Contact with {name} already exists. Please enter a different name.")
                     print("")
                 else:
                     break
@@ -116,24 +116,24 @@ while True:
                     print(f"{i}. Name: {contact.name}\n   Phone: {contact.phone}\n   Email: {contact.email}\n────────────────────────────────────────")
                 print("")
             
-            while True: # repeat until valid number entered
-                number = int(input("Enter the number of the contact to edit: "))
-                if 1 <= number <= len(contacts):
-                    print(f"Contact to edit: {contacts[number - 1].name}")
-                    contacts.pop(number - 1)
-                    print("")
-                    name = input("Enter new name: ")
-                    phone = input("Enter new phone number: ")
-                    email = input("Enter new email address: ")
-                    contact = Contact(name, phone, email)
-                    contacts.insert(number - 1, contact)
+                while True: # repeat until valid number entered
+                    number = int(input("Enter the number of the contact to edit: "))
+                    if 1 <= number <= len(contacts):
+                        print(f"Contact to edit: {contacts[number - 1].name}")
+                        contacts.pop(number - 1)
+                        print("")
+                        name = input("Enter new name: ")
+                        phone = input("Enter new phone number: ")
+                        email = input("Enter new email address: ")
+                        contact = Contact(name, phone, email)
+                        contacts.insert(number - 1, contact)
 
-                    print(f"\nContact edited: {name}")
-                    print("")
-                    break
-                else:
-                    print(f"Invalid number: {number}. Please try again.")
-                    print("")
+                        print(f"\nContact edited: {name}")
+                        print("")
+                        break
+                    else:
+                        print(f"Invalid number: {number}. Please try again.")
+                        print("")
 
         case 6:
             print("")

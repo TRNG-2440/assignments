@@ -69,7 +69,7 @@ while True:
             if word_count:
                 top_three = sorted(word_count.items(), key = lambda x: x[1], reverse = True)[0:3]
                 for word, times in top_three:
-                    print(f"'{word}', used {times} times)")
+                    print(f"'{word}', used {times} times")
                 print("")
             else:
                 print("No words have been analysed yet. Returning to main menu.")
