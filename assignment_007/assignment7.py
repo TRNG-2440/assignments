@@ -188,11 +188,18 @@ Error: Organic Strawberries has expired and cannot be ordered.
 """
 from abc import ABC, abstractmethod
 from datetime import datetime, date
+from enum import StrEnum
 
+
+class ProductType(StrEnum):
+    PHYSICAL = "Physical"
+    DIGITAL = "Digital"
+    PERISHABLE = "Perishable"
 
 class Product(ABC):
 
-    def __init__(self, id: str, name: str, price: float, quantity: int):
+    def __init__(self, type: ProductType, id: str, name: str, price: float, quantity: int):
+        self._type = type
         self._id = id
         self._name = name
         self._price = price
@@ -200,10 +207,22 @@ class Product(ABC):
 
     def display_str(self) -> str:
         return (f"Name: {self._name}"
+                f"\nType: {self._type}"
                 f"\nID: {self._id}"
                 f"\nPrice per Unit: ${self._price:,.2f}"
                 f"\nQuantity Available: {self._quantity}"
                 )
+
+    def get_name(self):
+        return self._name
+
+    def get_id(self):
+        return self._id
+
+    def increase_quantity(self, quantity_to_add: int):
+        if quantity_to_add < 0:
+            raise ValueError(f"Must add a positive quantity, instead got: {quantity_to_add}")
+        self. _quantity += quantity_to_add
 
     @abstractmethod
     def get_cost(self, to_buy: int) -> float:
@@ -226,7 +245,7 @@ class Product(ABC):
 class PhysicalProduct(Product):
 
     def __init__(self, id: str, name: str, price: float, quantity: int, weight_kg: float, shipping_cost_kg: float):
-        super().__init__(id, name, price, quantity)
+        super().__init__(ProductType.PHYSICAL, id, name, price, quantity)
         self.weight_kg = weight_kg
         self.shipping_cost_kg = shipping_cost_kg
 
@@ -246,7 +265,7 @@ class PhysicalProduct(Product):
 class DigitalProduct(Product):
 
     def __init__(self, id: str, name: str, price: float, quantity: int, file_size_mb: float, download_url: str):
-        super().__init__(id, name, price, quantity)
+        super().__init__(ProductType.DIGITAL, id, name, price, quantity)
         self._file_size_mb = file_size_mb
         self._download_url = download_url
 
@@ -268,10 +287,10 @@ class DigitalProduct(Product):
 
 
 
-class PerishiableProduct(Product):
+class PerishableProduct(Product):
 
     def __init__(self, id: str, name: str, price: float, quantity: int, expiration_date: date, shipping_cost: float, shipping_free_limit: float):
-        super().__init__(id, name, price, quantity)
+        super().__init__(ProductType.PERISHABLE, id, name, price, quantity)
         self._expiration_date = expiration_date
         self._shipping_cost = shipping_cost
         self._shipping_free_limit = shipping_free_limit
@@ -298,3 +317,70 @@ class PerishiableProduct(Product):
 class Expired(Exception):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class Store:
+    PRICE_PER_KG = 0.10
+    PERISHABLE_SHIPPING = 5
+    PERISHABLE_MIN_FREE = 25
+
+
+    def __init__(self):
+        self._products: dict[str, Product] = {}
+        self._next_id = 0
+
+    def create_product(self,
+                       type: ProductType,
+                       name: str,
+                       price: float,
+                       quantity: int,
+                       /,
+                       weight_kg: float = None,
+                       file_size_mb: float = None,
+                       download_url: str = None,
+                       expiration_date: date = None) -> Product:
+        new_product: Product
+        match type:
+            case ProductType.PHYSICAL:
+                if weight_kg is None or weight_kg <= 0:
+                    raise ValueError(f"Physical Products must have a positive weight, found: {weight_kg}")
+                new_product = PhysicalProduct(self._generate_product_id(), name, price, quantity, weight_kg, self.PRICE_PER_KG)
+
+            case ProductType.DIGITAL:
+                if file_size_mb is None or file_size_mb <= 0:
+                    raise ValueError(f"Digital Products must have a positive file size, found: {file_size_mb}")
+
+                if download_url is None:
+                    raise ValueError(f"Digital Products must have a download url, found: {download_url}")
+
+                new_product = DigitalProduct(self._generate_product_id(), name, price, quantity, file_size_mb, download_url)
+
+            case ProductType.PERISHABLE:
+                if expiration_date is None:
+                    raise ValueError(f"Perishable Products must have an expiration date, found: {expiration_date}")
+
+                new_product = PerishableProduct(self._generate_product_id(), name, price, quantity, expiration_date, self.PERISHABLE_SHIPPING, self.PERISHABLE_MIN_FREE)
+
+        self._products[new_product.get_id()] = new_product
+        return new_product
+
+    def _generate_product_id(self):
+        prd_id: str = "PRD_" + str(self._next_id)
+        self._next_id += 1
+        return prd_id
+
+    def remove_product(self, id: str) -> bool:
+        if id in self._products:
+            del self._products
+            return True
+        return False
+
+    def search_product(self, name: str) -> list[Product]:
+        found_products: list[Product] = []
+        for product in self._products.values():
+            if name.lower() in product.get_name():
+                found_products.append(product)
+        return found_products
+
+    def restock_product(self, id: str, quanitity_to_add: int) -> None:
+        self._products[id].increase_quantity(quanitity_to_add)
