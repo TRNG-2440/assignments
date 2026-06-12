@@ -31,6 +31,7 @@ def display_contacts():
     for contact in contacts_list:
         name, phone, email = contact
         print(f"Name: {name}\nPhone: {phone}\nEmail: {email}\n")
+        print("--------------------")
 
 
 def contact_book():
@@ -38,7 +39,7 @@ def contact_book():
                 #Welcome message and menu options
                 print("\n====Welcome to the Contact Book!====\n")
                 try:
-                    print("1. Add Contact\n2. Remove Contact\n3. Display Contacts\n4. Exit\n")
+                    print("1. Add Contact\n2. Display Contacts\n3. Search Contacts\n4. Remove Contact\n0. Exit\n")
 
                     choice = input("Enter your choice: \n")
                 except ValueError:
@@ -65,30 +66,50 @@ def contact_book():
                         continue
 
                     add_contact(name, phone, email)
-                    print(f"\nContact {name} added successfully!")
+                    print(f"\nContact \"{name}\" added successfully!")
+
+
                 elif choice == '2':
+                    print("\n====Contact List====")
+                    display_contacts()
+                    
+                    
+                elif choice == '3':
+                    name = input("\nEnter the name of the contact you would like to search: ")
+                    found = False
+                    for contact in contacts_list:
+                        if contact[0] == name:
+                            print(f"\nContact found:\nName: {contact[0]}\nPhone: {contact[1]}\nEmail: {contact[2]}")
+                            found = True
+                            break
+                    if not found:
+                        print(f"\nContact \"{name}\" not found.")
+
+                elif choice == '4':
                     #checks for any contacts to remove before asking for name input and displaying contact list for reference.
                     if not contacts_list:
                             print("\nNo contacts to remove.")
                             continue
                     else:
                         print("\n====Contact List====")
-                        for contact in contacts_list: print("Name:{0}\n".format(contact[0]))
-                    
+                        for contact in contacts_list: 
+                            print("Name:{0}\n".format(contact[0]))
+                            print("--------------------")
+                        print("====================")
+
                     name = input("Enter name to remove: ")
                     if name not in [contact[0] for contact in contacts_list]:
-                        print(f"\nContact {name} not found.")
+                        print(f"\nContact \"{name}\" not found.")
                         continue
                     if name in [contact[0] for contact in contacts_list]:
                         remove_contact(name)
-                    print(f"\nContact {name} removed successfully!")
-                elif choice == '3':
-                    print("\n====Contact List====")
-                    display_contacts()
-                elif choice == '4':
-                    prompt = input("Are you sure you want to exit? (yes/no): ")
-                    if prompt.lower() == "yes":
-                        print("Goodbye!")
+                    print(f"\nContact \"{name}\" removed successfully!")
+
+                    
+                elif choice == '0':
+                    prompt = input("Are you sure you want to exit? (y/n): ")
+                    if prompt.lower() == "y":
+                        print("Leaving Contact Book, Goodbye!")
                         break
                     else:
                         continue
