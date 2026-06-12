@@ -1,4 +1,3 @@
-import random
 
 class Account:
     def __init__(self, owner_name, balance, account_number, type, withdrawals=0, deposits=0):
