@@ -11,26 +11,29 @@ class Menu:
 
     def __init__(self, options: dict[str, Callable], add_quit: bool = False):
         self.options = options
-        if (add_quit):
+        if add_quit:
             self.options["Quit"] = self.quit
 
     def header(self) -> str:
         return ""
 
     def quit(self) -> None:
+        """
+        Exits the main loop
+        """
         raise KeyboardInterrupt
 
     def start(self) -> None:
         if self.header() != "":
             print(self.DIVIDER)
             print(self.header())
-            print(self.DIVIDER)
 
-            while True:
-                try:
-                    self.do_selection()
-                except KeyboardInterrupt:
-                    break
+        print(self.DIVIDER)
+        while True:
+            try:
+                self.do_selection()
+            except KeyboardInterrupt:
+                break
 
     def do_selection(self):
         selected: int = self.get_selection()

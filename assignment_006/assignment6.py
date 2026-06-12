@@ -223,7 +223,7 @@ class Account(ABC):
         return f"{self._account_number}: ${self._balance:,.2f}"
 
     def __str__(self):
-        return (f"Account ({self.get_type()}:\n"
+        return (f"Account ({self.get_type()}):\n"
                 f"\tName: {self._name}\n"
                 f"\tAccount Number: {self._account_number}\n"
                 f"\tBalance: ${self._balance:,.2f}")
@@ -246,15 +246,19 @@ class CheckingAccount(Account):
         to_withdraw: float = amount
         remainder: float = self._balance - amount
         if remainder < 0:
-            self.balance = 0
-            to_withdraw += remainder
-            overdraft_remainder: float = self._overdraft - to_withdraw
+            overdraft_remainder: float = self._overdraft + remainder
             if overdraft_remainder < 0:
-                raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (overdraft: ${self._overdraft:,.2f})")
+                raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self._balance:,.2f}, overdraft: ${self._overdraft:,.2f}, total allowed: ${(self._balance + self._overdraft):,.2f})")
+            self._balance = 0
             self._overdraft = overdraft_remainder
         else:
-            self.balance = remainder
+            self._balance = remainder
         return to_withdraw
+
+    def get_balance(self) -> float:
+        if self._balance <= 0:
+            return -1 * (self._max_overdraft - self._overdraft)
+        return super().get_balance()
 
     def deposit(self, amount: float) -> None:
         #first, replenish overdraft
@@ -297,6 +301,7 @@ class SavingsAccount(Account):
         to_withdraw: float = amount
         remainder: float = self._balance - amount
         if remainder < 0:
+            self._remaining_withdrawals += 1
             raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self._balance:,.2f})")
 
         self._balance -= to_withdraw
@@ -305,8 +310,8 @@ class SavingsAccount(Account):
 
     def __str__(self):
         return super().__str__() + (f"\n\tRemaining Withdrawals: {self._remaining_withdrawals}\n"
-                         f"\tMax Withdrawals: {self._max_withdrawals}"
-                         f"\tMonthly Interest: {self._monthly_interest}%")
+                         f"\tMax Withdrawals: {self._max_withdrawals}\n"
+                         f"\tMonthly Interest: {self._monthly_interest*100}%")
 
 
 class InvestmentAccount(Account):
@@ -318,7 +323,7 @@ class InvestmentAccount(Account):
         return AccountType.INVESTMENT
 
     def apply_variable_return(self, return_rate: float) -> None:
-        self._balance *= return_rate
+        self._balance *= (1 + return_rate)
 
     def withdraw(self, amount: float) -> float:
         if amount <= 0:
@@ -330,13 +335,13 @@ class InvestmentAccount(Account):
         to_withdraw: float = amount
         remainder: float = self._balance - self._minimum_balance - amount
         if remainder < 0:
-            raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self._balance:,.2f})")
+            raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self._balance:,.2f}, required minimum: ${self._minimum_balance:,.2f})")
 
         return to_withdraw
 
 
     def __str__(self):
-        return super().__str__() + (f"\n\tMinimum Balance: {self._minimum_balance}\n")
+        return super().__str__() + (f"\n\tMinimum Balance: ${self._minimum_balance:,.2f}\n")
 
 
 class Bank:
@@ -402,7 +407,7 @@ class BankMenu(Menu):
         self._bank = bank
 
     def header(self) -> str:
-        return "Bank CLI"
+        return "\t\t\tBank CLI"
 
     def open_account(self):
         CreateAccountMenu(self._bank).do_selection()
@@ -412,12 +417,14 @@ class BankMenu(Menu):
         account: Optional[Account] = self._bank.lookup_account(account_id)
         if account is None:
             print(f"No account with the number: {account_id}")
-        SelectedAccountMenu(account).show_menu()
+            return
+        SelectedAccountMenu(account).start()
 
 
     def list_accounts(self):
         if len(self._bank.get_accounts()) == 0:
             print("There are currently no accounts")
+            return
         print(self._bank.list_accounts())
 
 class CreateAccountMenu(Menu):
@@ -457,10 +464,16 @@ class SelectedAccountMenu(Menu):
             "Deposit": self.deposit,
             "Withdraw": self.withdraw,
             "Apply Monthly Interest": self.apply_monthly_interest,
+            "Apply Investment Rate": self.apply_interest_rate,
             "View Details": self.view_details,
-            "Back to Main Menu": self.back_to_main_menu,
+            "Back to Main Menu": self.quit,
         })
         self.account = account
+        if not isinstance(self.account, SavingsAccount):
+            del self.options["Apply Monthly Interest"]
+
+        if not isinstance(self.account, InvestmentAccount):
+            del self.options["Apply Investment Rate"]
 
     def deposit(self):
         while True:
@@ -486,11 +499,15 @@ class SelectedAccountMenu(Menu):
                 print("Amount must be a float and greater than $0")
                 continue
             try:
-                self.account.deposit(amount)
+                self.account.withdraw(amount)
                 print(f"Withdrew ${amount:,.2f}. New balance: ${self.account.get_balance():,.2f}")
                 break
-            except ValueError | InsuffcientFundsError | InsufficientWithdrawalsError as e:
+            except ValueError as e:
                 print(e.args[0])
+                break
+            except Exception as e:
+                print(e.args[0])
+                break
 
     def apply_monthly_interest(self):
         if not isinstance(self.account, SavingsAccount):
@@ -501,11 +518,23 @@ class SelectedAccountMenu(Menu):
         savings_account.apply_monthly_interest()
         print(f"Applied monthly interest. Balance is now ${savings_account.get_balance():,.2f}")
 
+    def apply_interest_rate(self):
+        if not isinstance(self.account, InvestmentAccount):
+            print("Invalid type: Account is not an Investment Account")
+            return
+        while True:
+            try:
+                rate: float = float(input("Rate to apply: ").strip("$"))
+                investment_account: InvestmentAccount = self.account
+                investment_account.apply_variable_return(rate)
+                print(f"Applied variable rate. Balance is now ${investment_account.get_balance():,.2f}")
+                break
+            except ValueError:
+                print("Rate must be a float")
+                continue
+
     def view_details(self):
         print(self.account)
-
-    def back_to_main_menu(self):
-        raise KeyboardInterrupt
 
 
 if __name__ == "__main__":
