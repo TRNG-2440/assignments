@@ -28,20 +28,23 @@ class Menu:
 
             while True:
                 try:
-                    selected: int = self.get_selection()
-                    option: Callable = list(self.options.values())[selected]
-                    option()
-                    print("")
-                    print(self.DIVIDER)
+                    self.do_selection()
                 except KeyboardInterrupt:
                     break
+
+    def do_selection(self):
+        selected: int = self.get_selection()
+        option: Callable = list(self.options.values())[selected]
+        option()
+        print("")
+        print(self.DIVIDER)
 
     def show_menu(self) -> None:
         """
         Shows the menu
         """
-        for i in range (0, len(self.options)):
-            item = self.options[i]
+        for i in range (0, len(self.options.keys())):
+            item = list(self.options.keys())[i]
             print(f"{i+1}. {item}")
 
     def get_selection(self) -> int:
