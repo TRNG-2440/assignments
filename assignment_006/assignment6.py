@@ -153,6 +153,10 @@ Interest    : 2.5% monthly
 import random
 from abc import ABC, abstractmethod
 from enum import StrEnum
+from typing import Optional, Callable
+
+from assignments.shared.menu import Menu
+
 
 class AccountType(StrEnum):
     CHECKING = "Checking"
@@ -214,6 +218,9 @@ class Account(ABC):
 
         """
         raise NotImplemented()
+
+    def short_account_info(self) -> str:
+        return f"{self.account_number}: ${self.balance:,.2f}"
 
     def __str__(self):
         return (f"Account ({self.get_type()}:\n"
@@ -364,6 +371,17 @@ class Bank:
     def generate_account_id(self):
         return "ACC_" + str(len(self.accounts)) + "_" + str(random.randint(1, 64))
 
+    def lookup_account(self, account_id: str) -> Optional[Account]:
+        if account_id not in self.accounts:
+            return None
+
+        return self.accounts[account_id]
+
+    def list_accounts(self) -> str:
+        return "\n".join([account.short_account_info() for account in self.accounts.values()])
+
+    def get_accounts(self) -> dict[str, Account]:
+        return self.accounts
 
 
 class InsuffcientFundsError(Exception):
@@ -372,8 +390,30 @@ class InsuffcientFundsError(Exception):
 class InsufficientWithdrawalsError(Exception):
     pass
 
-#TODO InvestmentAccount
 
-#TODO Bank
+class BankMenu(Menu):
+    def __init__(self):
+        super().__init__({
+            "Open a new Account": self.open_account,
+            "Select an account": self.select_an_account,
+            "List all accounts": self.list_accounts,
+        },
+        add_quit=True)
+        self.bank = Bank()
 
-#TODO menus
+    def header(self) -> str:
+        return "Bank CLI"
+
+    def open_account(self):
+        #TODO open account menu
+        pass
+
+    def select_an_account(self):
+        #TODO select an account menu
+        pass
+
+    def list_accounts(self):
+        print(self.bank.list_accounts())
+
+
+
