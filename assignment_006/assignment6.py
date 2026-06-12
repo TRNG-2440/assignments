@@ -412,10 +412,12 @@ class BankMenu(Menu):
         account: Optional[Account] = self._bank.lookup_account(account_id)
         if account is None:
             print(f"No account with the number: {account_id}")
-            return
+        SelectedAccountMenu(account).show_menu()
 
 
     def list_accounts(self):
+        if len(self._bank.get_accounts()) == 0:
+            print("There are currently no accounts")
         print(self._bank.list_accounts())
 
 class CreateAccountMenu(Menu):
@@ -430,11 +432,12 @@ class CreateAccountMenu(Menu):
 
     def create_account(self, type: AccountType):
         print("")
+        print(f"Account: {type}")
         name: str = input("Owner Name: ")
         balance: float
         while True:
             try:
-                balance: float = float(input("Opening Balance").strip("$"))
+                balance: float = float(input("Opening Balance: ").strip("$"))
                 if balance < 0:
                     raise ValueError
                 break
@@ -445,8 +448,6 @@ class CreateAccountMenu(Menu):
         print(f"{str(type)} account opened for {name}.")
         print(new_account)
         print("")
-        #not the best way to do this, but it is how we do it
-        raise InterruptedError
 
 
 class SelectedAccountMenu(Menu):

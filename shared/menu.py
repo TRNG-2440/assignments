@@ -34,7 +34,7 @@ class Menu:
 
     def do_selection(self):
         selected: int = self.get_selection()
-        option: Callable = list(self.options.values())[selected]
+        option: Callable = list(self.options.values())[selected - 1]
         option()
         print("")
         print(self.DIVIDER)
