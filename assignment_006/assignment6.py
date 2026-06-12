@@ -150,9 +150,14 @@ Interest    : 2.5% monthly
 
 - **Monthly Reset Simulation** - Add a main menu option that simulates the end of a month: applies interest/returns to all eligible accounts and resets withdrawal counters on all Savings accounts.
 """
+import random
 from abc import ABC, abstractmethod
-from typing import Optional
+from enum import StrEnum
 
+class AccountType(StrEnum):
+    CHECKING = "Checking"
+    SAVINGS = "Savings"
+    INVESTMENT = "Investment"
 
 class Account(ABC):
     """
@@ -195,22 +200,20 @@ class Account(ABC):
         :param amount:
         """
         if amount <= 0:
-            return
+            raise ValueError(f"Deposit amount cannot be less than or equal to $0 (was {amount:,.2f}")
         self.balance += amount
 
 
     @abstractmethod
-    def get_type(self) -> str:
-        raise NotImplemented
+    def get_type(self) -> AccountType:
+        raise NotImplemented()
 
     @abstractmethod
     def withdraw(self, amount: float) -> float:
         """
 
         """
-        raise NotImplemented
-
-
+        raise NotImplemented()
 
     def __str__(self):
         return (f"Account ({self.get_type()}:\n"
@@ -219,16 +222,19 @@ class Account(ABC):
                 f"\tBalance: ${self.balance:,.2f}")
 
 
-class CheckingAccount(Account, ABC):
+class CheckingAccount(Account):
 
     def __init__(self, name: str, account_number: str, balance: float, overdraft: float, max_overdraft: float = None):
         super().__init__(name, account_number, balance)
         self.overdraft = overdraft
         self.max_overdraft = max_overdraft if max_overdraft is not None else overdraft
 
+    def get_type(self) -> AccountType:
+        return AccountType.CHECKING
+
     def withdraw(self, amount: float) -> float:
         if amount <= 0:
-            return 0
+            raise ValueError(f"Withdrawal amount cannot be less than or equal to $0 (was {amount:,.2f}")
 
         to_withdraw: float = amount
         remainder: float = self.balance - amount
@@ -237,10 +243,8 @@ class CheckingAccount(Account, ABC):
             to_withdraw += remainder
             overdraft_remainder: float = self.overdraft - to_withdraw
             if overdraft_remainder < 0:
-                self.overdraft = 0
-                to_withdraw += overdraft_remainder
-            else:
-                self.overdraft = overdraft_remainder
+                raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (overdraft: ${self.overdraft:,.2f})")
+            self.overdraft = overdraft_remainder
         else:
             self.balance = remainder
         return to_withdraw
@@ -248,7 +252,7 @@ class CheckingAccount(Account, ABC):
     def deposit(self, amount: float) -> None:
         #first, replenish overdraft
         if amount <= 0:
-            return
+            raise ValueError(f"Deposit amount cannot be less than or equal to $0 (was {amount:,.2f}")
         needed_overdraft: float = self.max_overdraft - self.overdraft
         if needed_overdraft > 0:
             to_overdraft: float = needed_overdraft - amount
@@ -269,21 +273,26 @@ class SavingsAccount(Account):
         self.remaining_withdrawals: int = remaining_withdrawals
         self.max_withdrawals: int = max_withdrawals if max_withdrawals is not None else remaining_withdrawals
 
+    def get_type(self) -> AccountType:
+        return AccountType.SAVINGS
+
     def apply_monthly_interest(self):
         self.balance *= 1 + self.monthly_interest
 
     def withdraw(self, amount: float) -> float:
         if amount <= 0:
-            return 0
+            raise ValueError(f"Withdrawal amount cannot be less than or equal to $0 (was {amount:,.2f}")
         if self.remaining_withdrawals <= 0:
-            return 0
+            raise InsufficientWithdrawalsError("No remaining withdrawals")
 
         self.remaining_withdrawals -= 1
 
         to_withdraw: float = amount
         remainder: float = self.balance - amount
         if remainder < 0:
-            self.balance = 0
+            raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self.balance:,.2f})")
+
+        self.balance -= to_withdraw
 
         return to_withdraw
 
@@ -292,6 +301,76 @@ class SavingsAccount(Account):
                          f"\tMax Withdrawals: {self.max_withdrawals}"
                          f"\tMonthly Interest: {self.monthly_interest}%")
 
+
+class InvestmentAccount(Account):
+    def __init__(self, name: str, account_number: str, balance: float, minimum_balance: float):
+        super().__init__(name, account_number, balance)
+        self.minimum_balance = minimum_balance
+
+    def get_type(self) -> AccountType:
+        return AccountType.INVESTMENT
+
+    def apply_variable_return(self, return_rate: float) -> None:
+        self.balance *= return_rate
+
+    def withdraw(self, amount: float) -> float:
+        if amount <= 0:
+            raise ValueError(f"Withdrawal amount cannot be less than or equal to $0 (was {amount:,.2f}")
+
+        if self.balance < self.minimum_balance:
+            raise InsuffcientFundsError(f"Cannot withdraw, balance ${self.balance:,.2f} is below minimum balance ${self.minimum_balance:,.2f}")
+
+        to_withdraw: float = amount
+        remainder: float = self.balance - self.minimum_balance - amount
+        if remainder < 0:
+            raise InsuffcientFundsError(f"Not enough funds to withdraw ${amount:,.2f} (balance: ${self.balance:,.2f})")
+
+        return to_withdraw
+
+
+    def __str__(self):
+        return super().__str__() + (f"\n\tMinimum Balance: {self.minimum_balance}\n")
+
+
+class Bank:
+    max_overdraft: float = 250
+    max_withdrawals: int = 5
+    monthly_interest: float = 0.025
+    minimum_balance: float = 500
+    def __init__(self):
+        self.accounts: dict[str, Account] = {}
+
+    def create_account(self, type: AccountType, name: str, balance: float) -> Account:
+        """
+        Creates the account
+        :param type:
+        :param name:
+        :param balance:
+        """
+        new_account: Account
+        new_id: str = self.generate_account_id()
+        match type:
+            case AccountType.CHECKING:
+                new_account = CheckingAccount(name, new_id, balance, self.max_overdraft, self.max_overdraft)
+            case AccountType.SAVINGS:
+                new_account = SavingsAccount(name, new_id, balance, self.monthly_interest, self.max_withdrawals, self.max_withdrawals)
+            case AccountType.INVESTMENT:
+                new_account = InvestmentAccount(name, new_id, balance, self.minimum_balance)
+
+        self.accounts[new_id] = new_account
+
+        return new_account
+
+    def generate_account_id(self):
+        return "ACC_" + str(len(self.accounts)) + "_" + str(random.randint(1, 64))
+
+
+
+class InsuffcientFundsError(Exception):
+    pass
+
+class InsufficientWithdrawalsError(Exception):
+    pass
 
 #TODO InvestmentAccount
 
