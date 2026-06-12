@@ -45,31 +45,94 @@ def main():
 def case_1(contacts):
     input_name = input("Enter name: ")
     input_phone = input("Enter phone number: ")
-    input_email = input("Enter email")
+    input_email = input("Enter email: ")
 
     contact_tuple = (input_name,input_phone,input_email)
     contacts.append(contact_tuple)
-    print(f"Contact added: {input_name}")
+    print("Contact successfully added to Contact Book")
 
     return
 
 def case_2(contacts):
     """- If the list is empty, print a message saying so
 - Otherwise display each contact's details in a formatted, numbered list"""
-    pass
-def case_3(comtacts):
+    if not contacts:
+        print("Contact Book is empty.")
+    else:
+        count = 0
+        print("All Contacts:")
+        print("______________________________")
+        for contact in contacts:
+            count+=1
+            display_contact(count, contact)
+            
+    return
+    
+def case_3(contacts):
     """- Prompt the user to enter a name to search for
 - If a contact's name matches (case-insensitive), display their full details
 - If no match is found, print a message saying the contact was not found"""
-    pass
+
+
+    if contacts:
+        str_name = input("Enter name to search: ")
+        print("______________________________")
+        print()
+        for contact in contacts:
+            name, _, _= contact
+            if str_name.lower() == name.lower():
+                print("Contact found:")
+                display_contact(False,contact)
+                
+            else:
+                print("Contact not found.")
+    else:
+         print("Cannot search empty Contact Book.")
+        
+
 def case_4(contacts):
-    """ Display all contacts in a numbered list
-- Prompt the user to enter the number of the contact to delete
-- Remove the selected conntact from the `contacts` list
-- Print a confirmation message
-- Handle the case where the user enters an invalid number"""
+    """Display all contacts in a numbered list
+    - Prompt the user to enter the number of the contact to delete
+    - Remove the selected conntact from the `contacts` list
+    - Print a confirmation message
+    - Handle the case where the user enters an invalid number"""
+    count = 0
+    if contacts:
+        print("All Contacts")
+        print("______________________________")
+        for contact in contacts:
+            count+=1
+            display_contact(count,contact)
+        delete_contact = int(input(f"Select a contact to delete(1-{count}): "))
+
+        if delete_contact <1 or delete_contact > count:
+             print("Not a valid contact to delete")
+        else:
+            del contacts[delete_contact-1] #-1 to account for zero indexing
+            print("Contact was removed from Contact Book")
+    else:
+         print("There are no Contacts to delete")
+   
+
+
+def display_contact(count, contact):
+    name,phone,email = contact
     
-    pass
+    if count:
+        number = (f"{count}.")
+        print(f"{number:<3} {'Name':<8} {':'} {name:<20}")
+        print(f"{' ':<3} {'Phone':<8} {':'} {phone:<20}")
+        print(f"{' ':<3} {'Email':<8} {':'} {email:<20}")
+        print("______________________________")
+    else:
+        print(f"{'Name':<8} {':'} {name:<20}")
+        print(f"{'Phone':<8} {':'} {phone:<20}")
+        print(f"{'Email':<8} {':'} {email:<20}")
+        print("______________________________")
+
+    
+
+
 
 
 if __name__ == "__main__":
