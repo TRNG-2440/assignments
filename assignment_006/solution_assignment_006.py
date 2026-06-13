@@ -43,7 +43,7 @@ class Account:
             print("                HISTORY                ")
             print("---------------------------------------")
             for entry in self.history:
-                print(f"{entry[0]}, {entry[1]}, {entry[2]}")
+                print(f"{entry[0]}, {entry[1]}, DATE/TIME: {entry[2]}")
             print("---------------------------------------")
             print(f"Successfully printed {len(self.history)} entries.")
 
@@ -282,9 +282,11 @@ class Bank:
             with open(filename, "r") as file:
                 data = json.load(file)
         except FileNotFoundError as e:
-            print(f"Error: {e}")
-            return
+            raise FileNotFoundError(f"{filename} does not exist.")
         
+        self.accounts = []
+        self.auth_table = data["auth_table"]
+
         for acct in data["accounts"]:
             if acct["type"] == "Checking":
                 acct_data = CheckingAccount(acct["owner_name"], acct["account_num"], acct["balance"])
@@ -296,11 +298,14 @@ class Bank:
                 acct_data = InvestmentAccount(acct["owner_name"], acct["account_num"], acct["balance"])
             acct_data.history = acct["history"]
             self.accounts.append(acct_data)
-        self.auth_table = data["auth_table"]
+    
 
 def BankInteract():
     bank = Bank()
-    bank.LoadData()
+    try:
+        bank.LoadData()
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
 
     # login menu
     while True:
