@@ -120,30 +120,30 @@ Interest    : 2.5% monthly
 
 ## Requirements Checklist
 
-- [ ] A base `Account` class exists with shared attributes and a deposit method
-- [ ] `CheckingAccount` correctly allows overdraft up to its defined limit and rejects amounts beyond it
-- [ ] `SavingsAccount` tracks monthly withdrawals and enforces the withdrawal limit
-- [ ] `SavingsAccount` correctly applies interest to the current balance
-- [ ] `InvestmentAccount` enforces a minimum balance on withdrawals
-- [ ] `InvestmentAccount` correctly applies a variable return rate
-- [ ] Each subclass overrides a method for displaying account details
-- [ ] A `Bank` class manages multiple accounts and supports lookup by account number
-- [ ] Account numbers are auto-generated and unique
-- [ ] All invalid operations raise exceptions with descriptive messages
-- [ ] The CLI menu loop handles bad input (non-numeric amounts, invalid menu options) gracefully without crashing
-- [ ] Depositing a negative or zero amount is rejected
-- [ ] Selecting a non-existent account number displays an appropriate error
+- [x] A base `Account` class exists with shared attributes and a deposit method
+- [x] `CheckingAccount` correctly allows overdraft up to its defined limit and rejects amounts beyond it
+- [x] `SavingsAccount` tracks monthly withdrawals and enforces the withdrawal limit
+- [x] `SavingsAccount` correctly applies interest to the current balance
+- [x] `InvestmentAccount` enforces a minimum balance on withdrawals
+- [x] `InvestmentAccount` correctly applies a variable return rate
+- [x] Each subclass overrides a method for displaying account details
+- [x] A `Bank` class manages multiple accounts and supports lookup by account number
+- [x] Account numbers are auto-generated and unique
+- [x] All invalid operations raise exceptions with descriptive messages
+- [x] The CLI menu loop handles bad input (non-numeric amounts, invalid menu options) gracefully without crashing
+- [x] Depositing a negative or zero amount is rejected
+- [x] Selecting a non-existent account number displays an appropriate error
 
 ---
 
 ## Stretch Goals
 
-- **Account Management & Authentication** - The top-level menu allows users to open a new account or login before accessing their existing account details. Login is protected via username/password combination matching.
+<!-- - **Account Management & Authentication** - The top-level menu allows users to open a new account or login before accessing their existing account details. Login is protected via username/password combination matching. -->
 
-- **Transaction History** - Each account maintains a log of all transactions (type, amount, timestamp). Add a "View History" option to the account menu that prints a formatted ledger.
+<!-- - **Transaction History** - Each account maintains a log of all transactions (type, amount, timestamp). Add a "View History" option to the account menu that prints a formatted ledger. -->
 
-- **Persistence** - Save and load all account data to/from a JSON file so that account state is preserved between sessions.
+<!-- - **Persistence** - Save and load all account data to/from a JSON file so that account state is preserved between sessions. -->
 
-- **Account Transfers** - Add a transfer option from the main menu that moves funds from one account to another, respecting both accounts' withdrawal and balance rules.
+<!-- - **Account Transfers** - Add a transfer option from the main menu that moves funds from one account to another, respecting both accounts' withdrawal and balance rules. -->
 
-- **Monthly Reset Simulation** - Add a main menu option that simulates the end of a month: applies interest/returns to all eligible accounts and resets withdrawal counters on all Savings accounts.
+<!-- - **Monthly Reset Simulation** - Add a main menu option that simulates the end of a month: applies interest/returns to all eligible accounts and resets withdrawal counters on all Savings accounts. -->
