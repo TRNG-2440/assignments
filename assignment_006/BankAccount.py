@@ -153,6 +153,15 @@ Interest    : 2.5% monthly
 # Random number library
 from random import randint
 
+# Declare Bank
+MENU: str = """
+=== BANK MENU ===
+[1] Open a new account
+[2] Select an account
+[3] List all accounts
+[4] Quit
+"""
+
 # -------------------------------------------------------------------------------------
 
 # Parent class
@@ -168,17 +177,19 @@ class Account:
     self.balance = balance
   
   # Deposit funds in checking account
-  def Desposit(self, amount):
-    self.checking += amount
+  def Deposit(self, amount):
+    self.balance += amount
 
   # Display bank account details
   def Display(self):
     
-    # Display name
+    # Display criteria
     print(f'\n------- {self.ownerName} -------\n')
-    # Display information
-    print(f'Account Number: ${self.accountNumber}')
-    print(f'Balance: ${self.balance:.2f}')
+    print(f'Checking Account Number: {self.checkingAccountNumber}')
+    print(f'Savings Account Number: {self.savingsAccountNumber}')
+    print(f'Investment Account Number: {self.investmentAccountNumber}')
+    print(f'Balance: ${self.balance}')
+
 
 # -------------------------------------------------------------------------------------
 
@@ -186,10 +197,10 @@ class Account:
 class CheckingAccount(Account):
   
   # Constructor
-  def __init__(self, ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance, overDraftLimit):
+  def __init__(self, ownerName, checkingAccountNumber, balance, overDraftLimit):
 
     # Implement parent class constructor  
-    super.__init__(ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance)
+    super().__init__(ownerName, checkingAccountNumber, None, None, balance)
 
     self.overDraftLimit = overDraftLimit
     self.isOverDraft = False
@@ -225,10 +236,10 @@ class CheckingAccount(Account):
 class SavingsAccount(Account):
 
   # Constructor
-  def __init__(self, ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance, interestRate = 0.1, maxWithdrawals = 3):
+  def __init__(self, ownerName, savingsAccountNumber, balance, interestRate = 0.1, maxWithdrawals = 3):
 
     # Implement parent class constructor
-    super.__init__(ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance)
+    super().__init__(ownerName, None, savingsAccountNumber, None, balance)
     self.interestRate = interestRate
     self.maxWithdrawals = maxWithdrawals
     self.interest = (self.balance * self.interestRate)
@@ -276,10 +287,10 @@ class SavingsAccount(Account):
 class InvestmentAccount(Account):
 
   # Constructor 
-  def __init__(self, ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance, minimumBalance = 300):
+  def __init__(self, ownerName, investmentAccountNumber, balance, minimumBalance = 300):
         
         # Implement parent class constructor
-        super().__init__(ownerName, checkingAccountNumber, savingsAccountNumber, investmentAccountNumber, balance)
+        super().__init__(ownerName, None, None, investmentAccountNumber, balance)
         self.minimumBalance = minimumBalance
 
   # Withdraw from investment account
@@ -327,28 +338,23 @@ class InvestmentAccount(Account):
     print(f'Return Rate: ${(self.balance * interest):.2f}')
 
 # -------------------------------------------------------------------------------------
-# Child class - banking account 
-class BankingAccount(Account):
+# Class used to store bank accounts
+class Bank():
 
   # Constructor 
   def __init__(self):
-    
-    # Establsh account for user
-    self.OpenAccount()
 
-    # Implement parent class constructor
-    super().__init__
-    (self.firstName + ' ' + self.lastName, 
-     self.checkingAccountNumber, 
-     self.savingsAccountNumber, 
-     self.investmentAccountNumber,
-     randint(100, 50000))
+    self.firstName = ""
+
+    self.lastName = ""
+
+    # Store accounts
+    self.accountList = []
 
 # ------------------------------------------------------------------------------------  
 
   # User menu
   def AccountTypeMenu(self) -> str:
-
 
     print("\n     Account Type:"\
     "\n----------------------------"\
@@ -361,11 +367,47 @@ class BankingAccount(Account):
   
   # List of all accounts
   def ListAccounts(self) -> None:
-    print(f'\n----------- {self.ownerName} -----------\n')
-    print(f'Checking Account: {self.checkingAccountNumber}')
-    print(f'\nSavings Account: {self.savingsAccountNumber}')
-    print(f'\nInvestment Account: {self.investmentAccountNumber}')
+
+    # Declare checking account object
+    checkingAcct = None
+
+    # Declare savings account object
+    savingsAcct = None
+
+    # Declare investment account object
+    investmentAcct = None
+
+    # Traverse through accountList data strcuture 
+    for a in self.accountList:
+        
+        # Execute condition if subscript contains CheckingAccount instance
+        if isinstance(a, CheckingAccount):
+            checkingAcct = a
+
+        # Execute condition if subscript contains SavingsAccount instance
+        elif isinstance(a, SavingsAccount):
+            savingsAcct = a
+
+        # Execute condition if subscript contains Inventory instance
+        elif isinstance(a, InvestmentAccount):
+            investmentAcct = a
+
+    # Display Criteria
+
     
+    print(f"\n------- {self.firstName} {self.lastName} -------\n")
+      
+    if checkingAcct is not None: 
+      print(f"Checking Account Number: {checkingAcct.checkingAccountNumber}")
+      print(f"\nChecking account Balance: ${checkingAcct.balance}")
+
+    if savingsAcct is not None:   
+      print(f"\nSavings Account Number: {savingsAcct.savingsAccountNumber}")
+      print(f"\nSavings account Balance: ${savingsAcct.balance}")
+      
+    if investmentAcct is not None:
+      print(f"\nInvestment Account Number: {investmentAcct.investmentAccountNumber}")
+      print(f"\nInventory account Balance: ${investmentAcct.balance}")
 
 # ------------------------------------------------------------------------------------  
   # Allow client to open an account of their choice
@@ -380,51 +422,72 @@ class BankingAccount(Account):
           # Header
           print(f'\n------- Checking Account -------\n')
 
-          # Prompt for owner name
-          self.firstName = input('\nPlease enter first name: ')
+          # Prompt for owner first name if firstName is not in the system
+          if not self.firstName:
+            self.firstName = input('Please enter first name: ')
 
           if not self.firstName:
             raise ValueError('\nError - first name cannot be empty, please re-enter\n')
 
-          self.lastName = input('\nPlease enter last name: ')
+          # Prompt for owner last name if lastName is not in the system
+          if not self.lastName:
+            self.lastName = input('\nPlease enter last name: ')
 
           if not self.lastName:
             raise ValueError('\nError - last name cannot be empty, please re-enter\n')
           
-          self.balance = input('\nOpening Balance: ')
+          self.balance = float(input('Opening Balance: '))
 
           if not self.balance:
             raise ValueError('\nError - balance cannot be empty, please re-enter\n')
           
           self.checkingAccountNumber = randint(10000000, 99999999999999999)
 
-          print(f'Checking account opened for {self.firstName + ' ' + self.lastName}\n')
-          print(f'Account #: {self.checkingAccountNumber} | ${self.balance}\n\n')
+          self.accountList.append(CheckingAccount(
+          self.firstName + " " + self.lastName,
+          self.checkingAccountNumber,
+          self.balance,
+          50))
+
+          print(f'\nChecking account opened for {self.firstName + ' ' + self.lastName}')
+          print(f'Account #: {self.checkingAccountNumber} | ${self.balance:.2f}\n\n')
 
         case "2":
 
           # Header
           print(f'\n------- Savings Account -------\n')
 
-          # Prompt for owner name
-          self.firstName = input('\nPlease enter first name: ')
+
+
+          # Prompt for owner name if firstName is not in the system
+          if not self.firstName:
+            self.firstName = input('\nPlease enter first name: ').strip()
 
           if not self.firstName:
             raise ValueError('\nError - first name cannot be empty, please re-enter\n')
 
-          self.lastName = input('\nPlease enter last name: ')
+          # Prompt for owner last name if lastName is not in the system
+          if not self.lastName:
+            self.lastName = input('\nPlease enter last name: ').strip()
 
           if not self.lastName:
             raise ValueError('\nError - last name cannot be empty, please re-enter\n')
           
-          self.balance = input('\nOpening Balance: ')
+          self.balance = float(input('Opening Balance: '))
 
           if not self.balance:
             raise ValueError('\nError - balance cannot be empty, please re-enter\n')
 
-          self.checkingAccountNumber = randint(10000000, 99999999999999999)
+          self.savingsAccountNumber = randint(10000000, 99999999999999999)
 
-          print(f'Savings account opened for {self.firstName + ' ' + self.lastName}\n')
+          self.accountList.append(SavingsAccount(
+          self.firstName + " " + self.lastName,
+          self.savingsAccountNumber,
+          self.balance,
+          0.1,
+          3))
+
+          print(f'Savings account opened for {self.firstName }  {self.lastName}\n')
           print(f'Account #: {self.savingsAccountNumber} | ${self.balance}\n\n')
 
         case "3":
@@ -432,23 +495,37 @@ class BankingAccount(Account):
           # Header
           print(f'\n------- Investment Account -------\n')
 
-          # Prompt for owner name
-          self.firstName = input('\nPlease enter first name: ')
+          # Prompt for owner first name if firstName is not in the system
+          if not self.firstName:
+            self.firstName = input('Please enter first name: ')
 
           if not self.firstName:
-            raise ValueError('\nError - first name cannot be empty, please re-enter\n')
+            raise ValueError('\nError - first name cannot be empty, please re-enter\n').strip()
 
-          self.lastName = input('\nPlease enter last name: ')
+          # Prompt for owner last name if lastName is not in the system
+          if not self.lastName:
+            self.lastName = input('\nPlease enter last name: ')
 
           if not self.lastName:
-            raise ValueError('\nError - last name cannot be empty, please re-enter\n')
+            raise ValueError('\nError - last name cannot be empty, please re-enter\n').strip()
           
-          self.balance = input('\nOpening Balance: ')
+          self.balance = float(input('Opening Balance: '))
 
           if not self.balance:
             raise ValueError('\nError - balance cannot be empty, please re-enter\n')
 
           self.investmentAccountNumber = randint(10000000, 99999999999999999)
+
+          self.accountList.append(InvestmentAccount(
+          self.firstName + " " + self.lastName,
+          self.investmentAccountNumber,
+          self.balance,
+          300))
+
+
+          print(f'Investment account opened for {self.firstName } {self.lastName}\n')
+
+          print(f'Account #: {self.investmentAccountNumber} | ${self.balance}\n\n')
 
         case "4":
 
@@ -468,7 +545,37 @@ def main():
 
   try:
    
-   bank = BankingAccount()
+   bank = Bank()
+
+   while(True):
+     
+    # Display bank menu
+    print(MENU)
+
+    match(input('Input option: ')):
+
+      case "1":
+
+        bank.OpenAccount()
+
+      case "2":
+
+      # Under constructions
+      # A Bank class manages multiple accounts and supports lookup by account number
+        break
+
+
+      case "3":
+
+        bank.ListAccounts()
+
+      case "4":
+        break
+
+      case _:
+
+        # Alert user that invalid entry was enter
+        print('\nInvalid entry - please re-enter option')
 
   except ValueError as error:
     print(error)
