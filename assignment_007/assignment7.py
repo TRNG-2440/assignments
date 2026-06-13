@@ -275,7 +275,7 @@ class DigitalProduct(Product):
         self._download_url = download_url
 
     def display_str(self) -> str:
-        return super().display_str() + (f"\nFile Size: {self._file_size_mb:,f}MB"
+        return super().display_str() + (f"\nFile Size: {self._file_size_mb:,.1f}MB"
                                         f"\nDownload URL: {self._download_url}")
 
     def get_file_size(self):
@@ -387,8 +387,11 @@ class Store:
                 found_products.append(product)
         return found_products
 
+    def get_product(self, id: str) -> Product:
+        return self._products[id]
+
     def has_product(self, prod_id: str):
-        return id in self._products
+        return prod_id in self._products
 
     def restock_product(self, id: str, quantity_to_add: int) -> bool:
         if id in self._products:
@@ -414,7 +417,7 @@ class StoreMenu(Menu):
         self.store = store
 
     def manager_menu(self) -> None:
-        pass
+        ManagerMenu(self.store).start()
 
     def customer_menu(self) -> None:
         pass
@@ -449,25 +452,54 @@ class ManagerMenu(Menu):
         print(f"Restocked Product: {product_id} (+{quantity}")
 
     def list_all_inventory(self) -> None:
+        print(Menu.MINOR_DIVIDER)
         for product in self.store.get_all_products():
             print(product.display_str())
+            print(Menu.MINOR_DIVIDER)
 
 
 class CustomerMenu(Menu):
 
     def __init__(self, store: Store):
         super().__init__({
-            "Browse all products"
+            "Browse all products": self.browse_all_products,
+            "Search by name": self.search_by_name,
+            "Place an order": self.place_an_order,
+            "Back": self.quit,
         })
+        self.store = store
 
     def browse_all_products(self) -> None:
-        pass
+        print(Menu.MINOR_DIVIDER)
+        for product in self.store.get_in_stock_products():
+            print(product.display_str())
+            print(Menu.MINOR_DIVIDER)
 
     def search_by_name(self) -> None:
-        pass
+        search: str = Menu.get_str("Search: ")
+        results: list[Product] = self.store.search_product(search)
+        if len(results) == 0:
+            print("No search results found")
+            return
+        print(Menu.MINOR_DIVIDER)
+        for product in results:
+            print(product.display_str())
+            print(Menu.MINOR_DIVIDER)
 
     def place_an_order(self) -> None:
-        pass
+        product_id: str = Menu.get_str("Product ID: ", test=lambda text: self.store.has_product(text))
+        quantity: int = Menu.get_positive_int("Quality: ")
+        product: Product = self.store.get_product(product_id)
+
+        try:
+            if product.buy(quantity):
+                price: float = product.get_cost(quantity)
+                print(f"Bought {product.get_name()} x{quantity} for {price}")
+        except ValueError as e:
+            print(e.args[0])
+        except Expired as e:
+            print(e.args[0])
+
 
 
 class AddProductMenu(Menu):
@@ -484,7 +516,7 @@ class AddProductMenu(Menu):
 
         name: str = input("Name: ")
         price: float = Menu.get_currency("Price: ")
-        quantity: int = Menu.get_positive_int("Stock quantity: 30")
+        quantity: int = Menu.get_positive_int("Stock quantity: ")
 
         new_product: Product
 
@@ -504,6 +536,6 @@ class AddProductMenu(Menu):
         print("Product Added.")
         print(new_product.display_str())
 
-
-
-#HELPER
+if __name__ == "__main__":
+    store = Store()
+    StoreMenu(store).start()
