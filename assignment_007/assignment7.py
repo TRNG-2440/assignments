@@ -375,13 +375,13 @@ class Store:
 
     def remove_product(self, id: str) -> bool:
         if id in self._products:
-            del self._products
+            del self._products[id]
             return True
         return False
 
     def search_product(self, name: str) -> list[Product]:
         found_products: list[Product] = []
-        for product in self._products.values():
+        for product in list(self._products.values()):
             if name.lower() in product.get_name().lower():
                 found_products.append(product)
         return found_products
@@ -402,7 +402,7 @@ class Store:
         return [product for product in self._products.values() if product.get_quantity() > 0]
 
     def get_all_products(self) -> list[Product]:
-        return [product for product in self._products.values()]
+        return list(self._products.values())
 
 
 class StoreMenu(Menu):
@@ -445,7 +445,7 @@ class ManagerMenu(Menu):
     def restock_product(self) -> None:
         print("Restock Product")
         product_id: str = Menu.get_str("Product ID: ", test=lambda text: self.store.has_product(text))
-        quantity: int = Menu.get_positive_int("Additional Quality: ")
+        quantity: int = Menu.get_positive_int("Additional Quantity: ")
 
         self.store.restock_product(product_id, quantity)
         print(f"Restocked Product: {product_id} (+{quantity}")
@@ -487,7 +487,7 @@ class CustomerMenu(Menu):
 
     def place_an_order(self) -> None:
         product_id: str = Menu.get_str("Product ID: ", test=lambda text: self.store.has_product(text))
-        quantity: int = Menu.get_positive_int("Quality: ")
+        quantity: int = Menu.get_positive_int("Quantity: ")
         product: Product = self.store.get_product(product_id)
 
         try:
@@ -536,9 +536,4 @@ class AddProductMenu(Menu):
         print(new_product.display_str())
 
 if __name__ == "__main__":
-    store = Store()
-    store.create_product(ProductType.PHYSICAL, "Stone", 50, 10, weight_kg=50)
-    store.create_product(ProductType.DIGITAL, "Game", 20, 10, file_size_mb=20, download_url="aurlhere.com")
-    store.create_product(ProductType.PERISHABLE, "Bad Fruit", 20, 10, expiration_date=date(2020, 1, 1))
-    store.create_product(ProductType.PERISHABLE, "Good Fruit", 20, 10, expiration_date=date(2027, 1, 1))
-    StoreMenu(store).start()
+    StoreMenu(Store()).start()
