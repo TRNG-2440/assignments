@@ -291,7 +291,6 @@ class DigitalProduct(Product):
         return True
 
 
-
 class PerishableProduct(Product):
 
     def __init__(self, id: str, name: str, price: float, quantity: int, expiration_date: date, shipping_cost: float, shipping_free_limit: float):
@@ -302,8 +301,8 @@ class PerishableProduct(Product):
 
     def display_str(self) -> str:
         return super().display_str() + (f"\nExpiration: {self._expiration_date:}"
-                                        f"\nShipping Cost: {self._shipping_cost}"
-                                        f"\nFree Shipping Minimum: {self._shipping_free_limit}")
+                                        f"\nShipping Cost: ${self._shipping_cost:,.2f}"
+                                        f"\nFree Shipping Minimum: ${self._shipping_free_limit:,.2f}")
 
     def get_cost(self, to_buy: int) -> float:
         total: float = to_buy * self._price
@@ -383,7 +382,7 @@ class Store:
     def search_product(self, name: str) -> list[Product]:
         found_products: list[Product] = []
         for product in self._products.values():
-            if name.lower() in product.get_name():
+            if name.lower() in product.get_name().lower():
                 found_products.append(product)
         return found_products
 
@@ -420,7 +419,7 @@ class StoreMenu(Menu):
         ManagerMenu(self.store).start()
 
     def customer_menu(self) -> None:
-        pass
+        CustomerMenu(self.store).start()
 
 class ManagerMenu(Menu):
 
@@ -494,7 +493,7 @@ class CustomerMenu(Menu):
         try:
             if product.buy(quantity):
                 price: float = product.get_cost(quantity)
-                print(f"Bought {product.get_name()} x{quantity} for {price}")
+                print(f"Bought {product.get_name()} x{quantity} for ${price:,.2f}")
         except ValueError as e:
             print(e.args[0])
         except Expired as e:
@@ -533,9 +532,13 @@ class AddProductMenu(Menu):
                 new_product = self.store.create_product(type, name, price, quantity, expiration_date=expiration_date)
 
         print("")
-        print("Product Added.")
+        print("Product added:")
         print(new_product.display_str())
 
 if __name__ == "__main__":
     store = Store()
+    store.create_product(ProductType.PHYSICAL, "Stone", 50, 10, weight_kg=50)
+    store.create_product(ProductType.DIGITAL, "Game", 20, 10, file_size_mb=20, download_url="aurlhere.com")
+    store.create_product(ProductType.PERISHABLE, "Bad Fruit", 20, 10, expiration_date=date(2020, 1, 1))
+    store.create_product(ProductType.PERISHABLE, "Good Fruit", 20, 10, expiration_date=date(2027, 1, 1))
     StoreMenu(store).start()
