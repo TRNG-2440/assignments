@@ -190,6 +190,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime, date
 from enum import StrEnum
 
+from assignments.shared.menu import Menu
+
 
 class ProductType(StrEnum):
     PHYSICAL = "Physical"
@@ -218,6 +220,9 @@ class Product(ABC):
 
     def get_id(self):
         return self._id
+
+    def get_quantity(self):
+        return self._quantity
 
     def increase_quantity(self, quantity_to_add: int):
         if quantity_to_add < 0:
@@ -384,3 +389,63 @@ class Store:
 
     def restock_product(self, id: str, quanitity_to_add: int) -> None:
         self._products[id].increase_quantity(quanitity_to_add)
+
+    def get_in_stock_products(self) -> list[Product]:
+        return [product for product in self._products.values() if product.get_quantity() > 0]
+
+class StoreMenu(Menu):
+    def __init__(self, store: Store):
+        super().__init__({
+            "Manager Menu": self.manager_menu,
+            "Customer Menu": self.customer_menu,
+        },
+            add_quit=True
+        )
+        self.store = store
+
+    def manager_menu(self):
+        pass
+
+    def customer_menu(self):
+        pass
+
+class ManagerMenu(Menu):
+
+    def __init__(self, store: Store):
+        super().__init__({
+            "Add product": self.add_product,
+            "Remove product": self.remove_product,
+            "Restock product": self.restock_product,
+            "List all inventory": self.list_all_inventory,
+            "Back": self.quit
+        })
+        self.store = store
+
+    def add_product(self):
+        pass
+
+    def remove_product(self):
+        pass
+
+    def restock_product(self):
+        pass
+
+    def list_all_inventory(self):
+        pass
+
+
+class CustomerMenu(Menu):
+
+    def __init__(self, store: Store):
+        super().__init__({
+            "Browse all products"
+        })
+
+    def browse_all_products(self):
+        pass
+
+    def search_by_name(self):
+        pass
+
+    def place_an_order(self):
+        pass
