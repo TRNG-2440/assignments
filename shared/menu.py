@@ -146,6 +146,19 @@ class Menu:
         return datetime.date.fromisoformat(clean_str)
 
     @staticmethod
+    def time_test(text: str) -> bool:
+        try:
+            time: datetime.time = datetime.time.fromisoformat(text)
+        except ValueError:
+            return False
+        return True
+
+    @staticmethod
+    def get_time(text: str) -> datetime.time:
+        clean_str: str = Menu.get_str(text, Menu.time_test)
+        return datetime.time.fromisoformat(clean_str)
+
+    @staticmethod
     def get_str(text: str, /, test: Optional[Callable[[str], bool]] = None, cleaner: Optional[Callable[[str], str]] = None) -> str:
         """
         Gets a float, that must match the test after the input was cleaned (if a test or cleaner exists)
