@@ -152,34 +152,34 @@ Error: Organic Strawberries has expired and cannot be ordered.
 
 ## Requirements Checklist
 
-- [ ] A base `Product` class exists with shared attributes and a price calculation method
-- [ ] `PhysicalProduct` calculates shipping cost based on weight and includes it in the total
-- [ ] `DigitalProduct` has no shipping cost and its stock is unaffected by purchases
-- [ ] `PerishableProduct` stores an expiration date and correctly identifies expired products
-- [ ] `PerishableProduct` applies a flat-rate shipping cost to all orders
-- [ ] `PerishableProduct` shipping is waived when the pre-shipping order total exceeds $25.00
-- [ ] Expired `PerishableProduct` items are blocked from being ordered
-- [ ] A `Store` class manages a collection of products and supports add, remove, restock, and search
-- [ ] Product IDs are auto-generated and unique
-- [ ] Searching by name supports partial, case-insensitive matches
-- [ ] Placing an order correctly deducts stock (except for digital products)
-- [ ] Orders for out-of-stock items are rejected with a clear error message
-- [ ] Orders for quantities exceeding available stock are rejected
-- [ ] Restocking a non-existent product ID raises an appropriate error
-- [ ] Removing a product that does not exist raises an appropriate error
-- [ ] The CLI handles invalid input (bad product IDs, non-numeric quantities, invalid dates) without crashing
-- [ ] Each product type overrides the detail display method to show its unique attributes
+- [x] A base `Product` class exists with shared attributes and a price calculation method
+- [x] `PhysicalProduct` calculates shipping cost based on weight and includes it in the total
+- [x] `DigitalProduct` has no shipping cost and its stock is unaffected by purchases
+- [x] `PerishableProduct` stores an expiration date and correctly identifies expired products
+- [x] `PerishableProduct` applies a flat-rate shipping cost to all orders
+- [x] `PerishableProduct` shipping is waived when the pre-shipping order total exceeds $25.00
+- [x] Expired `PerishableProduct` items are blocked from being ordered
+- [x] A `Store` class manages a collection of products and supports add, remove, restock, and search
+- [x] Product IDs are auto-generated and unique
+- [x] Searching by name supports partial, case-insensitive matches
+- [x] Placing an order correctly deducts stock (except for digital products)
+- [x] Orders for out-of-stock items are rejected with a clear error message
+- [x] Orders for quantities exceeding available stock are rejected
+- [x] Restocking a non-existent product ID raises an appropriate error
+- [x] Removing a product that does not exist raises an appropriate error
+- [x] The CLI handles invalid input (bad product IDs, non-numeric quantities, invalid dates) without crashing
+- [x] Each product type overrides the detail display method to show its unique attributes
 
 ---
 
 ## Stretch Goals
 
-- **Discount System** — Add a `apply_discount(percent)` method to the base `Product` class that temporarily reduces a product's price. Add a manager menu option to apply a store-wide sale to all products of a given type.
+<!-- - **Discount System** — Add a `apply_discount(percent)` method to the base `Product` class that temporarily reduces a product's price. Add a manager menu option to apply a store-wide sale to all products of a given type. -->
 
-- **Persistence** — Save and load the full inventory to/from a JSON file so product data survives between sessions. You will need to handle serialization carefully to preserve each subclass's unique attributes and restore the correct type on load.
+<!-- - **Persistence** — Save and load the full inventory to/from a JSON file so product data survives between sessions. You will need to handle serialization carefully to preserve each subclass's unique attributes and restore the correct type on load. -->
 
-- **Expiration Sweep** — Add a manager menu option that scans the inventory and automatically removes all expired `PerishableProduct` items, printing a report of what was removed.
+<!-- - **Expiration Sweep** — Add a manager menu option that scans the inventory and automatically removes all expired `PerishableProduct` items, printing a report of what was removed. -->
 
-- **Order History** — Track all placed orders in memory with a timestamp, product name, quantity, and total cost. Add a customer menu option to view past orders from the current session.
+<!-- - **Order History** — Track all placed orders in memory with a timestamp, product name, quantity, and total cost. Add a customer menu option to view past orders from the current session. -->
 
-- **Low Stock Alerts** — After every order or restock operation, check if any product's stock has fallen below a defined threshold (e.g. 5 units) and print a warning to the manager view.
+<!-- - **Low Stock Alerts** — After every order or restock operation, check if any product's stock has fallen below a defined threshold (e.g. 5 units) and print a warning to the manager view. -->
