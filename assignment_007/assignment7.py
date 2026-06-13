@@ -387,11 +387,21 @@ class Store:
                 found_products.append(product)
         return found_products
 
-    def restock_product(self, id: str, quanitity_to_add: int) -> None:
-        self._products[id].increase_quantity(quanitity_to_add)
+    def has_product(self, prod_id: str):
+        return id in self._products
+
+    def restock_product(self, id: str, quantity_to_add: int) -> bool:
+        if id in self._products:
+            self._products[id].increase_quantity(quantity_to_add)
+            return True
+        return False
 
     def get_in_stock_products(self) -> list[Product]:
         return [product for product in self._products.values() if product.get_quantity() > 0]
+
+    def get_all_products(self) -> list[Product]:
+        return [product for product in self._products.values()]
+
 
 class StoreMenu(Menu):
     def __init__(self, store: Store):
@@ -403,10 +413,10 @@ class StoreMenu(Menu):
         )
         self.store = store
 
-    def manager_menu(self):
+    def manager_menu(self) -> None:
         pass
 
-    def customer_menu(self):
+    def customer_menu(self) -> None:
         pass
 
 class ManagerMenu(Menu):
@@ -421,17 +431,26 @@ class ManagerMenu(Menu):
         })
         self.store = store
 
-    def add_product(self):
-        pass
+    def add_product(self) -> None:
+        AddProductMenu(self.store).do_selection()
 
-    def remove_product(self):
-        pass
+    def remove_product(self) -> None:
+        print("Remove Product")
+        product_id: str = Menu.get_str("Product ID: ", test=lambda text: self.store.has_product(text))
+        if self.store.remove_product(product_id):
+            print(f"Removed Product {product_id}")
 
-    def restock_product(self):
-        pass
+    def restock_product(self) -> None:
+        print("Restock Product")
+        product_id: str = Menu.get_str("Product ID: ", test=lambda text: self.store.has_product(text))
+        quantity: int = Menu.get_positive_int("Additional Quality: ")
 
-    def list_all_inventory(self):
-        pass
+        self.store.restock_product(product_id, quantity)
+        print(f"Restocked Product: {product_id} (+{quantity}")
+
+    def list_all_inventory(self) -> None:
+        for product in self.store.get_all_products():
+            print(product.display_str())
 
 
 class CustomerMenu(Menu):
@@ -441,11 +460,50 @@ class CustomerMenu(Menu):
             "Browse all products"
         })
 
-    def browse_all_products(self):
+    def browse_all_products(self) -> None:
         pass
 
-    def search_by_name(self):
+    def search_by_name(self) -> None:
         pass
 
-    def place_an_order(self):
+    def place_an_order(self) -> None:
         pass
+
+
+class AddProductMenu(Menu):
+
+    def __init__(self, store: Store):
+        super().__init__({
+            str(ProductType.PHYSICAL): lambda : self.add_product(ProductType.PHYSICAL),
+            str(ProductType.DIGITAL): lambda : self.add_product(ProductType.DIGITAL),
+            str(ProductType.PERISHABLE): lambda : self.add_product(ProductType.PERISHABLE),
+        })
+        self.store = store
+
+    def add_product(self, type: ProductType):
+
+        name: str = input("Name: ")
+        price: float = Menu.get_currency("Price: ")
+        quantity: int = Menu.get_positive_int("Stock quantity: 30")
+
+        new_product: Product
+
+        match type:
+            case ProductType.PHYSICAL:
+                weight_kg: float = Menu.get_positive_float("Weight (kg): ")
+                new_product = self.store.create_product(type, name, price, quantity, weight_kg=weight_kg)
+            case ProductType.DIGITAL:
+                file_size_mb: float = Menu.get_positive_float("File Size (MB): ")
+                download_url: str = Menu.get_str("Download URL: ")
+                new_product = self.store.create_product(type, name, price, quantity, file_size_mb=file_size_mb, download_url=download_url)
+            case ProductType.PERISHABLE:
+                expiration_date: date = Menu.get_date("Expiration Date (YYYY-MM-DD): ")
+                new_product = self.store.create_product(type, name, price, quantity, expiration_date=expiration_date)
+
+        print("")
+        print("Product Added.")
+        print(new_product.display_str())
+
+
+
+#HELPER
