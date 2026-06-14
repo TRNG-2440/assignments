@@ -153,15 +153,6 @@ Interest    : 2.5% monthly
 # Random number library
 from random import randint
 
-# Declare Bank
-MENU: str = """
-=== BANK MENU ===
-[1] Open a new account
-[2] Select an account
-[3] List all accounts
-[4] Quit
-"""
-
 # -------------------------------------------------------------------------------------
 
 # Parent class
@@ -629,6 +620,15 @@ class Bank():
           print('\nInvalid entry - please re-enter option')
 
 # -------------------------------------------------------------------------------------
+# Display bank menu
+def BankMenu() -> str:
+  print('=== BANK MENU ===')
+  print('[1] Open a new account')
+  print('[2] Select an account')
+  print('[3] List all accounts')
+  print('[4] Quit')
+
+  return input('> ')
 
 # Main function
 def main():
@@ -640,7 +640,7 @@ def main():
    while(True):
      
     # Display bank menu
-    print(MENU)
+    print(BankMenu())
 
     match(input('Input option: ')):
 
