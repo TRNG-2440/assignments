@@ -1,3 +1,17 @@
+"""
+In this activity, you will design and implement an inventory management system for an online store. 
+You will practice core OOP concepts including:
+
+Abstract base classes and interface design
+Inheritance with specialized subclass behavior
+Encapsulation and property validation
+Polymorphism through shared methods with type-specific logic
+Composition (a Store class that owns and manages product objects)
+Exception handling for invalid inventory operations
+Basic CLI interaction via a menu-driven loop
+
+"""
+
 from datetime import datetime
 import random
 
