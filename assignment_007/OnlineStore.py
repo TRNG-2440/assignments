@@ -1,173 +1,3 @@
-"""
-Python Coding Activity 7 - Online Store Inventory System
-Objective
-In this activity, you will design and implement an inventory management system for an online store. You will practice core OOP concepts including:
-
-Abstract base classes and interface design
-Inheritance with specialized subclass behavior
-Encapsulation and property validation
-Polymorphism through shared methods with type-specific logic
-Composition (a Store class that owns and manages product objects)
-Exception handling for invalid inventory operations
-Basic CLI interaction via a menu-driven loop
-Instructions
-You will build an inventory system that supports three types of products: Physical, Digital, and Perishable. Each product type shares a common interface but has unique behaviors and attributes.
-
-Create a base Product class that holds common attributes such as product ID, name, price, and stock quantity. It should support a method to display product details and a method to calculate a total price for a given quantity.
-
-Create a PhysicalProduct subclass with the following unique behavior:
-
-Has a weight attribute (in kg or lbs) used to calculate a shipping cost. Shipping cost should scale with weight.
-Overrides the total price calculation to include the calculated shipping cost.
-Create a DigitalProduct subclass with the following unique behavior:
-
-Has a file size attribute and a download URL.
-Has no shipping cost — its total price is always just the item price.
-Stock is not limited in the traditional sense; purchasing a digital product does not reduce available stock.
-Create a PerishableProduct subclass with the following unique behavior:
-
-Has an expiration date attribute.
-Includes a method to check if the product is expired based on today's date. You will need to import the datetime module.
-Expired products cannot be added to a customer order.
-Has a flat-rate shipping cost applied to all orders. However, if the pre-shipping order total exceeds $25.00, shipping is free.
-Create a Store class that manages the full product inventory. It should support:
-
-Adding a new product of any supported type to the inventory
-Removing a product by ID
-Restocking an existing product (increasing its quantity)
-Searching for products by name (partial matches count)
-Listing all in-stock products
-Create a simple Order system — when a customer places an order, the store should:
-
-Verify the product exists and is in stock (and not expired, if perishable)
-Deduct the appropriate quantity from inventory (except for digital products)
-Return an order summary with the total cost including any applicable shipping
-Build a CLI menu loop that lets the user interact with the store as either a store manager (add, remove, restock products) or a customer (browse, search, and place orders).
-
-Example Interaction
-==============================
-   PyStore Inventory System
-==============================
-
-[1] Manager Menu
-[2] Customer Menu
-[3] Quit
-
-> 1
-
---- Manager Menu ---
-[1] Add product
-[2] Remove product
-[3] Restock product
-[4] List all inventory
-[5] Back
-
-> 1
-
-Product type:
-[1] Physical
-[2] Digital
-[3] Perishable
-> 3
-
-Name: Organic Strawberries
-Price: 4.99
-Stock quantity: 30
-Expiration date (YYYY-MM-DD): 2025-06-15
-
-Perishable product added.
-   ID: PRD-0041  |  Organic Strawberries  |  $4.99  |  Expires: 2025-06-15
-
-------------------------------
-
-> 2
-
---- Customer Menu ---
-[1] Browse all products
-[2] Search by name
-[3] Place an order
-[4] Back
-
-> 2
-Search: straw
-
-Results:
-  [PRD-0041]  Organic Strawberries  |  $4.99  |  In Stock: 30  |  Expires: 2025-06-15
-
-> 3
-Product ID: PRD-0041
-Quantity: 5
-
-==============================
-         Order Summary
-==============================
-  Organic Strawberries x5
-  Unit Price : $4.99
-  Subtotal   : $24.95
-  Shipping   : $3.99  (flat-rate)
-  ---------------------
-  Total      : $28.94
-==============================
-Order placed! Remaining stock: 25
-
-------------------------------
-
-> 3
-Product ID: PRD-0041
-Quantity: 6
-
-==============================
-         Order Summary
-==============================
-  Organic Strawberries x6
-  Unit Price : $4.99
-  Subtotal   : $29.94
-  Shipping   : $0.00  (free over $25)
-  ---------------------
-  Total      : $29.94
-==============================
-Order placed! Remaining stock: 19
-
-------------------------------
-
-> 3
-Product ID: PRD-0041
-Quantity: 2
-
-Error: Organic Strawberries has expired and cannot be ordered.
-NOTE: The example above is for illustrative purposes - either the order would succeed, or it would fail for expired products, not both.
-
-Requirements Checklist
- A base Product class exists with shared attributes and a price calculation method
- PhysicalProduct calculates shipping cost based on weight and includes it in the total
- DigitalProduct has no shipping cost and its stock is unaffected by purchases
- PerishableProduct stores an expiration date and correctly identifies expired products
- PerishableProduct applies a flat-rate shipping cost to all orders
- PerishableProduct shipping is waived when the pre-shipping order total exceeds $25.00
- Expired PerishableProduct items are blocked from being ordered
- A Store class manages a collection of products and supports add, remove, restock, and search
- Product IDs are auto-generated and unique
- Searching by name supports partial, case-insensitive matches
- Placing an order correctly deducts stock (except for digital products)
- Orders for out-of-stock items are rejected with a clear error message
- Orders for quantities exceeding available stock are rejected
- Restocking a non-existent product ID raises an appropriate error
- Removing a product that does not exist raises an appropriate error
- The CLI handles invalid input (bad product IDs, non-numeric quantities, invalid dates) without crashing
- Each product type overrides the detail display method to show its unique attributes
-Stretch Goals
-Discount System — Add a apply_discount(percent) method to the base Product class that temporarily reduces a product's price. Add a manager menu option to apply a store-wide sale to all products of a given type.
-
-Persistence — Save and load the full inventory to/from a JSON file so product data survives between sessions. You will need to handle serialization carefully to preserve each subclass's unique attributes and restore the correct type on load.
-
-Expiration Sweep — Add a manager menu option that scans the inventory and automatically removes all expired PerishableProduct items, printing a report of what was removed.
-
-Order History — Track all placed orders in memory with a timestamp, product name, quantity, and total cost. Add a customer menu option to view past orders from the current session.
-
-Low Stock Alerts — After every order or restock operation, check if any product's stock has fallen below a defined threshold (e.g. 5 units) and print a warning to the manager view.
-
-"""
-
 from datetime import datetime
 import random
 
@@ -406,6 +236,8 @@ class Store:
     total = subtotal + shippingCost
 
     # Display order summary
+    # --------------------------------------
+
     print("-" * 15)
 
     print(f"{'\n\nORDER SUMMARY':^15}\n\n")
@@ -525,123 +357,91 @@ def ManagerPortal(store) -> None:
 
           case "1":
 
-            # Randomly assign product id
             productID = str(random.randint(1, 1000000000000))
 
-            # Prompt user for name
             name = input("\nName: ")
 
-            # Prompt user for price
             price = float(input("\nPrice: "))
 
-            # Prompt user for stock quantity
             stockQuantity = int(input("\nStock quantity: "))
 
-            # Prompt user for shipping weight
             weight = float(input("\nWeight: "))
 
-            # Assign value for price per weight
             pricePerWeight = 0.50
 
-            # Instantial PhysicalProduct object
             product = PhysicalProduct(productID, name, price, stockQuantity, weight, pricePerWeight)
 
           case "2":
 
-            # Randomly assign product id
             productID = str(random.randint(1, 1000000000000))
 
-            # Prompt user for name
             name = input("\nName: ")
 
-            # Prompt user for price
             price = float(input("\nPrice: "))
 
-            # Prompt user for stock quantity
             stockQuantity = int(input("\nStock quantity: "))
 
-            # Prompt user for file size
             fileSize = input("\nFile size: ")
 
-            # Prompt user for url
             url = input("\nDownload URL: ")
 
-            # Instantiate DigitalProduct object
             product = DigitalProduct(productID, name, price, stockQuantity, fileSize, url)
 
           case "3":
 
-            # Randomly assign product id
             productID = str(random.randint(1, 1000000000000))
 
-            # Prompt user for name
             name = input("\nName: ")
 
-            # Prompt user for price
             price = float(input("\nPrice: "))
 
-            # prompt user for stock quantity
             stockQuantity = int(input("\nStock quantity: "))
 
-            # Prompt user for expiration date
             expirationDate = input("\nExpiration date (YYYY-MM-DD): ")
 
-            # Instantiate PerishableProduct object
             product = PerishableProduct(productID, name, price, stockQuantity, expirationDate)
 
           case _:
             print('\nInvalid option - please re-enter\n')
             continue
 
-        # Insert instantiated object in memory
         store.InsertProduct(product)
 
         print("\nProduct added.")
 
       case "2":
 
-        # Prompt user to remove product id from inventory
         productID = input("\nProduct ID to remove: ")
 
-        # Input validation
         if(not productID):
           raise ValueError("\nError - product ID cannot be empty")
 
-        # Remove product id from memory
         store.RemoveProduct(productID)
 
-        # Notify user product has been removed
         print("\nProduct removed.")
 
       case "3":
 
-        # Prompt user for product id
         productID = input("\nProduct ID to restock: ")
 
-        # Prompt user for quantity
         quantity = int(input("\nQuantity to add: "))
 
-        # Modify quantity in memory
         store.RestockQuantity(productID, quantity)
 
-        # Notify user product is restocked
         print("\nProduct restocked.")
 
       case "4":
 
-        # Display all product
         store.ListAllProducts()
 
       case "5":
 
-        # Navigate back to main menu
         print('\nNavigating back to main menu\n')
 
         break
 
       case _:
-          
-          # Notify user invalid option was selected
+
           print('\nError - Invalid option.  Please re-enter\n')
           continue
 
@@ -656,37 +456,29 @@ def CustomerPortal(store) -> None:
     match(CustomerMenu()):
       case "1":
 
-        # List all products
         store.ListAllProducts()
 
       case "2":
 
-        # Prompt user to search for product name
         productName = input("\nSearch: ")
 
-        # Search for product through product name
         store.SearchProduct(productName)
 
       case "3":
 
-        # Prompt user to input product id
         productID = input("\nProduct ID: ")
 
-        # Prompt user to input quantity
         quantity = int(input("\nQuantity: "))
 
-        # Process Order
         store.Order(productID, quantity)
 
       case "4":
 
-        # Navigate back to main menu
         print("\nNavigating back to main menu")
         break
     
       case _:
 
-        # Notify user invalid option was selected
         print('\nError - Invalid option. Please re-enter\n')
 
         continue
