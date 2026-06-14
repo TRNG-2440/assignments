@@ -356,7 +356,7 @@ def ProductTypeMenu() -> str:
   
 # -------------------------------------------------------------------------------------
 # Function designated for manager portal
-def ManagerPortal(store) -> None:
+def ManagerPortal(storeObj) -> None:
 
   while(True):
 
@@ -380,7 +380,7 @@ def ManagerPortal(store) -> None:
 
             pricePerWeight = 0.50
 
-            product = PhysicalProduct(productID, name, price, stockQuantity, weight, pricePerWeight)
+            productObj = PhysicalProduct(productID, name, price, stockQuantity, weight, pricePerWeight)
 
           case "2":
 
@@ -396,7 +396,7 @@ def ManagerPortal(store) -> None:
 
             url = input("\nDownload URL: ")
 
-            product = DigitalProduct(productID, name, price, stockQuantity, fileSize, url)
+            productObj = DigitalProduct(productID, name, price, stockQuantity, fileSize, url)
 
           case "3":
 
@@ -410,13 +410,13 @@ def ManagerPortal(store) -> None:
 
             expirationDate = input("\nExpiration date (YYYY-MM-DD): ")
 
-            product = PerishableProduct(productID, name, price, stockQuantity, expirationDate)
+            productObj = PerishableProduct(productID, name, price, stockQuantity, expirationDate)
 
           case _:
             print('\nInvalid option - please re-enter\n')
             continue
 
-        store.InsertProduct(product)
+        storeObj.InsertProduct(productObj)
 
         print("\nProduct added.")
 
@@ -437,13 +437,13 @@ def ManagerPortal(store) -> None:
 
         quantity = int(input("\nQuantity to add: "))
 
-        store.RestockQuantity(productID, quantity)
+        storeObj.RestockQuantity(productID, quantity)
 
         print("\nProduct restocked.")
 
       case "4":
 
-        store.ListAllProducts()
+        storeObj.ListAllProducts()
 
       case "5":
 
@@ -460,20 +460,20 @@ def ManagerPortal(store) -> None:
 
 # -------------------------------------------------------------------------------------
 # Function designated for customer portal
-def CustomerPortal(store) -> None:
+def CustomerPortal(storeObj) -> None:
 
   while(True):
 
     match(CustomerMenu()):
       case "1":
 
-        store.ListAllProducts()
+        storeObj.ListAllProducts()
 
       case "2":
 
         productName = input("\nSearch: ")
 
-        store.SearchProduct(productName)
+        storeObj.SearchProduct(productName)
 
       case "3":
 
@@ -481,7 +481,7 @@ def CustomerPortal(store) -> None:
 
         quantity = int(input("\nQuantity: "))
 
-        store.Order(productID, quantity)
+        storeObj.Order(productID, quantity)
 
       case "4":
 
@@ -499,7 +499,7 @@ def CustomerPortal(store) -> None:
 def main():
   
   # Instantiate store object
-  store = Store()
+  storeObj = Store()
 
   while(True):
 
@@ -509,12 +509,12 @@ def main():
       case "1":
 
         # Provide features for management
-        ManagerPortal(store)
+        ManagerPortal(storeObj)
     
       case "2":
 
         # Provide features for management
-        CustomerPortal(store)
+        CustomerPortal(storeObj)
 
       case "3":
 
