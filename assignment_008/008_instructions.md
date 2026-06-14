@@ -26,25 +26,25 @@ You will build a system that allows users to create events, book time slots, and
    - `EventNotFoundError` — raised when a lookup is performed for a booking ID or event that does not exist.
    - `InvalidBookingError` — raised for general validation failures such as a booking made in the past, an invalid duration, or a missing required field.
 
-3. Create an `Event` class to represent a single bookable event. It should store at minimum: an event name, a start datetime, a duration, a host name, and a unique booking ID. You will need to import the `datetime` module.
+<!-- 3. Create an `Event` class to represent a single bookable event. It should store at minimum: an event name, a start datetime, a duration, a host name, and a unique booking ID. You will need to import the `datetime` module. -->
 
 4. Create a `BookingSystem` class that manages all events and exposes the following operations:
-   - **Book an event** — accepts event details, validates them, and adds the event if no conflicts exist. Must raise appropriate custom exceptions for all invalid states.
-   - **Cancel a booking** — accepts a booking ID and cancels the event if it exists and the cancellation window allows it.
-   - **View a booking** — looks up and returns a single event by booking ID.
-   - **List all upcoming bookings** — returns all future events in chronological order.
-   - **List bookings by host** — returns all events associated with a given host name.
+   <!-- - **Book an event** — accepts event details, validates them, and adds the event if no conflicts exist. Must raise appropriate custom exceptions for all invalid states. -->
+   <!-- - **Cancel a booking** — accepts a booking ID and cancels the event if it exists and the cancellation window allows it. -->
+   <!-- - **View a booking** — looks up and returns a single event by booking ID. -->
+   <!-- - **List all upcoming bookings** — returns all future events in chronological order. -->
+   <!-- - **List bookings by host** — returns all events associated with a given host name. -->
 
 5. Validation rules your `BookingSystem` must enforce via custom exceptions:
-   - A new booking may not start in the past.
-   - A new booking may not be scheduled more than 90 days in advance.
-   - A new booking may not overlap with an existing booking (same day, overlapping time range).
-   - A cancellation requested within 24 hours of the event start must raise `LateCancellationError`.
-   - Any lookup by booking ID that finds no match must raise `EventNotFoundError`.
+   <!-- - A new booking may not start in the past. -->
+   <!-- - A new booking may not be scheduled more than 90 days in advance. -->
+   <!-- - A new booking may not overlap with an existing booking (same day, overlapping time range). -->
+   <!-- - A cancellation requested within 24 hours of the event start must raise `LateCancellationError`. -->
+   <!-- - Any lookup by booking ID that finds no match must raise `EventNotFoundError`. -->
 
-6. Booking IDs should be auto-generated and unique. You may use any strategy you like to generate them.
+<!-- 6. Booking IDs should be auto-generated and unique. You may use any strategy you like to generate them. -->
 
-7. Build a CLI menu loop that allows users to: create a booking, cancel a booking, view a booking by ID, list all upcoming bookings, and list bookings by host. All exceptions should be caught at the CLI layer and displayed as clean, user-friendly error messages — the user should never see a raw Python traceback.
+<!-- 7. Build a CLI menu loop that allows users to: create a booking, cancel a booking, view a booking by ID, list all upcoming bookings, and list bookings by host. All exceptions should be caught at the CLI layer and displayed as clean, user-friendly error messages — the user should never see a raw Python traceback. -->
 
 ---
 
@@ -127,19 +127,19 @@ Upcoming Bookings
 
 ## Requirements Checklist
 
-- [ ] A base `BookingError` exception class exists and all custom exceptions inherit from it
-- [ ] `TimeSlotTakenError` includes the conflicting event name and time range in its message
-- [ ] `BookingWindowExceededError` includes the requested date and the latest allowed date in its message
-- [ ] `LateCancellationError` includes the event start time and cancellation deadline in its message
-- [ ] `EventNotFoundError` is raised for any lookup using an unrecognized booking ID
-- [ ] `InvalidBookingError` is raised for bookings with a start time in the past
-- [ ] `InvalidBookingError` is raised for any other general validation failure (e.g. zero or negative duration)
+- [x] A base `BookingError` exception class exists and all custom exceptions inherit from it
+- [x] `TimeSlotTakenError` includes the conflicting event name and time range in its message
+- [x] `BookingWindowExceededError` includes the requested date and the latest allowed date in its message (can't be scheduled more than 90 days in advance)
+- [x] `LateCancellationError` includes the event start time and cancellation deadline in its message
+- [x] `EventNotFoundError` is raised for any lookup using an unrecognized booking ID
+- [x] `InvalidBookingError` is raised for bookings with a start time in the past
+- [x] `InvalidBookingError` is raised for any other general validation failure (e.g. zero or negative duration)
 - [ ] The `BookingSystem` class raises exceptions for all invalid states rather than returning error strings
-- [ ] Overlap detection correctly identifies conflicts for events on the same day with overlapping time ranges
-- [ ] Booking IDs are auto-generated and unique across all bookings in the session
-- [ ] Cancellation within 24 hours of the event raises `LateCancellationError`
-- [ ] Listing upcoming bookings returns only future events, sorted chronologically
-- [ ] Listing by host name is case-insensitive
+- [x] Overlap detection correctly identifies conflicts for events on the same day with overlapping time ranges
+- [x] Booking IDs are auto-generated and unique across all bookings in the session
+- [x] Cancellation within 24 hours of the event raises `LateCancellationError`
+- [x] Listing upcoming bookings returns only future events, sorted chronologically
+- [x] Listing by host name is case-insensitive
 - [ ] All exceptions are caught at the CLI layer and displayed as readable messages — no raw tracebacks reach the user
 - [ ] The CLI handles non-numeric menu input and malformed dates/times without crashing
 
