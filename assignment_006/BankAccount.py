@@ -178,7 +178,12 @@ class Account:
   
   # Deposit funds in checking account
   def Deposit(self, amount):
-    self.balance += amount
+
+    if(amount < 0):
+      raise ValueError('\nError - Amount must be over $0.00.  Please re-enter\n\n')
+    
+    else:
+      self.balance += amount
 
   # Display bank account details
   def Display(self):
@@ -209,7 +214,7 @@ class CheckingAccount(Account):
     if(amount > (self.balance + self.overDraftLimit)):
       raise ValueError(f'\nError - value exceeds balance\n\nUser may only withdraw up to ${self.balance + self.overDraftLimit}\n\nPlease withdraw different amount.\n\n')
     
-    elif amount < self.balance:
+    elif amount <= self.balance:
       self.balance -= amount
 
       
@@ -226,9 +231,10 @@ class CheckingAccount(Account):
 
       print(f'Balance: ${self.balance:.2f}')
     
-    elif amount > self.balance and amount < (self.balance + self.overDraftLimit):
-      self.balance = (self.balance - amount)
-      self.overDraftLimit = self.balance + self.overDraftLimit
+    elif amount > self.balance and amount <= (self.balance + self.overDraftLimit):
+      overDraftUsed = (amount - self.balance)
+      self.balance -= amount
+      self.overDraftLimit -= overDraftUsed
       self.isOverDraft = True
     
 # -------------------------------------------------------------------------------------
@@ -298,7 +304,7 @@ class InvestmentAccount(Account):
   def Withdraw(self, amount):
     
     if(self.balance - amount < self.minimumBalance):
-      raise ValueError(f'\nError - Withdraw failed\n\nbalance must exceed minimum balance requirement of ${self.balance + self.overDraftLimit}\n\nPlease withdraw a lower amount.\n\n')
+      raise ValueError(f'\nError - Withdraw failed\n\nbalance must exceed minimum balance requirement of ${self.minimumBalance}\n\nPlease withdraw a lower amount.\n\n')
     
     else:
 
@@ -644,8 +650,8 @@ def main():
 
       case "2":
  
-        # Determine if bank account is empty
-        if(bank):
+        # Determine if bank account exists
+        if bank.accountList:
 
           # Retreive selected bank account
           account = bank.SearchAccount(input('\nEnter Account Number: '))
