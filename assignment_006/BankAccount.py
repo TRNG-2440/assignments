@@ -205,12 +205,13 @@ class CheckingAccount(Account):
     self.overDraftLimit = overDraftLimit
     self.isOverDraft = False
 
-  def WithDraw(self, amount):
+  def Withdraw(self, amount):
     if(amount > (self.balance + self.overDraftLimit)):
       raise ValueError(f'\nError - value exceeds balance\n\nUser may only withdraw up to ${self.balance + self.overDraftLimit}\n\nPlease withdraw different amount.\n\n')
     
     elif amount < self.balance:
       self.balance -= amount
+
       
       # Display checking account information
       print(f'\n------- Checking Account -------\n')
@@ -226,8 +227,8 @@ class CheckingAccount(Account):
       print(f'Balance: ${self.balance:.2f}')
     
     elif amount > self.balance and amount < (self.balance + self.overDraftLimit):
-      self.balance = (amount - self.balance)
-      self.overDraftLimit -= self.balance
+      self.balance = (self.balance - amount)
+      self.overDraftLimit = self.balance + self.overDraftLimit
       self.isOverDraft = True
     
 # -------------------------------------------------------------------------------------
@@ -365,6 +366,94 @@ class Bank():
       
     return input('\n> ')
   
+
+# ------------------------------------------------------------------------------------  
+# Account menu - provides various account options
+  def AccountMenuHelper(self) -> str:
+
+    print("\n     Account Type:"\
+    "\n----------------------------"\
+    '\n[1] Deposit'\
+    '\n[2] Withdraw'\
+    '\n[3] Apply Monthly Interest'\
+    '\n[4] View Details'\
+    '\n[5] Exit')
+      
+    return input('\n> ')
+
+# ------------------------------------------------------------------------------------  
+# Account menu helper - Contributes to AccountMenu(self,account)
+  def AccountMenu(self,account):
+
+    while(True):
+    
+      match(self.AccountMenuHelper()):
+
+        case "1": 
+        
+          amount = float(input('Input deposit amount $'))
+
+          if not amount:
+            raise ValueError('\nError - amount cannot be empty, please re-enter\n')
+        
+          elif amount < 0:
+            raise ValueError('\nError - amount cannot be negative, please re-enter\n')
+        
+          account.Deposit(amount)
+
+        case "2": 
+
+          amount = float(input('Input withdraw amount $'))
+
+          account.Withdraw(amount)
+
+          print(f'\nAmount of ${amount} successfully withdrawn\n')
+
+        case "3": 
+
+          # Execute if account number is a savings account
+          if(isinstance(account, SavingsAccount)):
+            account.ExecuteInterest()
+        
+          # Execute if account number is an investment account
+          elif(isinstance(account, InvestmentAccount)):
+            account.ReturnRate(0.3)
+
+        case "4": 
+
+          account.Display()
+
+        case "5": 
+
+          print('\nExiting menu')
+
+          break
+
+        case _:
+
+          # Alert user that invalid entry was enter
+         print('\nInvalid entry - please re-enter option')
+
+# ------------------------------------------------------------------------------------  
+# Search for a specific account
+  def SearchAccount(self, accountNumber):
+
+    # Search through accounts
+    for account in self.accountList:
+
+      if str(account.checkingAccountNumber) == accountNumber:
+        return account
+      
+      elif str(account.savingsAccountNumber) == accountNumber:
+        return account
+      
+      elif str(account.investmentAccountNumber) == accountNumber:
+        return account
+      
+    return None
+  
+# ------------------------------------------------------------------------------------  
+
   # List of all accounts
   def ListAccounts(self) -> None:
 
@@ -378,23 +467,21 @@ class Bank():
     investmentAcct = None
 
     # Traverse through accountList data strcuture 
-    for a in self.accountList:
+    for account in self.accountList:
         
         # Execute condition if subscript contains CheckingAccount instance
-        if isinstance(a, CheckingAccount):
-            checkingAcct = a
+        if isinstance(account, CheckingAccount):
+            checkingAcct = account
 
         # Execute condition if subscript contains SavingsAccount instance
-        elif isinstance(a, SavingsAccount):
-            savingsAcct = a
+        elif isinstance(account, SavingsAccount):
+            savingsAcct = account
 
         # Execute condition if subscript contains Inventory instance
-        elif isinstance(a, InvestmentAccount):
-            investmentAcct = a
+        elif isinstance(account, InvestmentAccount):
+            investmentAcct = account
 
     # Display Criteria
-
-    
     print(f"\n------- {self.firstName} {self.lastName} -------\n")
       
     if checkingAcct is not None: 
@@ -436,7 +523,8 @@ class Bank():
           if not self.lastName:
             raise ValueError('\nError - last name cannot be empty, please re-enter\n')
           
-          self.balance = float(input('Opening Balance: '))
+          
+          self.balance = float(input('\nOpening Balance: '))
 
           if not self.balance:
             raise ValueError('\nError - balance cannot be empty, please re-enter\n')
@@ -456,8 +544,6 @@ class Bank():
 
           # Header
           print(f'\n------- Savings Account -------\n')
-
-
 
           # Prompt for owner name if firstName is not in the system
           if not self.firstName:
@@ -522,7 +608,6 @@ class Bank():
           self.balance,
           300))
 
-
           print(f'Investment account opened for {self.firstName } {self.lastName}\n')
 
           print(f'Account #: {self.investmentAccountNumber} | ${self.balance}\n\n')
@@ -536,7 +621,6 @@ class Bank():
 
           # Alert user that invalid entry was enter
           print('\nInvalid entry - please re-enter option')
-
 
 # -------------------------------------------------------------------------------------
 
@@ -559,11 +643,23 @@ def main():
         bank.OpenAccount()
 
       case "2":
+ 
+        # Determine if bank account is empty
+        if(bank):
 
-      # Under constructions
-      # A Bank class manages multiple accounts and supports lookup by account number
-        break
+          # Retreive selected bank account
+          account = bank.SearchAccount(input('\nEnter Account Number: '))
+        
+        else:
+          
+          raise ValueError('\nError - No account exists\n')
 
+
+        if(account):
+          bank.AccountMenu(account)
+
+        else:
+          raise ValueError('\nAccount not found\n')
 
       case "3":
 
