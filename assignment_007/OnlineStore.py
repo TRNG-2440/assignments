@@ -1,8 +1,6 @@
 from datetime import datetime
 import random
 
-
-# -------------------------------------------------------------------------------------
 # Base class
 class Product:
 
