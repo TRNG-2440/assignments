@@ -169,6 +169,7 @@ Low Stock Alerts — After every order or restock operation, check if any produc
 """
 
 from datetime import datetime
+import random
 
 
 # -------------------------------------------------------------------------------------
@@ -197,7 +198,7 @@ class Product:
     print(f'\n------- {self.name} -------\n')
     print(f'Product ID: {self.productID}')
     print(f'Stock Quantity: {self.stockQuantity}')
-    print(f'Price: {self.price}')
+    print(f'Price: {self.price:.2f}')
   
 # -------------------------------------------------------------------------------------
 # Physical product class
@@ -226,9 +227,10 @@ class PhysicalProduct(Product):
   def Display(self):
 
     # Display criteria
-    print(f'\n------- {self.name} -------\n')
     super().Display()
-    print(f'Weight: {self.weight}')
+
+    # Print weight
+    print(f"Weight (LB's) {self.weight}")
   
 # -------------------------------------------------------------------------------------
 # Digital Product class
@@ -239,6 +241,7 @@ class DigitalProduct(Product):
     super().__init__(productID, name, price, stockQuantity)
 
     self.fileSize = fileSize
+
     self.url = url
 
   # Determine total price
@@ -253,9 +256,11 @@ class DigitalProduct(Product):
   def Display(self):
 
     # Display criteria
-    print(f'\n------- {self.name} -------\n')
+
     super().Display()
+
     print(f'File Size: {self.fileSize}')
+
     print(f'Url: {self.url}')
 
 # -------------------------------------------------------------------------------------
@@ -278,11 +283,22 @@ class PerishableProduct(Product):
     # Declare flat rate
     FLAT_RATE = 5.99
 
+    # if total exceed $25 shipping cost is $0.00
     if (self.price * quantity) > 25:
       return 0.00
     
     return FLAT_RATE
   
+  # Display perishable product information
+  def Display(self):
+
+    # Execute base class Display() function
+    super().Display()
+
+    # Print expiration date
+    print(f'Expiration Date: {self.expirationDate.strftime("%Y-%m-%d")}')
+  
+  # Calculate price of perishable item(s)
   def CalculatePrice(self, quantity):
 
     if self.isExpired():
@@ -300,29 +316,41 @@ class Store:
 
   # Add product to inventory
   def InsertProduct(self, product) -> None:
+
+    # Throw exception if product is missing
+    if(not product):
+      raise ValueError('\nError - Product is empty.  Please re-enter\n\n')
+    
+    # Add product to inventory if product is found
     self.inventory[product.productID] = product
     
   # Re-stock quantity within inventory
   def RestockQuantity(self, productID, quantity)  -> None:
 
+    # Throw exception if product is not found
     if productID not in self.inventory:
-          print("Product not found")
-          return
-
+      raise ValueError("\nProduct not found\n")
+      
+    # Modify quantity in inventory if product is found
     self.inventory[productID].stockQuantity += quantity
 
   # Search for product in inventory
-  def SearchProduct(self, productID)  -> None:
+  def SearchProduct(self, productName)  -> None:
 
-    if productID in self.inventory:
-          dictionary = self.inventory[productID]
+    # Declare bool to determine if product is found
+    isFound = False
 
-          print("Product found\n")
-          print(f"Product: {dictionary.productID}")
-          print(f"Quantity: {dictionary.stockQuantity}")
+    # Traverse through each instance to determine if product is found
+    for inventory in self.inventory.values():
 
-    else:
-        print(f"{productID} is not found")
+      # If product is found display content
+      if productName.lower() in inventory.name.lower():
+        inventory.Display()
+        isFound = True
+
+    # Execute If product is not found 
+    if not isFound:
+      print(f"No products found matching {productName}")
 
   # Remove product
   def RemoveProduct(self, productID) -> None:
@@ -337,19 +365,13 @@ class Store:
   # List all product in inventory
   def ListAllProducts(self) -> None:
 
-    print('\n---------------- Products: ----------------\n\n')
-    for key, value in self.inventory.items():
-      print(f'Product: {key} | Quantity: {value}\n')
+    print('\n---------------- Products: ----------------\n')
+    for product in self.inventory.values():
+      product.Display()
 
-  # Implement when customer places order
-  def Order(self, productID, quantity) -> None:
+  # Modify inventory stock once customer places order
+  def ModifyStock(self, inventoryMap, productID, quantity) -> None:
 
-    if(self.inventory.get(productID)):
-      inventoryMap = self.inventory[productID]
-    else:
-      print(f'\n{productID} was not found\n\n')
-      return
-    
     # Determine if product is perishable and has expired
     if isinstance(inventoryMap, PerishableProduct) and inventoryMap.isExpired():
       raise ValueError(f"Error - {inventoryMap.name} has expired and cannot be ordered")
@@ -371,21 +393,349 @@ class Store:
     if not isinstance(inventoryMap, DigitalProduct):
       inventoryMap.stockQuantity -= quantity
 
+  # Print Order
+  def PrintOrder(self, inventoryMap, quantity) -> None:
+
+    # Declare subtotal
+    subtotal = inventoryMap.price * quantity
+
+    # Declare shipping cost
+    shippingCost = inventoryMap.CalculateShipping(quantity)
+
+    # Declare total price
+    total = subtotal + shippingCost
+
     # Display order summary
     print("-" * 15)
-    print(f"{'\n\nORDER SUMAMARY':^15}\n\n")
+
+    print(f"{'\n\nORDER SUMMARY':^15}\n\n")
+
     print("-" * 25)
+
     print(f"{inventoryMap.name} x {quantity}")
-    print(f"{'Unit Price:':<15}{inventoryMap.price}")
-    print(f"{'Subtotal:':<15}{inventoryMap.CalculatePrice(quantity)}")
-    print(f"{'Shipping:':<15}{inventoryMap.CalculateShipping(quantity)}")
+
+    print(f"{'Unit Price:':<15} ${inventoryMap.price:.2f}")
+
+    print(f"{'Subtotal:':<15} ${subtotal:.2f}")
+
+    print(f"{'Shipping:':<15} ${shippingCost:.2f}")
+
     print(f"{'-' * 10:^20}")
-    print(f"{'Total:':<15}{inventoryMap.CalculateShipping(quantity)} + {inventoryMap.CalculatePrice(quantity)}")
+
+    print(f"{'Total:':<15}{total:.2f}")
+
     print("-" * 25)
+
     print(f'\nOrder Placed!  Remaining stock: {inventoryMap.stockQuantity}')
+
+  # Implement when customer places order
+  def Order(self, productID, quantity) -> None:
+
+    # Execute condition if product id is found
+    if(self.inventory.get(productID)):
+      inventoryMap = self.inventory[productID]
+
+    # Display error message if product id is not found
+    else:
+      print(f'\n{productID} was not found\n\n')
+      return
+    
+    # Modify inventory stock once customer places order
+    self.ModifyStock(inventoryMap, productID, quantity)
+    
+    # Print Order
+    self.PrintOrder(inventoryMap, quantity)
+
+# -------------------------------------------------------------------------------------
+# Display main menu
+def MainMenu() -> str:
+  while True:
+    print("\n" + "-" * 20)
+
+    print("   PyStore Inventory System")
+
+    print("\n" + "-" * 20)
+
+    print("[1] Manager Menu")
+
+    print("[2] Customer Menu")
+
+    print("[3] Quit")
+    
+    return input("\n> ")
+# -------------------------------------------------------------------------------------
+# Display manager menu
+def ManagerMenu() -> str:
+  while True:
+    print("\n--- Manager Menu ---")
+
+    print("[1] Add product")
+
+    print("[2] Remove product")
+
+    print("[3] Restock product")
+
+    print("[4] List all inventory")
+
+    print("[5] Back")
+
+    return input("\n> ")
+
+# -------------------------------------------------------------------------------------
+# Display customer menu
+def CustomerMenu() -> str:
+
+  print("\n--- Customer Menu ---")
+
+  print("[1] Browse all products")
+
+  print("[2] Search by name")
+
+  print("[3] Place an order")
+
+  print("[4] Back")
+
+  return input("\n> ")
+
+# -------------------------------------------------------------------------------------
+# Display product type
+#   
+def ProductTypeMenu() -> str:
+
+  print("\nProduct type:")
+
+  print("[1] Physical")
+
+  print("[2] Digital")
+
+  print("[3] Perishable")
+  return input("> ")
+  
+# -------------------------------------------------------------------------------------
+# Function designated for manager portal
+def ManagerPortal(store) -> None:
+
+  while(True):
+
+    match(ManagerMenu()):
+
+      case "1":
+
+        match(ProductTypeMenu()):
+
+          case "1":
+
+            # Randomly assign product id
+            productID = str(random.randint(1, 1000000000000))
+
+            # Prompt user for name
+            name = input("\nName: ")
+
+            # Prompt user for price
+            price = float(input("\nPrice: "))
+
+            # Prompt user for stock quantity
+            stockQuantity = int(input("\nStock quantity: "))
+
+            # Prompt user for shipping weight
+            weight = float(input("\nWeight: "))
+
+            # Assign value for price per weight
+            pricePerWeight = 0.50
+
+            # Instantial PhysicalProduct object
+            product = PhysicalProduct(productID, name, price, stockQuantity, weight, pricePerWeight)
+
+          case "2":
+
+            # Randomly assign product id
+            productID = str(random.randint(1, 1000000000000))
+
+            # Prompt user for name
+            name = input("\nName: ")
+
+            # Prompt user for price
+            price = float(input("\nPrice: "))
+
+            # Prompt user for stock quantity
+            stockQuantity = int(input("\nStock quantity: "))
+
+            # Prompt user for file size
+            fileSize = input("\nFile size: ")
+
+            # Prompt user for url
+            url = input("\nDownload URL: ")
+
+            # Instantiate DigitalProduct object
+            product = DigitalProduct(productID, name, price, stockQuantity, fileSize, url)
+
+          case "3":
+
+            # Randomly assign product id
+            productID = str(random.randint(1, 1000000000000))
+
+            # Prompt user for name
+            name = input("\nName: ")
+
+            # Prompt user for price
+            price = float(input("\nPrice: "))
+
+            # prompt user for stock quantity
+            stockQuantity = int(input("\nStock quantity: "))
+
+            # Prompt user for expiration date
+            expirationDate = input("\nExpiration date (YYYY-MM-DD): ")
+
+            # Instantiate PerishableProduct object
+            product = PerishableProduct(productID, name, price, stockQuantity, expirationDate)
+
+          case _:
+            print('\nInvalid option - please re-enter\n')
+            continue
+
+        # Insert instantiated object in memory
+        store.InsertProduct(product)
+
+        print("\nProduct added.")
+
+      case "2":
+
+        # Prompt user to remove product id from inventory
+        productID = input("\nProduct ID to remove: ")
+
+        # Input validation
+        if(not productID):
+          raise ValueError("\nError - product ID cannot be empty")
+
+        # Remove product id from memory
+        store.RemoveProduct(productID)
+
+        # Notify user product has been removed
+        print("\nProduct removed.")
+
+      case "3":
+
+        # Prompt user for product id
+        productID = input("\nProduct ID to restock: ")
+
+        # Prompt user for quantity
+        quantity = int(input("\nQuantity to add: "))
+
+        # Modify quantity in memory
+        store.RestockQuantity(productID, quantity)
+
+        # Notify user product is restocked
+        print("\nProduct restocked.")
+
+      case "4":
+
+        # Display all product
+        store.ListAllProducts()
+
+      case "5":
+
+        # Navigate back to main menu
+        print('\nNavigating back to main menu\n')
+
+        break
+
+      case _:
+          
+          # Notify user invalid option was selected
+          print('\nError - Invalid option.  Please re-enter\n')
+          continue
+
 
 
 # -------------------------------------------------------------------------------------
+# Function designated for customer portal
+def CustomerPortal(store) -> None:
+
+  while(True):
+
+    match(CustomerMenu()):
+      case "1":
+
+        # List all products
+        store.ListAllProducts()
+
+      case "2":
+
+        # Prompt user to search for product name
+        productName = input("\nSearch: ")
+
+        # Search for product through product name
+        store.SearchProduct(productName)
+
+      case "3":
+
+        # Prompt user to input product id
+        productID = input("\nProduct ID: ")
+
+        # Prompt user to input quantity
+        quantity = int(input("\nQuantity: "))
+
+        # Process Order
+        store.Order(productID, quantity)
+
+      case "4":
+
+        # Navigate back to main menu
+        print("\nNavigating back to main menu")
+        break
+    
+      case _:
+
+        # Notify user invalid option was selected
+        print('\nError - Invalid option. Please re-enter\n')
+
+        continue
+# -------------------------------------------------------------------------------------
+
+# Main function
+def main():
+  
+  # Instantiate store object
+  store = Store()
+
+  while(True):
+
+    # Display main menu
+    match(MainMenu()):
+
+      case "1":
+
+        # Provide features for management
+        ManagerPortal(store)
+    
+      case "2":
+
+        # Provide features for management
+        CustomerPortal(store)
+
+      case "3":
+
+        # Exit program
+        print('\nExiting program\n')
+
+        break
+
+      case _:
+          
+          # Notify user invalid option was selected
+          print('\nError - Invalid option.  Please re-enter\n')
+          continue
+
+
+if __name__=="__main__":
+
+  try:
+
+    main()
+
+  except ValueError as error:
+
+    print(error)
 
   
 
