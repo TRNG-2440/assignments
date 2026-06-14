@@ -86,7 +86,6 @@ class DigitalProduct(Product):
   def Display(self):
 
     # Display criteria
-
     super().Display()
 
     print(f'File Size: {self.fileSize}')
