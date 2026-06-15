@@ -159,13 +159,9 @@ def main():
           print("\n------------- Book Event -------------\n")
 
           eventName = input("Event name: ")
-
           hostName = input("Host name: ")
-
           date = input("Start date (YYYY-MM-DD): ")
-
           time = input("Start time (HH:MM): ")
-
           duration = int(input("Duration (minutes): "))
 
           print("\n--------------------------------------\n")
