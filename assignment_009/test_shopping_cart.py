@@ -6,10 +6,11 @@ import unittest
 from typing import Any
 from unittest.mock import patch, MagicMock
 
+from assignments.assignment_009.catalogue import DISCOUNT_CODES
 from assignments.assignment_009.inventory import InventoryService
 from assignments.assignment_009.pricing import PricingService
 from cart import ShoppingCart
-from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError
+from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError, InvalidDiscountCodeError
 from catalogue import PRODUCT_CATALOGUE
 
 
@@ -165,47 +166,68 @@ class TestInventoryService(unittest.TestCase):
 
 class TestDiscountCodes(unittest.TestCase):
     def setUp(self) -> None:
-        self.inventory = PricingService()
-
-        self.item_quantity = 10
-        self.inventory.get_stock.return_value = self.item_quantity
-
-        self.cart = ShoppingCart(inventory_service=self.inventory, customer_id="1")
-        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
-        self.test_items_2: list[dict[str, Any]] = [item_of_quantity(key, value, 2) for key, value in PRODUCT_CATALOGUE.items()]
-        self.test_items_20: list[dict[str, Any]] = [item_of_quantity(key, value, 20) for key, value in PRODUCT_CATALOGUE.items()]
+        self.pricing_service = PricingService()
 
     def test_valid_percent_code(self):
-        #TODO
-        pass
+        code: str = "SAVE10"
+        discount_count: dict[str, Any] = self.pricing_service.validate_discount_code(code)
+        self.assertDictEqual(discount_count, DISCOUNT_CODES[code])
 
     def test_valid_flat_code(self):
-        #TODO
-        pass
+        code: str = "FLAT5"
+        discount_count: dict[str, Any] = self.pricing_service.validate_discount_code(code)
+        self.assertDictEqual(discount_count, DISCOUNT_CODES[code])
 
     def test_unrecognized_code(self):
-        #TODO
-        pass
+        code: str = "UNKNOWN"
+        self.assertRaisesRegex(InvalidDiscountCodeError, f"Discount code '{code}' is invalid or expired.",
+        self.pricing_service.validate_discount_code, code)
 
     def test_expired_code(self):
-        #TODO
-        pass
+        code: str = "EXPIRED50"
+        self.assertRaisesRegex(InvalidDiscountCodeError, f"Discount code '{code}' is expired.",
+                               self.pricing_service.validate_discount_code, code)
 
-    def test_apply_code(self):
-        #TODO
-        pass
+    def test_apply_percent_code(self):
+        cart = ShoppingCart(pricing_service=self.pricing_service, customer_id="1")
+        code: str = "SAVE10"
+        cart.apply_discount_code(code)
+        self.assertEqual(cart._discount_code, code)
 
     def test_remove_code(self):
-        #TODO
-        pass
-
-    def test_flat_code_correct(self):
-        #TODO
-        pass
+        cart = ShoppingCart(pricing_service=self.pricing_service, customer_id="1")
+        code: str = "SAVE10"
+        cart.apply_discount_code(code)
+        cart.remove_discount_code()
+        self.assertIsNone(cart._discount_code)
 
     def test_percent_code_correct(self):
-        #TODO
-        pass
+        subtotal: float = 10.00
+        code: str = "SAVE10"
+        wanted_total: float = subtotal * 0.90
+
+        total: float = self.pricing_service.apply_discount(subtotal, code)
+
+        self.assertEqual(total, wanted_total)
+
+    def test_flat_code_correct(self):
+        subtotal: float = 10.00
+        code: str = "FLAT5"
+        wanted_total: float = subtotal - 5.0
+
+        total: float = self.pricing_service.apply_discount(subtotal, code)
+
+        self.assertEqual(total, wanted_total)
+
+    def test_applied_discount_cannot_be_negative(self):
+        subtotal: float = 2.00
+        code: str = "FLAT5"
+        wanted_total: float = 0
+
+        total: float = self.pricing_service.apply_discount(subtotal, code)
+
+        self.assertEqual(total, wanted_total)
+
 
 
 def item_of_quantity(key: str, product: dict[str, Any], quantity: int) -> dict[str, Any]:
