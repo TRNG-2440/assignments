@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from BookingSystem import BookingSystem
 from Event import Event
@@ -52,7 +53,11 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(e)
             case 2:
-                pass
+                try:
+                    booking_id: UUID = UUID(input("Enter booking id to cancel: "))
+                    booking_system.cancel_booking(booking_id)
+                except Exception as e:
+                    print(e)
             case 3:
                 pass
             case 4:

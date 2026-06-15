@@ -5,7 +5,9 @@ from uuid import UUID
 from Event import Event
 from custom_exceptions import (
     BookingWindowExceededError,
+    EventNotFoundError,
     InvalidBookingError,
+    LateCancellationError,
     TimeSlotTakenError,
 )
 
@@ -71,3 +73,18 @@ class BookingSystem:
                 lo = mid + 1
             else:
                 hi = mid - 1
+
+    def cancel_booking(self, booking_id: UUID) -> None:
+        if booking_id not in self.bookings:
+            raise EventNotFoundError(booking_id)
+
+        booking: Event = self.bookings[booking_id]
+        cancellation_deadline: datetime = booking.start_datetime - timedelta(
+            hours=CANCELLATION_WINDOW_HOURS
+        )
+        if cancellation_deadline < datetime.now():
+            raise LateCancellationError(
+                booking.event_name, booking.start_datetime, cancellation_deadline
+            )
+        del self.bookings[booking_id]
+        print(f"Cancelled event for booking id: {booking_id} successfully!")
