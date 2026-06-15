@@ -1,0 +1,130 @@
+"""
+
+"""
+
+import unittest
+from typing import Any
+from unittest.mock import patch, MagicMock
+
+from cart import ShoppingCart
+from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError
+from catalogue import PRODUCT_CATALOGUE
+
+
+
+
+
+class TestItemManagement(unittest.TestCase):
+    def setUp(self):
+        self.inventory = MagicMock()
+
+        self.item_quantity = 10
+        self.inventory.get_stock.return_value = self.item_quantity
+
+        self.cart = ShoppingCart(inventory_service=self.inventory, customer_id="1")
+        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
+        self.test_items_2: list[dict[str, Any]] = [item_of_quantity(key, value, 2) for key, value in PRODUCT_CATALOGUE.items()]
+        self.test_items_20: list[dict[str, Any]] = [item_of_quantity(key, value, 20) for key, value in PRODUCT_CATALOGUE.items()]
+
+    def test_shopping_cart_add_item_adds_item(self):
+        item: dict[str, Any] = self.test_items_1[0]
+
+        self.cart.add_item(item["sku"])
+        self.assertEqual(len(self.cart.get_items()), 1, "Only 1 item for add item")
+        self.assertDictEqual(self.cart.get_items()[0], item, "Items must be match")
+
+    def test_shopping_cart_adds_item_adds_multiple_items(self):
+        for i in range(0, len(self.test_items_1)):
+            item: dict[str, Any] = self.test_items_1[i]
+            self.cart.add_item(item["sku"])
+            self.assertEqual(len(self.cart.get_items()), i+1, "Additional items should increase the number of items")
+
+    def test_shopping_cart_adds_item_adds_quantity(self):
+        item: dict[str, Any] = self.test_items_2[0]
+        self.cart.add_item(item["sku"], 2)
+        self.assertDictEqual(self.cart.get_items()[0], item, "Items must match")
+
+    def test_shopping_cart_adds_item_multiple_adds_increase_quantity(self):
+        item: dict[str, Any] = self.test_items_1[0]
+        item2: dict[str, Any] = self.test_items_2[0]
+
+        self.cart.add_item(item["sku"], 1)
+        self.cart.add_item(item["sku"], 1)
+
+        self.assertEqual(len(self.cart.get_items()), 1)
+        self.assertDictEqual(self.cart.get_items()[0], item2, "Items must match")
+
+    def test_shopping_cart_adds_item_errors_on_unknown_item(self):
+        item_key: str = "unknown item"
+        self.assertRaisesRegex(ItemNotFoundError, f"No product found with SKU '{item_key}'.", self.cart.add_item, item_key)
+
+    def test_shopping_cart_adds_item_errors_on_invalid_quantity(self):
+        item: dict[str, Any] = self.test_items_1[0]
+        quantity: int = -1
+        self.assertRaisesRegex(InvalidQuantityError, f"Invalid quantity '{quantity}': quantity must be a positive integer.", self.cart.add_item, item["sku"], quantity)
+
+    def test_shopping_cart_adds_item_errors_on_insufficient_quantity(self):
+        quantity: int = 20
+        item: dict[str, Any] = self.test_items_20[0]
+        self.assertRaisesRegex(InsufficientStockError,
+                               f"Insufficient stock for SKU '{item["sku"]}': "
+                                f"requested {quantity}, only {self.item_quantity} available.",
+                               self.cart.add_item, item["sku"], quantity)
+
+    def test_shopping_cart_remove_item_removes_item(self):
+        for item in self.test_items_2:
+            self.cart.add_item(item["sku"])
+        self.cart.remove_item(self.test_items_2[0]["sku"])
+        self.assertEqual(len(self.cart.get_items()), len(self.test_items_2) - 1)
+        self.assertNotIn(self.test_items_2[0], self.cart.get_items(), "Item should be removed")
+
+    def test_shopping_cart_remove_item_error_on_not_found(self):
+        item: dict[str, Any] = self.test_items_2[0]
+        not_found_item: dict[str, Any] = self.test_items_2[1]
+        not_found_sku = not_found_item["sku"]
+        self.cart.add_item(item["sku"])
+        self.assertRaisesRegex(CartItemNotFoundError, f"SKU '{not_found_sku}' is not in the cart.", self.cart.remove_item, not_found_sku)
+
+    def test_shopping_cart_update_quantity_updates_quantity(self):
+        item: dict[str, Any] = self.test_items_1[0]
+        item2: dict[str, Any] = self.test_items_2[0]
+        self.cart.add_item(item["sku"])
+        self.cart.update_quantity(item["sku"], 2)
+
+        self.assertEqual(len(self.cart.get_items()), 1)
+        self.assertDictEqual(self.cart.get_items()[0], item2, "Items must match")
+
+    def test_shopping_cart_update_quantity_errors_on_not_found(self):
+        item: dict[str, Any] = self.test_items_2[0]
+        item_sku = item["sku"]
+        quantity: int = 5
+
+        self.assertRaisesRegex(CartItemNotFoundError, f"SKU '{item_sku}' is not in the cart.",
+                               self.cart.update_quantity, item_sku, quantity)
+
+    def test_shopping_cart_update_quantity_error_on_invalid_quantity(self):
+        item: dict[str, Any] = self.test_items_1[0]
+        self.cart.add_item(item["sku"])
+        quantity: int = -1
+        self.assertRaisesRegex(InvalidQuantityError,
+                               f"Invalid quantity '{quantity}': quantity must be a positive integer.",
+                               self.cart.update_quantity, item["sku"], quantity)
+
+
+    def test_shopping_cart_update_quantity_errors_on_insufficient_stock(self):
+        item: dict[str, Any] = self.test_items_1[0]
+        self.cart.add_item(item["sku"])
+        quantity: int = 20
+        self.assertRaisesRegex(InsufficientStockError,
+                               f"Insufficient stock for SKU '{item["sku"]}': "
+                               f"requested {quantity}, only {self.item_quantity} available.",
+                               self.cart.update_quantity, item["sku"], quantity)
+
+def item_of_quantity(key: str, product: dict[str, Any], quantity: int) -> dict[str, Any]:
+    item: dict[str, Any] = dict(product)
+    item["sku"] = key
+    price: int = product["price"]
+    del item["price"]
+    item["unit_price"] = price
+    item["quantity"] = quantity
+    return item
