@@ -1,12 +1,12 @@
 # Mark White
 # 06/12/2026
+# Assignment 6
 # Banking System
 
 # This program simulates a banking system. 
 # the program allows the user to open an account, select an account, list all accounts, and quit.
 # you can deposit, withdraw, and apply interest to your account. 
 # there are limits to withdrawals, overdrafts, and minimum balances according to accounts type.
-
 
 
 from bank import Bank
