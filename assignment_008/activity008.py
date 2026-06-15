@@ -82,7 +82,7 @@ class BookingSystem:
         # cannot overlap time range
         event_name = input("Event name: ")
         host_name = input("host name: ")
-        start_date = dt.date.fromisoformat(input("start date (yyyy-mm-dd): "))
+        start_date = dt.datetime.fromisoformat(input("start date (yyyy-mm-dd): "))
         start_time = dt.time.fromisoformat(input("start time (hh:mm): "))
         dur = dt.timedelta(minutes=int(input("duration (min): ")))
 
@@ -92,19 +92,20 @@ class BookingSystem:
             raise InvalidBookingError("missing required field")
         if dur < dt.timedelta(minutes=0):
             raise InvalidBookingError("duration cannot be negative")
-        if start_date < dt.date.today():
+        if start_date < dt.datetime.today():
             raise InvalidBookingError("event cannot be booked before the current date")
         for event in self.events.values():
+            # FIX need to solve converting time object and timedelta object
             if start_date == event.start_date:
-                if start_time > event.start_time and start_time < event.start_time + event.duration:
+                if start_time > event.start_time and start_time < convert_add_time(event.start_time, event.duration):
                     raise TimeSlotTakenError()
-                if start_time + dur > event.start_time and start_time + dur < event.start_time + event.duration:
+                if convert_add_time(start_time, dur) > event.start_time and convert_add_time(start_time, dur) < convert_add_time(event.start_time, event.duration):
                     raise TimeSlotTakenError()
-                if event.start_time > start_time and event.start_time < start_time + dur:
+                if event.start_time > start_time and event.start_time < convert_add_time(start_time, dur):
                     raise TimeSlotTakenError()
-                if event.start_time + event.duration > start_time and event.start_time + event.duration < start_time + dur:
+                if convert_add_time(event.start_time, event.duration) > start_time and convert_add_time(event.start_time, event.duration) < convert_add_time(start_time, dur):
                     raise TimeSlotTakenError()
-        if start_date > dt.date.today() + dt.timedelta(days=90):
+        if start_date > dt.datetime.today() + dt.timedelta(days=90):
             raise BookingWindowExceededError()
         
         event = Event(event_name, start_date, start_time, dur, host_name)
@@ -118,7 +119,7 @@ class BookingSystem:
             event = self.events[id]
         except KeyError:
             raise EventNotFoundError()
-        if dt.timedelta(days= dt.date.today() - event.start_date) < 1:
+        if dt.timedelta(days= dt.datetime.today() - event.start_date) < 1:
             raise LateCancellationError()
 
     def view_booking(self):
@@ -132,7 +133,7 @@ class BookingSystem:
 
     def list_upcoming(self):
         for event in self.events.values():
-            if event.start_date > dt.date.today():
+            if event.start_date > dt.datetime.today():
                 print(event.details())
 
     def list_host(self):
@@ -176,6 +177,9 @@ class BookingSystem:
                 case 0: # exit
                     print("exiting...\nGoodbye")
                     return user_selection
+
+def convert_add_time(time_ob=None, datetime_ob=None):
+    return (dt.datetime.combine(dt.date(1,1,1),time_ob) + datetime_ob).time()
 
 def print_menu(*args:str) -> None:
     w = 31
