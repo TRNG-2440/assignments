@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
+import json
+import os
 
 
 class InventoryError(Exception):
@@ -21,6 +23,13 @@ class Product(ABC):
         cls.next_id += 1
         return product_id
 
+    @classmethod
+    def update_next_id(cls, product_id):
+        number = int(product_id.split("-")[1])
+
+        if number >= cls.next_id:
+            cls.next_id = number + 1
+
     @property
     def name(self):
         return self._name
@@ -38,8 +47,10 @@ class Product(ABC):
     @price.setter
     def price(self, value):
         value = float(value)
+
         if value < 0:
             raise ValueError("Price cannot be negative.")
+
         self._price = value
 
     @property
@@ -49,9 +60,17 @@ class Product(ABC):
     @stock_quantity.setter
     def stock_quantity(self, value):
         value = int(value)
+
         if value < 0:
             raise ValueError("Stock quantity cannot be negative.")
+
         self._stock_quantity = value
+
+    def apply_discount(self, percent):
+        if percent <= 0 or percent > 100:
+            raise InventoryError("Discount percent must be between 1 and 100.")
+
+        self.price = self.price * (1 - percent / 100)
 
     def calculate_subtotal(self, quantity):
         return self.price * quantity
@@ -67,6 +86,15 @@ class Product(ABC):
 
     def reduce_stock(self, quantity):
         self.stock_quantity -= quantity
+
+    def to_dict(self):
+        return {
+            "type": self.__class__.__name__,
+            "product_id": self.product_id,
+            "name": self.name,
+            "price": self.price,
+            "stock_quantity": self.stock_quantity
+        }
 
     @abstractmethod
     def calculate_shipping(self, quantity):
@@ -91,8 +119,10 @@ class PhysicalProduct(Product):
     @weight.setter
     def weight(self, value):
         value = float(value)
+
         if value <= 0:
             raise ValueError("Weight must be greater than 0.")
+
         self._weight = value
 
     def calculate_shipping(self, quantity):
@@ -104,6 +134,11 @@ class PhysicalProduct(Product):
             f"${self.price:.2f} | Stock: {self.stock_quantity} | "
             f"Weight: {self.weight:.2f} kg"
         )
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["weight"] = self.weight
+        return data
 
 
 class DigitalProduct(Product):
@@ -119,8 +154,10 @@ class DigitalProduct(Product):
     @file_size.setter
     def file_size(self, value):
         value = float(value)
+
         if value <= 0:
             raise ValueError("File size must be greater than 0.")
+
         self._file_size = value
 
     @property
@@ -131,6 +168,7 @@ class DigitalProduct(Product):
     def download_url(self, value):
         if not value.strip():
             raise ValueError("Download URL cannot be empty.")
+
         self._download_url = value.strip()
 
     def calculate_shipping(self, quantity):
@@ -151,6 +189,12 @@ class DigitalProduct(Product):
             f"${self.price:.2f} | Stock: Unlimited | "
             f"File Size: {self.file_size:.2f} MB | URL: {self.download_url}"
         )
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["file_size"] = self.file_size
+        data["download_url"] = self.download_url
+        return data
 
 
 class PerishableProduct(Product):
@@ -190,10 +234,18 @@ class PerishableProduct(Product):
             f"Expires: {self.expiration_date}"
         )
 
+    def to_dict(self):
+        data = super().to_dict()
+        data["expiration_date"] = str(self.expiration_date)
+        return data
+
 
 class Store:
+    LOW_STOCK_LIMIT = 5
+
     def __init__(self):
         self.products = {}
+        self.order_history = []
 
     def add_product(self, product):
         self.products[product.product_id] = product
@@ -258,7 +310,101 @@ class Store:
 
         product.reduce_stock(quantity)
 
+        order = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "product_name": product.name,
+            "quantity": quantity,
+            "total": total
+        }
+
+        self.order_history.append(order)
+
         return subtotal, shipping, total, product
+
+    def apply_sale_by_type(self, product_type, percent):
+        count = 0
+
+        for product in self.products.values():
+            if product_type == "physical" and isinstance(product, PhysicalProduct):
+                product.apply_discount(percent)
+                count += 1
+            elif product_type == "digital" and isinstance(product, DigitalProduct):
+                product.apply_discount(percent)
+                count += 1
+            elif product_type == "perishable" and isinstance(product, PerishableProduct):
+                product.apply_discount(percent)
+                count += 1
+
+        return count
+
+    def remove_expired_products(self):
+        removed = []
+
+        for product_id in list(self.products.keys()):
+            product = self.products[product_id]
+
+            if isinstance(product, PerishableProduct) and product.is_expired():
+                removed.append(product)
+                del self.products[product_id]
+
+        return removed
+
+    def get_low_stock_products(self):
+        low_stock = []
+
+        for product in self.products.values():
+            if not isinstance(product, DigitalProduct):
+                if product.stock_quantity < self.LOW_STOCK_LIMIT:
+                    low_stock.append(product)
+
+        return low_stock
+
+    def save_inventory(self, filename):
+        data = []
+
+        for product in self.products.values():
+            data.append(product.to_dict())
+
+        with open(filename, "w") as file:
+            json.dump(data, file, indent=4)
+
+    def load_inventory(self, filename):
+        if not os.path.exists(filename):
+            return
+
+        with open(filename, "r") as file:
+            data = json.load(file)
+
+        for item in data:
+            product_type = item["type"]
+
+            if product_type == "PhysicalProduct":
+                product = PhysicalProduct(
+                    item["name"],
+                    item["price"],
+                    item["stock_quantity"],
+                    item["weight"]
+                )
+            elif product_type == "DigitalProduct":
+                product = DigitalProduct(
+                    item["name"],
+                    item["price"],
+                    item["file_size"],
+                    item["download_url"]
+                )
+            elif product_type == "PerishableProduct":
+                product = PerishableProduct(
+                    item["name"],
+                    item["price"],
+                    item["stock_quantity"],
+                    item["expiration_date"]
+                )
+            else:
+                continue
+
+            product.product_id = item["product_id"]
+            Product.update_next_id(product.product_id)
+            self.products[product.product_id] = product
 
 
 def get_int(prompt):
@@ -314,6 +460,17 @@ def print_order_summary(product, quantity, subtotal, shipping, total):
         print(f"Order placed! Remaining stock: {product.stock_quantity}")
 
 
+def print_low_stock_alerts(store):
+    low_stock_products = store.get_low_stock_products()
+
+    if low_stock_products:
+        print()
+        print("Low Stock Alert:")
+
+        for product in low_stock_products:
+            print(f"{product.name} has only {product.stock_quantity} left.")
+
+
 def add_product_menu(store):
     print()
     print("Product type:")
@@ -361,6 +518,46 @@ def add_product_menu(store):
         print(f"Error: {error}")
 
 
+def sale_menu(store):
+    print()
+    print("Apply sale to product type:")
+    print("[1] Physical")
+    print("[2] Digital")
+    print("[3] Perishable")
+
+    choice = input("> ").strip()
+    percent = get_float("Discount percent: ")
+
+    try:
+        if choice == "1":
+            count = store.apply_sale_by_type("physical", percent)
+        elif choice == "2":
+            count = store.apply_sale_by_type("digital", percent)
+        elif choice == "3":
+            count = store.apply_sale_by_type("perishable", percent)
+        else:
+            print("Invalid product type.")
+            return
+
+        print(f"Sale applied to {count} product(s).")
+
+    except InventoryError as error:
+        print(f"Error: {error}")
+
+
+def expiration_sweep_menu(store):
+    removed_products = store.remove_expired_products()
+
+    print()
+    print("--- Expiration Sweep Report ---")
+
+    if not removed_products:
+        print("No expired products were removed.")
+    else:
+        for product in removed_products:
+            print(f"Removed: {product.name} | Expired: {product.expiration_date}")
+
+
 def manager_menu(store):
     while True:
         print()
@@ -369,7 +566,9 @@ def manager_menu(store):
         print("[2] Remove product")
         print("[3] Restock product")
         print("[4] List all inventory")
-        print("[5] Back")
+        print("[5] Apply sale by product type")
+        print("[6] Remove expired perishable products")
+        print("[7] Back")
 
         choice = input("> ").strip()
 
@@ -392,6 +591,7 @@ def manager_menu(store):
             try:
                 store.restock_product(product_id, quantity)
                 print("Product restocked.")
+                print_low_stock_alerts(store)
             except InventoryError as error:
                 print(f"Error: {error}")
 
@@ -401,10 +601,32 @@ def manager_menu(store):
             print_products(store.list_all_products())
 
         elif choice == "5":
+            sale_menu(store)
+
+        elif choice == "6":
+            expiration_sweep_menu(store)
+
+        elif choice == "7":
             break
 
         else:
             print("Invalid option.")
+
+
+def print_order_history(store):
+    print()
+    print("--- Order History ---")
+
+    if not store.order_history:
+        print("No orders have been placed.")
+        return
+
+    for order in store.order_history:
+        print(
+            f"{order['timestamp']} | "
+            f"{order['product_name']} x{order['quantity']} | "
+            f"Total: ${order['total']:.2f}"
+        )
 
 
 def customer_menu(store):
@@ -414,7 +636,8 @@ def customer_menu(store):
         print("[1] Browse all products")
         print("[2] Search by name")
         print("[3] Place an order")
-        print("[4] Back")
+        print("[4] View order history")
+        print("[5] Back")
 
         choice = input("> ").strip()
 
@@ -438,10 +661,14 @@ def customer_menu(store):
             try:
                 subtotal, shipping, total, product = store.place_order(product_id, quantity)
                 print_order_summary(product, quantity, subtotal, shipping, total)
+                print_low_stock_alerts(store)
             except InventoryError as error:
                 print(f"Error: {error}")
 
         elif choice == "4":
+            print_order_history(store)
+
+        elif choice == "5":
             break
 
         else:
@@ -449,7 +676,9 @@ def customer_menu(store):
 
 
 def main():
+    filename = "inventory.json"
     store = Store()
+    store.load_inventory(filename)
 
     while True:
         print()
@@ -469,6 +698,8 @@ def main():
             customer_menu(store)
 
         elif choice == "3":
+            store.save_inventory(filename)
+            print("Inventory saved.")
             print("Goodbye!")
             break
 
