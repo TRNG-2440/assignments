@@ -88,3 +88,10 @@ class BookingSystem:
             )
         del self.bookings[booking_id]
         print(f"Cancelled event for booking id: {booking_id} successfully!")
+
+    def view_booking(self, booking_id: UUID) -> None:
+        if booking_id not in self.bookings:
+            raise EventNotFoundError(booking_id)
+
+        booking: Event = self.bookings[booking_id]
+        booking.display_event_details()

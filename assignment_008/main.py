@@ -59,7 +59,11 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(e)
             case 3:
-                pass
+                try:
+                    booking_id: UUID = UUID(input("Enter booking id to view details: "))
+                    booking_system.view_booking(booking_id)
+                except Exception as e:
+                    print(e)
             case 4:
                 pass
             case 5:
