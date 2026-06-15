@@ -3,6 +3,7 @@
 """
 
 import unittest
+from functools import reduce
 from typing import Any
 from unittest.mock import patch, MagicMock
 
@@ -12,9 +13,6 @@ from assignments.assignment_009.pricing import PricingService
 from cart import ShoppingCart
 from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError, InvalidDiscountCodeError
 from catalogue import PRODUCT_CATALOGUE
-
-
-
 
 
 class TestItemManagement(unittest.TestCase):
@@ -227,6 +225,32 @@ class TestDiscountCodes(unittest.TestCase):
         total: float = self.pricing_service.apply_discount(subtotal, code)
 
         self.assertEqual(total, wanted_total)
+
+class TestPricingAndTax(unittest.TestCase):
+    def setUp(self) -> None:
+        self.pricing_service = PricingService()
+        self.inventory = MagicMock()
+        self.item_quantity = 10
+        self.inventory.get_stock.return_value = self.item_quantity
+        self.cart = ShoppingCart(inventory_service=self.inventory, customer_id="1")
+        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
+
+        for item in self.test_items_1:
+            self.cart.add_item(item["sku"])
+
+        self.code: str = "SAVE10"
+        self.cart.apply_discount_code(self.code)
+
+        self.sub_total: float = sum(item["unit_price"] * item["quantity"] for item in self.test_items_1)
+
+    def test_get_subtotal(self):
+        self.assertEqual(self.cart.get_subtotal(), self.sub_total)
+
+    def test_get_discount_amount(self):
+        discount_wanted: float = round(self.sub_total * 0.10, 2)
+
+        self.assertEqual(self.cart.get_discount_amount(), discount_wanted)
+
 
 
 
