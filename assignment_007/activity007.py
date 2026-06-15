@@ -20,9 +20,9 @@ class Product(ABC):
         self.quantity = qty
 
     def details(self):
-        return f"name: {self.name}\nid: {self.id}\nprice: {self.price}\n quantity: {self.quantity}\n"
+        return f"name: {self.name}\nid: {self.id}\nprice: {self.price}\nquantity: {self.quantity}\n"
 
-    def total_price(self, qty):
+    def subtotal(self, qty):
         return self.price * qty
     
     def generate_id(self):
@@ -43,11 +43,11 @@ class PhysicalProduct(Product):
         sup = super().details()
         return f"{sup}weight: {self.weight_kg}\n"
     
-    def shipping(self, rate):
-        return self.weight_kg * rate
+    def shipping(self, qty=0.0):
+        return self.weight_kg * qty * self.shipping_rate
     
     def total_price(self, qty):
-        return self.price * qty + self.shipping(self.shipping_rate)
+        return self.subtotal(qty) + self.shipping(qty)
 
 class DigitalProduct(Product):
     def __init__(self, name="", price=0.0, qty=None, size=0):
@@ -58,8 +58,11 @@ class DigitalProduct(Product):
         sup = super().details()
         return f"{sup}size: {self.size_kb}\n"
     
-    def total_price(self):
-        return self.price
+    def total_price(self, qty):
+        return self.subtotal(qty)
+    
+    def shipping(self, total=0.0):
+        return 0.0
 
 class PerishableProduct(Product):
     def __init__(self, name="", price=0.0, qty=0, exp_date=None):
@@ -69,8 +72,12 @@ class PerishableProduct(Product):
     def is_expired(self):
         return self.expiration < date.today()
     
-    def shipping(self, total):
+    def shipping(self, qty=0):
+        total = self.price * qty
         return total if total < 25.0 else total + 25.0
+    
+    def total_price(self, qty):
+        return self.subtotal(qty) + self.shipping(qty)
 
 class Store():
     def __init__(self):
@@ -102,8 +109,8 @@ class Store():
             
     def search_name(self, exp):
         for item in self.inventory.values():
-            if re.search(exp, item.name):
-                print(f"{item.name}{item.id}")
+            if re.search(exp.lower(), item.name.lower()):
+                print(f"name: {item.name}\nid: {item.id}")
     
     def list_instock(self):
         stock = [item for item in self.inventory.values() if item.qty > 0]
@@ -113,9 +120,39 @@ class Store():
     def list_all(self):
         for item in self.inventory.values():
             print(item.details())
+    
+    def valid_qty(self, id, qty):
+        if qty <= self.inventory[id].quantity:
+            return True
+        else:
+            print("not enough qty")
+            return False
 
     def create_order(self):
-        pass
+        prod = input("product: ")
+        self.search_name(prod)
+        id = valid_int("selct an id: ")
+
+        qty = valid_int("quantity: ")
+        valid = self.valid_qty(id, qty)
+        while not valid and qty > 0:
+            qty = valid_int("quantity: ")
+            valid = self.valid_qty(id, qty)
+
+        self.inventory[id].quantity -= qty
+        item = self.inventory[id]
+
+        border = "="*25
+        title = "Order Summary"
+
+        print(f"{border}\n{title:^25}\n{border}")
+        print(f" {item.name} x{qty}")
+        print(f" price each : ${item.price:.2f}")
+        print(f" subtotal   : ${item.subtotal(qty):.2f}")
+        print(f" shipping   : ${item.shipping(qty):.2f}")
+        print(" " + "-"*23 + " ")
+        print(f" total      : ${item.total_price(qty)}")
+
 
 # self.main_options
 # self.manager_options 
@@ -154,19 +191,20 @@ class Store():
             
     def customer_menu(self):
         print("customer options")
-        print_menu(*self.customer_options)
-        user_selection = get_selection(len(self.customer_options))
-        match user_selection:
-            case 1: # "Browse all products"
-                self.list_all()
-            case 2: # "Search by name",
-                name = input("product: ")
-                self.search_name(name)
-            case 3: # "Place an order"
-                self.create_order()
-            case 0:
-                print("returning to main menu")
-                return None
+        while True:
+            print_menu(*self.customer_options)
+            user_selection = get_selection(len(self.customer_options))
+            match user_selection:
+                case 1: # "Browse all products"
+                    self.list_all()
+                case 2: # "Search by name",
+                    name = input("product: ")
+                    self.search_name(name)
+                case 3: # "Place an order"
+                    self.create_order()
+                case 0:
+                    print("returning to main menu")
+                    return None
             
     def product_menu(self):
         print("Product type")
@@ -262,7 +300,7 @@ def get_price(msg=f"> ") -> float:
             continue
         except Exception as e:
             raise e
-        if sel > 0.0:
+        if sel >= 0.0:
             return sel
 
 def valid_int(msg=f"> "):
@@ -274,7 +312,7 @@ def valid_int(msg=f"> "):
             continue
         except Exception as e:
             raise e
-        if sel > 0.0:
+        if sel >= 0:
             return sel
 
 
