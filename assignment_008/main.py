@@ -65,7 +65,10 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(e)
             case 4:
-                pass
+                try:
+                    booking_system.view_upcoming_bookings()
+                except Exception as e:
+                    print(e)
             case 5:
                 pass
             case 6:

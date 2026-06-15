@@ -95,3 +95,13 @@ class BookingSystem:
 
         booking: Event = self.bookings[booking_id]
         booking.display_event_details()
+
+    def view_upcoming_bookings(self) -> None:
+        if self.bookings:
+            bookings: List[Event] = self._get_upcoming_events()
+
+            for booking in bookings:
+                booking.display_event_details()
+                print()
+        else:
+            print("No bookings found!")
