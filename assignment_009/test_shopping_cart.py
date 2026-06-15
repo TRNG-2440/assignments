@@ -6,6 +6,8 @@ import unittest
 from typing import Any
 from unittest.mock import patch, MagicMock
 
+from assignments.assignment_009.inventory import InventoryService
+from assignments.assignment_009.pricing import PricingService
 from cart import ShoppingCart
 from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError
 from catalogue import PRODUCT_CATALOGUE
@@ -119,6 +121,92 @@ class TestItemManagement(unittest.TestCase):
                                f"Insufficient stock for SKU '{item["sku"]}': "
                                f"requested {quantity}, only {self.item_quantity} available.",
                                self.cart.update_quantity, item["sku"], quantity)
+
+class TestInventoryService(unittest.TestCase):
+    def setUp(self) -> None:
+        self.inventory_service: InventoryService = InventoryService()
+        self.cart = ShoppingCart(inventory_service=self.inventory_service)
+        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
+        self.test_items_2: list[dict[str, Any]] = [item_of_quantity(key, value, 2) for key, value in PRODUCT_CATALOGUE.items()]
+
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_sufficient_stock(self, mock_inventory_db):
+        mock_inventory_db.return_value = 10
+        item: dict[str, Any] = self.test_items_1[0]
+
+        self.cart.add_item(item["sku"])
+        self.assertEqual(len(self.cart.get_items()), 1, "Only 1 item for add item")
+        self.assertDictEqual(self.cart.get_items()[0], item, "Items must be match")
+
+        mock_inventory_db.assert_called_once()
+
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_stock_unavailable(self, mock_inventory_db):
+        sku: str = self.test_items_2[0]["sku"]
+        mock_inventory_db.side_effect = ItemNotFoundError(sku)
+        item: dict[str, Any] = self.test_items_1[0]
+
+        self.assertRaisesRegex(ItemNotFoundError,
+                               f"No product found with SKU '{sku}'.",
+                               self.cart.add_item, item["sku"])
+        mock_inventory_db.assert_called_once()
+
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_insufficient_stock(self, mock_inventory_db):
+        max_quantity: int = 1
+        mock_inventory_db.return_value = max_quantity
+        quantity: int = 2
+        item: dict[str, Any] = self.test_items_2[0]
+        self.assertRaisesRegex(InsufficientStockError,
+                               f"Insufficient stock for SKU '{item["sku"]}': "
+                               f"requested {quantity}, only {max_quantity} available.",
+                               self.cart.add_item, item["sku"], quantity)
+        mock_inventory_db.assert_called_once()
+
+class TestDiscountCodes(unittest.TestCase):
+    def setUp(self) -> None:
+        self.inventory = PricingService()
+
+        self.item_quantity = 10
+        self.inventory.get_stock.return_value = self.item_quantity
+
+        self.cart = ShoppingCart(inventory_service=self.inventory, customer_id="1")
+        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
+        self.test_items_2: list[dict[str, Any]] = [item_of_quantity(key, value, 2) for key, value in PRODUCT_CATALOGUE.items()]
+        self.test_items_20: list[dict[str, Any]] = [item_of_quantity(key, value, 20) for key, value in PRODUCT_CATALOGUE.items()]
+
+    def test_valid_percent_code(self):
+        #TODO
+        pass
+
+    def test_valid_flat_code(self):
+        #TODO
+        pass
+
+    def test_unrecognized_code(self):
+        #TODO
+        pass
+
+    def test_expired_code(self):
+        #TODO
+        pass
+
+    def test_apply_code(self):
+        #TODO
+        pass
+
+    def test_remove_code(self):
+        #TODO
+        pass
+
+    def test_flat_code_correct(self):
+        #TODO
+        pass
+
+    def test_percent_code_correct(self):
+        #TODO
+        pass
+
 
 def item_of_quantity(key: str, product: dict[str, Any], quantity: int) -> dict[str, Any]:
     item: dict[str, Any] = dict(product)
