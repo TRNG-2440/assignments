@@ -131,11 +131,11 @@ class Event:
             "Duration (min)": self.duration_minutes
         }
 
-    def __repr__(self):
-        return (
-            f"Event({self.booking_id}, {self.event_name}, "
-            f"{self.start_time}, {self.duration_minutes}min, {self.host_name})"
-        )
+#    def __repr__(self):
+#        return (
+#            f"Event({self.booking_id}, {self.event_name}, "
+#            f"{self.start_time}, {self.duration_minutes}min, {self.host_name})"
+#        )
 
 class BookingSystem():
     def __init__(self):
