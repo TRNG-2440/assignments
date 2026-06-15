@@ -1,3 +1,6 @@
+import random
+import string
+
 class Account:
     
     def __init__(self, name, account_number, balance):
@@ -6,14 +9,14 @@ class Account:
         self.name = name
         self.account_number = account_number
         self.balance = balance
-        print(f"Account Successfully created. Account Number: {self.account_number:05d}")
+        print(f"Account Successfully created. Account Number: {self.account_number}")
 
     def deposit(self, amount):
         self.balance += amount
         print(f"Deposited ${amount:.2f}. New balance: ${self.balance:,.2f}")
         
     def display_details(self):
-        return (f"Name on account: {self.name}\nAccount Number: {self.account_number:05d}\n" \
+        return (f"Name on account: {self.name}\nAccount Number: {self.account_number}\n" \
                 f"Balance: ${self.balance:,.2f}\n")
 
 
@@ -149,8 +152,7 @@ class Bank:
 
     def open_account(self, name, balance, type):
         
-        account_number = len(self.accounts) + 1
-
+        account_number = self.random_account_number()
         match type:
             case "1":
                 self.accounts.append(CheckingAccount(name, account_number, balance))
@@ -180,6 +182,17 @@ class Bank:
         for account in self.accounts:
             account.display_details()
 
+    def random_account_number(self):
+        chars = string.digits
+        new_account_number = ""
+        try: 
+            while True:
+                for x in range (6):
+                    new_account_number += random.choice(chars)
+                self.select_account(new_account_number)
+        except:
+            return new_account_number
+
 
 bank = Bank()
 
@@ -194,7 +207,7 @@ def open_account():
         print(e)
 
 def select_account():
-    account_number = int(input("Enter your account number: "))
+    account_number = input("Enter your account number: ")
     try:
         bank.select_account(account_number)
     except Exception as e:
