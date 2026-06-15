@@ -70,7 +70,11 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(e)
             case 5:
-                pass
+                try:
+                    host_name: str = input("Host name: ")
+                    booking_system.list_bookings_by_host(host_name)
+                except Exception as e:
+                    print(e)
             case 6:
                 # Exit the application
                 break

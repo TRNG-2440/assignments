@@ -100,8 +100,26 @@ class BookingSystem:
         if self.bookings:
             bookings: List[Event] = self._get_upcoming_events()
 
-            for booking in bookings:
-                booking.display_event_details()
-                print()
+            BookingSystem._list_bookings(bookings)
         else:
             print("No bookings found!")
+
+    def list_bookings_by_host(self, host_name: str) -> None:
+        if not host_name or not host_name.strip():
+            raise InvalidBookingError("Event host name is required!")
+
+        filtered_bookings = [
+            booking
+            for booking in self.bookings.values()
+            if booking.host_name.lower() == host_name.lower()
+        ]
+        if filtered_bookings:
+            BookingSystem._list_bookings(filtered_bookings)
+        else:
+            print("No bookings found!")
+
+    @staticmethod
+    def _list_bookings(bookings: List[Event]) -> None:
+        for booking in bookings:
+            booking.display_event_details()
+            print()
