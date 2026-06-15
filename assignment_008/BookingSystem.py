@@ -22,8 +22,8 @@ class BookingError(Exception):
 # --- Child expcetion classes ---
 
 class TimeSlotTakenError(BookingError):
-   def __init__(self, timeSlot):
-      super().__init__(f"\nError - timeslot of {timeSlot} has already been booked\n")
+   def __init__(self, message, timeSlot):
+      super().__init__(message)
       self.slot = timeSlot
 
 class BookingWindowExceededError(BookingError):
@@ -156,7 +156,7 @@ def main():
        
        case "1":
           
-          print("\n------------- Book Event -------------\n")
+          print("\n" + "-" * 13 + " Book Event " + "-" * 13 + "\n")
 
           eventName = input("Event name: ")
           hostName = input("Host name: ")
@@ -164,7 +164,7 @@ def main():
           time = input("Start time (HH:MM): ")
           duration = int(input("Duration (minutes): "))
 
-          print("\n--------------------------------------\n")
+          print("\n" + "-" * 38 + "\n")
 
           bookingID = book.BookEvent(Event(eventName, datetime.datetime.strptime(f"{date} {time}","%Y-%m-%d %H:%M"), duration, hostName))
 
@@ -188,13 +188,13 @@ def main():
             event = book.ViewBooking(input(f'\nPlease input bookID: '))
 
             # Print booking details
-            print("\n------------- Booking Details -------------\n")
+            print("\n" + "-" * 13 + " Booking Details " + "-" * 13 + "\n")
             print(f"Booking ID : {event.bookingID}")
             print(f"Event      : {event.eventName}")
             print(f"Host       : {event.hostName}")
             print(f"When       : {event.startDateTime}")
             print(f"Duration   : {event.duration} minutes")
-            print("\n-------------------------------------------\n")
+            print("\n" + "-" * 38 + "\n")
 
             option = input("Would you like to view another booking (Y/N): ").strip()
 
@@ -216,12 +216,12 @@ def main():
           if len(upcomingBookings) == 0:
             print("No upcoming bookings found.")
 
-          print("\n-------------------------- Upcoming Bookings --------------------------\n")
+          print("\n" + "-" * 27 + " Upcoming Bookings " + "-" * 27 + "\n")
           # Display upcoming bookings
           for u in upcomingBookings:
              print(f'{u.bookingID} | {u.startDateTime} | {u.eventName} ({u.duration}) | Host: {u.hostName}\n')
           
-          print("--------------------------------------------------------------------------------------\n")
+          print("\n" + "-" * 86 + "\n")
 
           print(f"{len(upcomingBookings)} upcoming booking{'s' if len(upcomingBookings) > 1 else ''} found.")
 
@@ -234,13 +234,13 @@ def main():
           
           else:
              
-             print("\n-------------------------- Host Bookings --------------------------\n")
+             print("\n" + "-" * 27 + " Host Bookings " + "-" * 27 + "\n")
              
              # Traverse through host bookings
              for event in hostList:
                 print(f'{event.bookingID} | {event.startDateTime} | {event.eventName} ({event.duration}) | Host: {event.hostName}')
              
-             print("\n-----------------------------------------------------------------------\n")
+             print("\n" + "-" * 86 + "\n")
 
        case "6":
           
