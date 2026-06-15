@@ -45,41 +45,21 @@ def search_contact():
     if not found:
         print("Contact not found.")
 
-# def delete_contact():
-#     if not contacts:
-#         print("No contacts to delete.")
-#         return
-#     view_contacts()
-#     try:
-#         num = int(input("Enter the number of the contact to delete: "))
-#         if 1 <= num <= len(contacts):
-#             removed = contacts.pop(num - 1)
-#             print(f"Contact deleted : {removed[0]}")
-#         else:
-#             print("Invalid contact number.")
-#     except ValueError:
-#         print("Please enter a valid number.")
-
 def delete_contact():
     if not contacts:
         print("No contacts to delete.")
         return
-    print("\nAll Contacts:")
-    for i, (name, phone, email) in enumerate(contacts, 1):
-        print("────────────────────────────────────────")
-        print(f"{i}. Name  : {name}")
-        print(f"   Phone : {phone}")
-        print(f"   Email : {email}")
-    print("────────────────────────────────────────")
+    view_contacts()
     try:
         num = int(input("Enter the number of the contact to delete: "))
         if 1 <= num <= len(contacts):
             removed = contacts.pop(num - 1)
-            print(f"✔ Contact deleted: {removed[0]}")
+            print(f"Contact deleted : {removed[0]}")
         else:
-            print("Invalid number.")
+            print("Invalid contact number.")
     except ValueError:
         print("Please enter a valid number.")
+
 
 while True:
     print_menu()
