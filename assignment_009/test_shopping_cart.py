@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from catalogue import PRODUCT_CATALOGUE, DISCOUNT_CODES, CATEGORY_TAX_RATES
 from cart_exceptions import (
     CartItemNotFoundError,
+    EmptyCartError,
     InsufficientStockError,
     InvalidDiscountCodeError,
     InvalidQuantityError,
@@ -25,18 +26,6 @@ class TestItemManagement(unittest.TestCase):
 
     def tearDown(self) -> None:
         del self.cart
-
-    def test_add_negative_quantity(self):
-        with self.assertRaises(InvalidQuantityError):
-            self.cart.add_item(sku="SKU-001", quantity=-23)
-
-    def test_add_zero_quantity(self):
-        with self.assertRaises(InvalidQuantityError):
-            self.cart.add_item(sku="SKU-001", quantity=0)
-
-    def test_add_invalid_sku(self):
-        with self.assertRaises(ItemNotFoundError):
-            self.cart.add_item(sku="SKU-009")
 
     def test_add_insufficent_stock(self):
         sku = "SKU-001"
@@ -105,11 +94,6 @@ class TestItemManagement(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
         self.assertEquals(len(filtered_items), 0)
-
-    def test_update_sku_not_in_cart(self) -> None:
-        sku = "SKU-001"
-        with self.assertRaises(CartItemNotFoundError):
-            self.cart.update_quantity(sku=sku, quantity=1)
 
     def test_update_negative_quantity(self) -> None:
         sku = "SKU-001"
@@ -337,3 +321,87 @@ class TestPricingAndTax(unittest.TestCase):
             total,
             round(expected_subtotal - self.discount + expected_tax, 2),
         )
+
+
+class TestCheckoutAndEdgeCases(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cart = ShoppingCart()
+
+    def tearDown(self) -> None:
+        del self.cart
+
+    def test_valid_checkout(self) -> None:
+        sku: str = "SKU-001"
+        quantity: int = 2
+        discount_code: str = "FLAT5"
+        product = PRODUCT_CATALOGUE[sku]
+        item: dict = {
+            "sku": sku,
+            "name": product["name"],
+            "unit_price": product["price"],
+            "quantity": quantity,
+            "category": product["category"],
+        }
+        expected_dict: dict = {
+            "customer_id": "guest",
+            "items": [item],
+            "subtotal": 99.98,
+            "discount_code": discount_code,
+            "discount_amount": 5.00,
+            "tax": 8.00,
+            "total": 102.98,
+            "item_count": 2,
+        }
+
+        self.cart.add_item(sku=sku, quantity=quantity)
+        self.cart.apply_discount_code(discount_code)
+        output_dict = self.cart.checkout()
+        self.assertDictContainsSubset(expected_dict, output_dict)
+
+    def test_checkout_empty_cart(self) -> None:
+        with self.assertRaises(EmptyCartError):
+            self.cart.checkout()
+
+    def test_clear(self) -> None:
+        sku: str = "SKU-001"
+        quantity: int = 2
+        product = PRODUCT_CATALOGUE[sku]
+        discount_code = "FLAT5"
+        expected_dict: dict = {
+            "sku": sku,
+            "name": product["name"],
+            "unit_price": product["price"],
+            "quantity": quantity,
+            "category": product["category"],
+        }
+
+        self.cart.add_item(sku=sku, quantity=quantity)
+        items: List = self.cart.get_items()
+        filtered_items: List = [item for item in items if item.get("sku") == sku]
+
+        self.assertEquals(len(filtered_items), 1)
+        self.assertDictEqual(filtered_items[0], expected_dict)
+
+        self.cart.apply_discount_code(discount_code)
+        self.assertEquals(self.cart._discount_code, discount_code)
+
+        self.cart.clear()
+        self.assertCountEqual(self.cart.get_items(), [])
+        self.assertEquals(self.cart._discount_code, None)
+
+    def test_add_negative_quantity(self):
+        with self.assertRaises(InvalidQuantityError):
+            self.cart.add_item(sku="SKU-001", quantity=-23)
+
+    def test_add_zero_quantity(self):
+        with self.assertRaises(InvalidQuantityError):
+            self.cart.add_item(sku="SKU-001", quantity=0)
+
+    def test_update_sku_not_in_cart(self) -> None:
+        sku = "SKU-001"
+        with self.assertRaises(CartItemNotFoundError):
+            self.cart.update_quantity(sku=sku, quantity=1)
+
+    def test_add_invalid_sku(self):
+        with self.assertRaises(ItemNotFoundError):
+            self.cart.add_item(sku="SKU-009")
