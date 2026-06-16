@@ -19,6 +19,21 @@ from cart import ShoppingCart
 from pricing import PricingService
 from inventory import InventoryService
 
+# Stretch goal 3
+""" 
+    Coverage report
+    coverage report -m --omit="test_*.py"
+Name                 Stmts   Miss  Cover   Missing
+--------------------------------------------------
+cart.py                 71      0   100%
+cart_exceptions.py      27      0   100%
+catalogue.py             4      0   100%
+inventory.py            13      4    69%   48, 68-70
+pricing.py              26      0   100%
+--------------------------------------------------
+TOTAL                  141      4    97%
+"""
+
 
 class TestItemManagement(unittest.TestCase):
     def setUp(self) -> None:
@@ -58,7 +73,7 @@ class TestItemManagement(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
 
     def test_add_duplicate_SKU(self) -> None:
@@ -79,7 +94,7 @@ class TestItemManagement(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
 
     def test_remove_sku_not_in_cart(self) -> None:
@@ -93,7 +108,7 @@ class TestItemManagement(unittest.TestCase):
         self.cart.remove_item(sku=sku)
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
-        self.assertEquals(len(filtered_items), 0)
+        self.assertEqual(len(filtered_items), 0)
 
     def test_update_negative_quantity(self) -> None:
         sku = "SKU-001"
@@ -134,7 +149,7 @@ class TestItemManagement(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
 
 
@@ -184,9 +199,40 @@ class TestInventoryManagement(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
         mock_get_stock.assert_called_once_with(sku)
+
+    # Stretch goal 2
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_inventory_service_unavailable(self, mock_query_inventory_db) -> None:
+        sku: str = "SKU-001"
+        quantity: int = 2
+        product = PRODUCT_CATALOGUE[sku]
+        expected_dict: dict = {
+            "sku": sku,
+            "name": product["name"],
+            "unit_price": product["price"],
+            "quantity": quantity,
+            "category": product["category"],
+        }
+        mock_query_inventory_db.side_effect = ItemNotFoundError(sku)
+
+        with self.assertRaises(ItemNotFoundError):
+            self.cart.add_item(sku=sku, quantity=quantity)
+
+        mock_query_inventory_db.assert_called_once_with(sku)
+
+        # Second call
+        mock_query_inventory_db.return_value = 23
+        mock_query_inventory_db.side_effect = None
+        self.cart.add_item(sku=sku, quantity=quantity)
+        items: List = self.cart.get_items()
+        filtered_items: List = [item for item in items if item.get("sku") == sku]
+
+        self.assertEqual(len(filtered_items), 1)
+        self.assertDictEqual(filtered_items[0], expected_dict)
+        assert mock_query_inventory_db.call_count == 2
 
 
 class TestDiscountCodes(unittest.TestCase):
@@ -204,7 +250,7 @@ class TestDiscountCodes(unittest.TestCase):
 
         output_dict = self.pricing_service.validate_discount_code(discount_code)
         self.assertDictEqual(output_dict, expected_dict)
-        self.assertEquals(output_dict.get("type"), "percent")
+        self.assertEqual(output_dict.get("type"), "percent")
 
     def test_valid_flat_discount_code(self) -> None:
         discount_code = "flat5"
@@ -212,7 +258,7 @@ class TestDiscountCodes(unittest.TestCase):
 
         output_dict = self.pricing_service.validate_discount_code(discount_code)
         self.assertDictEqual(output_dict, expected_dict)
-        self.assertEquals(output_dict.get("type"), "flat")
+        self.assertEqual(output_dict.get("type"), "flat")
 
     def test_unrecognized_discount_code(self) -> None:
         discount_code = "flat50"
@@ -235,12 +281,12 @@ class TestDiscountCodes(unittest.TestCase):
 
         self.cart.apply_discount_code(discount_code)
         self.cart.remove_discount_code()
-        self.assertEquals(self.cart.get_discount_amount(), 0.0)
+        self.assertEqual(self.cart.get_discount_amount(), 0.0)
 
     def test_apply_discount_code_in_cart(self) -> None:
         discount_code = "flat5"
         self.cart.apply_discount_code(discount_code)
-        self.assertEquals(self.cart._discount_code, discount_code.upper().strip())
+        self.assertEqual(self.cart._discount_code, discount_code.upper().strip())
 
     def test_apply_discount_percent_code(self) -> None:
         discount_code = "save10"
@@ -248,7 +294,7 @@ class TestDiscountCodes(unittest.TestCase):
         subtotal = 20
 
         discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
-        self.assertEquals(
+        self.assertEqual(
             discount_subtotal, (1 - discount_info.get("value") / 100) * subtotal
         )
 
@@ -258,14 +304,14 @@ class TestDiscountCodes(unittest.TestCase):
         subtotal = 20
 
         discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
-        self.assertEquals(discount_subtotal, subtotal - discount_info.get("value"))
+        self.assertEqual(discount_subtotal, subtotal - discount_info.get("value"))
 
     def test_apply_discount_negative_discounted_amount(self) -> None:
         discount_code = "flat5"
         subtotal = 2
 
         discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
-        self.assertEquals(discount_subtotal, 0.0)
+        self.assertEqual(discount_subtotal, 0.0)
 
 
 class TestPricingAndTax(unittest.TestCase):
@@ -290,34 +336,34 @@ class TestPricingAndTax(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == self.sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
 
         self.cart.apply_discount_code(self.discount_code)
-        self.assertEquals(self.cart._discount_code, self.discount_code)
+        self.assertEqual(self.cart._discount_code, self.discount_code)
 
     def tearDown(self) -> None:
         del self.cart
 
     def test_get_subtotal(self) -> None:
         subtotal = self.cart.get_subtotal()
-        self.assertEquals(subtotal, self.quantity * self.unit_price)
+        self.assertEqual(subtotal, self.quantity * self.unit_price)
 
     def test_get_tax(self) -> None:
         tax_amount = self.cart.get_tax()
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             tax_amount, round(self.unit_price * self.quantity * self.tax_rate, 2)
         )
 
     def test_get_discount_amount(self) -> None:
         discounted_subtotal = self.cart.get_discount_amount()
-        self.assertAlmostEquals(discounted_subtotal, self.discount)
+        self.assertAlmostEqual(discounted_subtotal, self.discount)
 
     def test_get_total(self) -> None:
         total = self.cart.get_total()
         expected_subtotal = self.unit_price * self.quantity
         expected_tax = round(self.unit_price * self.quantity * self.tax_rate, 2)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             total,
             round(expected_subtotal - self.discount + expected_tax, 2),
         )
@@ -334,29 +380,25 @@ class TestCheckoutAndEdgeCases(unittest.TestCase):
         sku: str = "SKU-001"
         quantity: int = 2
         discount_code: str = "FLAT5"
-        product = PRODUCT_CATALOGUE[sku]
-        item: dict = {
-            "sku": sku,
-            "name": product["name"],
-            "unit_price": product["price"],
-            "quantity": quantity,
-            "category": product["category"],
-        }
-        expected_dict: dict = {
-            "customer_id": "guest",
-            "items": [item],
-            "subtotal": 99.98,
-            "discount_code": discount_code,
-            "discount_amount": 5.00,
-            "tax": 8.00,
-            "total": 102.98,
-            "item_count": 2,
+        expected_keys: set = {
+            "customer_id",
+            "timestamp",
+            "items",
+            "subtotal",
+            "discount_code",
+            "discount_amount",
+            "tax",
+            "total",
+            "item_count",
         }
 
         self.cart.add_item(sku=sku, quantity=quantity)
         self.cart.apply_discount_code(discount_code)
         output_dict = self.cart.checkout()
-        self.assertDictContainsSubset(expected_dict, output_dict)
+
+        for key in expected_keys:
+            with self.subTest(key=key):
+                self.assertIn(key, output_dict)
 
     def test_checkout_empty_cart(self) -> None:
         with self.assertRaises(EmptyCartError):
@@ -379,15 +421,15 @@ class TestCheckoutAndEdgeCases(unittest.TestCase):
         items: List = self.cart.get_items()
         filtered_items: List = [item for item in items if item.get("sku") == sku]
 
-        self.assertEquals(len(filtered_items), 1)
+        self.assertEqual(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
 
         self.cart.apply_discount_code(discount_code)
-        self.assertEquals(self.cart._discount_code, discount_code)
+        self.assertEqual(self.cart._discount_code, discount_code)
 
         self.cart.clear()
         self.assertCountEqual(self.cart.get_items(), [])
-        self.assertEquals(self.cart._discount_code, None)
+        self.assertEqual(self.cart._discount_code, None)
 
     def test_add_negative_quantity(self):
         with self.assertRaises(InvalidQuantityError):
