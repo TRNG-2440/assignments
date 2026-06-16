@@ -2,11 +2,11 @@ import os
 import sys
 from typing import List
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from catalogue import PRODUCT_CATALOGUE, DISCOUNT_CODES
+from catalogue import PRODUCT_CATALOGUE, DISCOUNT_CODES, CATEGORY_TAX_RATES
 from cart_exceptions import (
     CartItemNotFoundError,
     InsufficientStockError,
@@ -282,3 +282,58 @@ class TestDiscountCodes(unittest.TestCase):
 
         discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
         self.assertEquals(discount_subtotal, 0.0)
+
+
+class TestPricingAndTax(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cart = ShoppingCart()
+        self.sku = "SKU-001"
+        self.quantity = 2
+        product = PRODUCT_CATALOGUE[self.sku]
+        self.unit_price = product["price"]
+        self.tax_rate = CATEGORY_TAX_RATES[product["category"]]
+        self.discount_code = "FLAT5"
+        self.discount = DISCOUNT_CODES[self.discount_code].get("value")
+        expected_dict: dict = {
+            "sku": self.sku,
+            "name": product["name"],
+            "unit_price": product["price"],
+            "quantity": self.quantity,
+            "category": product["category"],
+        }
+
+        self.cart.add_item(sku=self.sku, quantity=self.quantity)
+        items: List = self.cart.get_items()
+        filtered_items: List = [item for item in items if item.get("sku") == self.sku]
+
+        self.assertEquals(len(filtered_items), 1)
+        self.assertDictEqual(filtered_items[0], expected_dict)
+
+        self.cart.apply_discount_code(self.discount_code)
+        self.assertEquals(self.cart._discount_code, self.discount_code)
+
+    def tearDown(self) -> None:
+        del self.cart
+
+    def test_get_subtotal(self) -> None:
+        subtotal = self.cart.get_subtotal()
+        self.assertEquals(subtotal, self.quantity * self.unit_price)
+
+    def test_get_tax(self) -> None:
+        tax_amount = self.cart.get_tax()
+        self.assertAlmostEquals(
+            tax_amount, round(self.unit_price * self.quantity * self.tax_rate, 2)
+        )
+
+    def test_get_discount_amount(self) -> None:
+        discounted_subtotal = self.cart.get_discount_amount()
+        self.assertAlmostEquals(discounted_subtotal, self.discount)
+
+    def test_get_total(self) -> None:
+        total = self.cart.get_total()
+        expected_subtotal = self.unit_price * self.quantity
+        expected_tax = round(self.unit_price * self.quantity * self.tax_rate, 2)
+        self.assertAlmostEquals(
+            total,
+            round(expected_subtotal - self.discount + expected_tax, 2),
+        )
