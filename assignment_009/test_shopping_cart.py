@@ -1,5 +1,10 @@
+import os
+import sys
 from typing import List
 import unittest
+from unittest.mock import patch
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from catalogue import PRODUCT_CATALOGUE
 from cart_exceptions import (
@@ -150,3 +155,51 @@ class TestItemManagement(unittest.TestCase):
 
         self.assertEquals(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
+
+
+class TestInventoryManagement(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cart = ShoppingCart()
+
+    @patch.object(InventoryService, "get_stock")
+    def test_get_stock_unavailable(self, mock_get_stock) -> None:
+        sku: str = "SKU-001"
+        mock_get_stock.return_value = 0
+
+        with self.assertRaises(InsufficientStockError):
+            self.cart.add_item(sku=sku, quantity=1)
+
+        mock_get_stock.assert_called_once_with(sku)
+
+    @patch.object(InventoryService, "get_stock")
+    def test_get_stock_insufficient(self, mock_get_stock) -> None:
+        sku: str = "SKU-001"
+        quantity: int = 51
+        mock_get_stock.return_value = 20
+
+        with self.assertRaises(InsufficientStockError):
+            self.cart.add_item(sku=sku, quantity=quantity)
+
+        mock_get_stock.assert_called_once_with(sku)
+
+    @patch.object(InventoryService, "get_stock")
+    def test_get_stock_available(self, mock_get_stock) -> None:
+        sku: str = "SKU-001"
+        quantity: int = 1
+        product = PRODUCT_CATALOGUE[sku]
+        expected_dict: dict = {
+            "sku": sku,
+            "name": product["name"],
+            "unit_price": product["price"],
+            "quantity": quantity,
+            "category": product["category"],
+        }
+        mock_get_stock.return_value = 23
+
+        self.cart.add_item(sku=sku, quantity=quantity)
+        items: List = self.cart.get_items()
+        filtered_items: List = [item for item in items if item.get("sku") == sku]
+
+        self.assertEquals(len(filtered_items), 1)
+        self.assertDictEqual(filtered_items[0], expected_dict)
+        mock_get_stock.assert_called_once_with(sku)
