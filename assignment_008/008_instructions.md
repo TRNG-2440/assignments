@@ -127,16 +127,16 @@ Upcoming Bookings
 
 ## Requirements Checklist
 
-- [ ] A base `BookingError` exception class exists and all custom exceptions inherit from it
-- [ ] `TimeSlotTakenError` includes the conflicting event name and time range in its message
+- [x] A base `BookingError` exception class exists and all custom exceptions inherit from it
+- [x] `TimeSlotTakenError` includes the conflicting event name and time range in its message
 - [ ] `BookingWindowExceededError` includes the requested date and the latest allowed date in its message
 - [ ] `LateCancellationError` includes the event start time and cancellation deadline in its message
 - [ ] `EventNotFoundError` is raised for any lookup using an unrecognized booking ID
-- [ ] `InvalidBookingError` is raised for bookings with a start time in the past
-- [ ] `InvalidBookingError` is raised for any other general validation failure (e.g. zero or negative duration)
+- [x] `InvalidBookingError` is raised for bookings with a start time in the past
+- [x] `InvalidBookingError` is raised for any other general validation failure (e.g. zero or negative duration)
 - [ ] The `BookingSystem` class raises exceptions for all invalid states rather than returning error strings
-- [ ] Overlap detection correctly identifies conflicts for events on the same day with overlapping time ranges
-- [ ] Booking IDs are auto-generated and unique across all bookings in the session
+- [x] Overlap detection correctly identifies conflicts for events on the same day with overlapping time ranges
+- [x] Booking IDs are auto-generated and unique across all bookings in the session
 - [ ] Cancellation within 24 hours of the event raises `LateCancellationError`
 - [ ] Listing upcoming bookings returns only future events, sorted chronologically
 - [ ] Listing by host name is case-insensitive
