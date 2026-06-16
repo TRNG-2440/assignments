@@ -23,7 +23,7 @@ All other team members are expected to contribute meaningfully to both the code 
 ---
 
 ## Team Assignments:
-### Team 1
+### Team 1 (Coffee Flavor Profiles)
 - Ariyan Shaikh (onsite)
 - Naoto Shimizu (onsite)
 - Alex Tran (remote)
@@ -31,7 +31,7 @@ All other team members are expected to contribute meaningfully to both the code 
 - Kyle Drewes (remote)
 
 
-### Team 2
+### Team 2 (Rocket Launch Data)
 - Victor Huang (onsite)
 - Araf Zaman (onsite)
 - Meera Vasishta (remote)
@@ -39,7 +39,7 @@ All other team members are expected to contribute meaningfully to both the code 
 - Jesus Cerda (remote)
 
 
-### Team 3
+### Team 3 (AI Impact on Student Values)
 - Suelem Audelo (onsite)
 - Mark White (onsite)
 - Prachi Trivedi (remote)
@@ -47,7 +47,7 @@ All other team members are expected to contribute meaningfully to both the code 
 - Will Mahnke (remote)
 
 
-### Team 4
+### Team 4 (IMDB Movie Data)
 - Alex Dumerve (onsite)
 - Evelyn Yohannan (onsite)
 - Robert Collins (remote)
