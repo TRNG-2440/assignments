@@ -7,7 +7,8 @@ from cart_exceptions import (
     ItemNotFoundError,
     InsufficientStockError,
     CartItemNotFoundError,
-    InvalidDiscountCodeError
+    InvalidDiscountCodeError,
+    EmptyCartError
 )
 
 class TestItemManagement(unittest.TestCase):
@@ -109,19 +110,6 @@ class TestItemManagement(unittest.TestCase):
         with self.assertRaises(InsufficientStockError):    
             self.shopping.update_quantity("SKU-001", 1000)   
 
-    # VALID: clear cart
-    def test_clear(self):
-        self.shopping._items["SKU-001"] = {
-            "quantity": 2
-        }
-        self.shopping._items["SKU-002"] = {
-            "quantity": 5
-        }
-        self.shopping.apply_discount_code("SAVE10")
-        self.shopping.clear()
-        self.assertEqual(self.shopping._items, {})
-        self.assertIsNone(self.shopping._discount_code)
-
 class TestInventoryService(unittest.TestCase):
     def setUp(self):
         self.shopping = ShoppingCart()
@@ -158,7 +146,7 @@ class TestDiscountCodes(unittest.TestCase):
     def test_get_discount_percent(self):
         self.shopping._items["SKU-001"] = {
             "quantity": 2,
-            "unit_price": 50.00
+            "unit_price": 49.99
         }
         self.shopping.apply_discount_code("SAVE10")
         self.assertEqual(self.shopping.get_discount_amount(), 10.00)
@@ -167,7 +155,7 @@ class TestDiscountCodes(unittest.TestCase):
     def test_get_discount_flat(self):
         self.shopping._items["SKU-001"] = {
             "quantity": 2,
-            "unit_price": 50.00
+            "unit_price": 49.99
         }
         self.shopping.apply_discount_code("FLAT5")
         self.assertEqual(self.shopping.get_discount_amount(), 5.00)
@@ -176,18 +164,18 @@ class TestDiscountCodes(unittest.TestCase):
     def test_apply_discount_under_zero(self):
         self.shopping._items["SKU-001"] = {
             "quantity": 1,
-            "unit_price": 10.00
+            "unit_price": 49.99
         }
         self.shopping.apply_discount_code("FLAT15")
-        self.assertEqual(self.shopping.get_discount_amount(), 10.00)
+        self.assertEqual(self.shopping.get_discount_amount(), 15.00)
 
     # VALID: get discount, no discount
     def test_get_discount_none(self):
         self.shopping._items["SKU-001"] = {
             "quantity": 2,
-            "unit_price": 50.00
+            "unit_price": 49.99
         }
-        self.assertEqual(self.shopping.get_discount_amount(), 0.0)
+        self.assertEqual(self.shopping.get_discount_amount(), 0.00)
 
     # apply discount exceptions, invalid
     def test_apply_discount_invalid(self):
@@ -208,8 +196,84 @@ class TestDiscountCodes(unittest.TestCase):
 class TestPricingTaxCalc(unittest.TestCase):
     def setUp(self):
         self.shopping = ShoppingCart()
+        self.shopping._items["SKU-001"] = {
+                "sku": "SKU-001",
+                "quantity": 2,
+                "unit_price": 49.99
+            }
+        self.shopping._items["SKU-004"] = {
+            "sku": "SKU-004",
+            "quantity": 2,
+            "unit_price": 24.99
+        }
+
+    def test_get_subtotal(self):
+        self.assertEqual(self.shopping.get_subtotal(), 149.96)
+
+    def test_get_discount_percent(self):
+        self.shopping.apply_discount_code("SAVE20")
+        self.assertEqual(self.shopping.get_discount_amount(), 29.99)
+        
+    def test_get_tax(self):
+        self.assertEqual(self.shopping.get_tax(), 11.00)
+
+    def test_get_total(self):
+        self.shopping.apply_discount_code("SAVE20")
+        self.assertEqual(self.shopping.get_total(), 130.97)
 
 class TestCheckoutEdgeCases(unittest.TestCase):
     def setUp(self):
         self.shopping = ShoppingCart()
-    
+
+    # VALID: checkout with 2 items
+    def test_checkout(self):
+        self.shopping._items["SKU-003"] = {
+            "sku": "SKU-003",
+            "name": "Ergonomic Mouse",
+            "unit_price": 39.99,
+            "quantity": 2,
+            "category": "Electronics"
+        }
+        
+        self.shopping.apply_discount_code("SAVE20")
+        order = self.shopping.checkout()
+
+        self.assertIsInstance(order, dict)
+        self.assertIn("customer_id", order)
+        self.assertIn("timestamp", order)
+        self.assertIn("items", order)
+        self.assertIn("subtotal", order)
+        self.assertIn("discount_code", order)
+        self.assertIn("discount_amount", order)
+        self.assertIn("tax", order)
+        self.assertIn("total", order)
+        self.assertIn("item_count", order)
+
+        self.assertEqual(order["items"], {"SKU-003": {"sku": "SKU-003", "name": "Ergonomic Mouse", "unit_price": 39.99, "quantity": 2, "category": "Electronics"}})
+        self.assertEqual(order["subtotal"], 79.98)
+        self.assertEqual(order["discount_code"], "SAVE20")
+        self.assertEqual(order["discount_amount"], 16.00)
+        self.assertEqual(order["tax"], 6.40)
+        self.assertEqual(order["total"], 70.38)
+        self.assertEqual(order["item_count"], 2)
+
+    # checkout exception, empty cart
+    def test_empty_cart(self):
+        with self.assertRaises(EmptyCartError):
+            self.shopping.checkout()
+
+    # VALID: clear cart
+    def test_clear(self):
+        self.shopping._items["SKU-001"] = {
+            "quantity": 2
+        }
+        self.shopping._items["SKU-002"] = {
+            "quantity": 5
+        }
+        self.shopping.apply_discount_code("SAVE10")
+        self.shopping.clear()
+        self.assertEqual(self.shopping._items, {})
+        self.assertIsNone(self.shopping._discount_code)
+
+    # invalid quantity, cart item not found, and item not found tests
+    # are tested in section 1. Item Management
