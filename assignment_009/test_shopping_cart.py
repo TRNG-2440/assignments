@@ -245,28 +245,35 @@ class TestDiscountCodes(unittest.TestCase):
         del self.cart
 
     def test_valid_percent_discount_code(self) -> None:
-        discount_code = "save10"
-        expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+        discount_codes = ["save10", "save20"]
 
-        output_dict = self.pricing_service.validate_discount_code(discount_code)
-        self.assertDictEqual(output_dict, expected_dict)
-        self.assertEqual(output_dict.get("type"), "percent")
+        for discount_code in discount_codes:
+            expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+            with self.subTest(discount_code):
+                output_dict = self.pricing_service.validate_discount_code(discount_code)
+
+                self.assertDictEqual(output_dict, expected_dict)
+                self.assertEqual(output_dict.get("type"), "percent")
 
     def test_valid_flat_discount_code(self) -> None:
-        discount_code = "flat5"
-        expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+        discount_codes = ["flat5", "flat15"]
+        for discount_code in discount_codes:
+            expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+            with self.subTest(discount_code):
+                output_dict = self.pricing_service.validate_discount_code(discount_code)
 
-        output_dict = self.pricing_service.validate_discount_code(discount_code)
-        self.assertDictEqual(output_dict, expected_dict)
-        self.assertEqual(output_dict.get("type"), "flat")
+                self.assertDictEqual(output_dict, expected_dict)
+                self.assertEqual(output_dict.get("type"), "flat")
 
     def test_unrecognized_discount_code(self) -> None:
-        discount_code = "flat50"
-        with self.assertRaisesRegex(
-            InvalidDiscountCodeError,
-            f"Discount code '{discount_code.upper().strip()}' is invalid or expired.",
-        ):
-            self.pricing_service.validate_discount_code(discount_code)
+        discount_codes = ["flat50", "save25", "expired32", "sale40"]
+        for discount_code in discount_codes:
+            with self.subTest(discount_code):
+                with self.assertRaisesRegex(
+                    InvalidDiscountCodeError,
+                    f"Discount code '{discount_code.upper().strip()}' is invalid or expired.",
+                ):
+                    self.pricing_service.validate_discount_code(discount_code)
 
     def test_expired_discount_code(self) -> None:
         discount_code = "expired50"
@@ -432,18 +439,26 @@ class TestCheckoutAndEdgeCases(unittest.TestCase):
         self.assertEqual(self.cart._discount_code, None)
 
     def test_add_negative_quantity(self):
-        with self.assertRaises(InvalidQuantityError):
-            self.cart.add_item(sku="SKU-001", quantity=-23)
+        test_quantities = [-23, -90, -36, -1, -987]
+        for quantity in test_quantities:
+            with self.subTest(quantity):
+                with self.assertRaises(InvalidQuantityError):
+                    self.cart.add_item(sku="SKU-001", quantity=quantity)
 
     def test_add_zero_quantity(self):
         with self.assertRaises(InvalidQuantityError):
             self.cart.add_item(sku="SKU-001", quantity=0)
 
     def test_update_sku_not_in_cart(self) -> None:
-        sku = "SKU-001"
-        with self.assertRaises(CartItemNotFoundError):
-            self.cart.update_quantity(sku=sku, quantity=1)
+        test_skus = ["SKU-001", "SKU-002", "SKU-003", "SKU-009", "SKU-004"]
+        for sku in test_skus:
+            with self.subTest(sku):
+                with self.assertRaises(CartItemNotFoundError):
+                    self.cart.update_quantity(sku=sku, quantity=1)
 
-    def test_add_invalid_sku(self):
-        with self.assertRaises(ItemNotFoundError):
-            self.cart.add_item(sku="SKU-009")
+    def test_add_invalid_sku(self) -> None:
+        test_skus = ["SKU-009", "SKU-202", "SKU-013", "SKU-029", "SKU-204"]
+        for sku in test_skus:
+            with self.subTest(sku):
+                with self.assertRaises(ItemNotFoundError):
+                    self.cart.add_item(sku=sku)
