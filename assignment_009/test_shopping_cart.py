@@ -3,16 +3,16 @@
 """
 
 import unittest
+from datetime import datetime
 from functools import reduce
 from typing import Any
 from unittest.mock import patch, MagicMock
 
-from assignments.assignment_009.catalogue import DISCOUNT_CODES
-from assignments.assignment_009.inventory import InventoryService
-from assignments.assignment_009.pricing import PricingService
+from inventory import InventoryService
+from pricing import  PricingService
 from cart import ShoppingCart
-from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError, InvalidDiscountCodeError
-from catalogue import PRODUCT_CATALOGUE
+from cart_exceptions import CartError, ItemNotFoundError, InvalidQuantityError, InsufficientStockError, CartItemNotFoundError, InvalidDiscountCodeError, EmptyCartError
+from catalogue import PRODUCT_CATALOGUE, DISCOUNT_CODES
 
 
 class TestItemManagement(unittest.TestCase):
@@ -251,7 +251,63 @@ class TestPricingAndTax(unittest.TestCase):
 
         self.assertEqual(self.cart.get_discount_amount(), discount_wanted)
 
+    def test_calculate_tax(self):
+        tax: float = 20.48
+        self.assertEqual(self.pricing_service.calculate_tax(self.test_items_1), tax)
 
+
+    def test_get_tax(self):
+        tax: float = 20.48
+        self.assertEqual(self.cart.get_tax(), tax)
+
+    def test_get_total(self):
+        tax: float = 20.48
+        discount: float = round(self.sub_total * 0.10, 2)
+        self.assertAlmostEqual(self.cart.get_total(), self.sub_total - discount + tax, 2)
+
+class TestCheckout(unittest.TestCase):
+    def setUp(self) -> None:
+        self.pricing_service = PricingService()
+        self.inventory = MagicMock()
+        self.item_quantity = 10
+        self.inventory.get_stock.return_value = self.item_quantity
+        self.customer_id: str = "1"
+        self.cart = ShoppingCart(inventory_service=self.inventory, customer_id=self.customer_id)
+
+        self.test_items_1: list[dict[str, Any]] = [item_of_quantity(key, value, 1) for key, value in PRODUCT_CATALOGUE.items()]
+
+    def test_checkout_correct(self):
+        for item in self.test_items_1:
+            self.cart.add_item(item["sku"])
+
+        expected_keys: list[str] = [
+            "customer_id",
+            "timestamp",
+            "items",
+            "subtotal",
+            "discount_code",
+            "discount_amount",
+            "tax",
+            "total",
+            "item_count",
+        ]
+
+        summary: dict[str, Any] = self.cart.checkout()
+
+        for key in expected_keys:
+            with self.subTest(key=key):
+                self.assertIn(key, summary)
+
+    def test_checkout_errors(self):
+        self.assertRaisesRegex(EmptyCartError, "Cannot check out: the cart is empty.", self.cart.checkout)
+
+    def test_clear_resets_items_discount_code(self):
+        self.cart.add_item(self.test_items_1[0]["sku"])
+        self.cart.apply_discount_code("SAVE10")
+        self.cart.clear()
+
+        self.assertEqual(len(self.cart.get_items()), 0)
+        self.assertEqual(self.cart.get_discount_amount(), 0.0)
 
 
 def item_of_quantity(key: str, product: dict[str, Any], quantity: int) -> dict[str, Any]:
