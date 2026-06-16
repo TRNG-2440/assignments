@@ -462,3 +462,25 @@ class TestCheckoutAndEdgeCases(unittest.TestCase):
             with self.subTest(sku):
                 with self.assertRaises(ItemNotFoundError):
                     self.cart.add_item(sku=sku)
+
+
+# Stretch goal 4
+class TestPricingServiceMock(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cart = ShoppingCart()
+
+    def tearDown(self) -> None:
+        del self.cart
+
+    @patch("pricing.PricingService")
+    def test_checkout_pricing_mock(self, mock_pricing_service_class) -> None:
+        mock_pricing_service = mock_pricing_service_class.return_value
+        mock_pricing_service.calculate_tax.return_value = 0.08
+        mock_pricing_service.apply_discount.return_value = 94.98
+
+        self.cart.add_item(sku="SKU-001", quantity=2)
+        self.cart.apply_discount_code("flat5")
+        self.cart.checkout()
+
+        mock_pricing_service.calculate_tax.assert_called_once
+        mock_pricing_service.apply_discount.assert_called_once
