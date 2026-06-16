@@ -22,6 +22,41 @@ All other team members are expected to contribute meaningfully to both the code 
 
 ---
 
+## Team Assignments:
+### Team 1
+- Ariyan Shaikh (onsite)
+- Naoto Shimizu (onsite)
+- Alex Tran (remote)
+- Madhulika Sawant (remote)
+- Kyle Drewes (remote)
+
+
+### Team 2
+- Victor Huang (onsite)
+- Araf Zaman (onsite)
+- Meera Vasishta (remote)
+- Owen Peterson (remote)
+- Jesus Cerda (remote)
+
+
+### Team 3
+- Suelem Audelo (onsite)
+- Mark White (onsite)
+- Prachi Trivedi (remote)
+- Luke Fields (remote)
+- Will Mahnke (remote)
+
+
+### Team 4
+- Alex Dumerve (onsite)
+- Evelyn Yohannan (onsite)
+- Robert Collins (remote)
+- Stephanie Chen (remote)
+- Matthew Patterson (remote)
+- Isauro Ramos (remote)
+
+---
+
 ## Dataset Selection
 
 Each group must select one dataset from [Kaggle](https://www.kaggle.com/datasets) (or another online tool which can provide datasets in a csv or json format).
