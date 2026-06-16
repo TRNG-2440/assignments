@@ -75,7 +75,7 @@ class TestItemManagement(unittest.TestCase):
             "quantity": 2
         }
         self.shopping.update_quantity("SKU-001", 3)
-        self.assertEqual(self.shopping._items["SKU-001"]["quantity"], 5)
+        self.assertEqual(self.shopping._items["SKU-001"]["quantity"], 3)
 
     # update quantity exceptions, no item
     def test_update_quantity_cart_not_found(self):
@@ -275,5 +275,26 @@ class TestCheckoutEdgeCases(unittest.TestCase):
         self.assertEqual(self.shopping._items, {})
         self.assertIsNone(self.shopping._discount_code)
 
-    # invalid quantity, cart item not found, and item not found tests
-    # are tested in section 1. Item Management
+    # add item exceptions, no item
+    def test_add_item_not_found(self):
+        with self.assertRaises(ItemNotFoundError):
+            self.shopping.add_item("random string", 1)
+
+    # add item exceptions, bad quantity 
+    def test_add_item_invalid_quantity(self):
+        with self.assertRaises(InvalidQuantityError):
+            self.shopping.add_item("SKU-001", -1)
+    
+    # add item exceptions, low stock
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_add_item_insufficient_stock(self, mock_query):
+        mock_query.return_value = 2
+        with self.assertRaises(InsufficientStockError):
+            self.shopping.add_item("SKU-001", 1000)
+
+    # add item exceptions, no stock
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_add_item_no_stock(self, mock_query):
+        mock_query.return_value = 0
+        with self.assertRaises(InsufficientStockError):
+            self.shopping.add_item("SKU-001", 1000)
