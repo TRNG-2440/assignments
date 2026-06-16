@@ -6,10 +6,11 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from catalogue import PRODUCT_CATALOGUE
+from catalogue import PRODUCT_CATALOGUE, DISCOUNT_CODES
 from cart_exceptions import (
     CartItemNotFoundError,
     InsufficientStockError,
+    InvalidDiscountCodeError,
     InvalidQuantityError,
     ItemNotFoundError,
 )
@@ -20,14 +21,10 @@ from inventory import InventoryService
 
 class TestItemManagement(unittest.TestCase):
     def setUp(self) -> None:
-        self.inventory = InventoryService()
-        self.pricing = PricingService()
-        self.cart = ShoppingCart(self.inventory, self.pricing)
+        self.cart = ShoppingCart()
 
     def tearDown(self) -> None:
         del self.cart
-        del self.inventory
-        del self.pricing
 
     def test_add_negative_quantity(self):
         with self.assertRaises(InvalidQuantityError):
@@ -161,6 +158,9 @@ class TestInventoryManagement(unittest.TestCase):
     def setUp(self) -> None:
         self.cart = ShoppingCart()
 
+    def tearDown(self) -> None:
+        del self.cart
+
     @patch.object(InventoryService, "get_stock")
     def test_get_stock_unavailable(self, mock_get_stock) -> None:
         sku: str = "SKU-001"
@@ -203,3 +203,82 @@ class TestInventoryManagement(unittest.TestCase):
         self.assertEquals(len(filtered_items), 1)
         self.assertDictEqual(filtered_items[0], expected_dict)
         mock_get_stock.assert_called_once_with(sku)
+
+
+class TestDiscountCodes(unittest.TestCase):
+    def setUp(self) -> None:
+        self.pricing_service = PricingService()
+        self.cart = ShoppingCart(pricing_service=self.pricing_service)
+
+    def tearDown(self) -> None:
+        del self.pricing_service
+        del self.cart
+
+    def test_valid_percent_discount_code(self) -> None:
+        discount_code = "save10"
+        expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+
+        output_dict = self.pricing_service.validate_discount_code(discount_code)
+        self.assertDictEqual(output_dict, expected_dict)
+        self.assertEquals(output_dict.get("type"), "percent")
+
+    def test_valid_flat_discount_code(self) -> None:
+        discount_code = "flat5"
+        expected_dict = DISCOUNT_CODES.get(discount_code.upper().strip())
+
+        output_dict = self.pricing_service.validate_discount_code(discount_code)
+        self.assertDictEqual(output_dict, expected_dict)
+        self.assertEquals(output_dict.get("type"), "flat")
+
+    def test_unrecognized_discount_code(self) -> None:
+        discount_code = "flat50"
+        with self.assertRaisesRegex(
+            InvalidDiscountCodeError,
+            f"Discount code '{discount_code.upper().strip()}' is invalid or expired.",
+        ):
+            self.pricing_service.validate_discount_code(discount_code)
+
+    def test_expired_discount_code(self) -> None:
+        discount_code = "expired50"
+        with self.assertRaisesRegex(
+            InvalidDiscountCodeError,
+            f"Discount code '{discount_code.upper().strip()}' is expired.",
+        ):
+            self.pricing_service.validate_discount_code(discount_code)
+
+    def test_remove_discount_code(self) -> None:
+        discount_code = "flat5"
+
+        self.cart.apply_discount_code(discount_code)
+        self.cart.remove_discount_code()
+        self.assertEquals(self.cart.get_discount_amount(), 0.0)
+
+    def test_apply_discount_code_in_cart(self) -> None:
+        discount_code = "flat5"
+        self.cart.apply_discount_code(discount_code)
+        self.assertEquals(self.cart._discount_code, discount_code.upper().strip())
+
+    def test_apply_discount_percent_code(self) -> None:
+        discount_code = "save10"
+        discount_info = DISCOUNT_CODES.get(discount_code.upper().strip())
+        subtotal = 20
+
+        discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
+        self.assertEquals(
+            discount_subtotal, (1 - discount_info.get("value") / 100) * subtotal
+        )
+
+    def test_apply_discount_flat_code(self) -> None:
+        discount_code = "flat5"
+        discount_info = DISCOUNT_CODES.get(discount_code.upper().strip())
+        subtotal = 20
+
+        discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
+        self.assertEquals(discount_subtotal, subtotal - discount_info.get("value"))
+
+    def test_apply_discount_negative_discounted_amount(self) -> None:
+        discount_code = "flat5"
+        subtotal = 2
+
+        discount_subtotal = self.pricing_service.apply_discount(subtotal, discount_code)
+        self.assertEquals(discount_subtotal, 0.0)
