@@ -32,27 +32,25 @@ class TestItemManagement(unittest.TestCase):
     
     # add item exceptions, no item
     def test_add_item_not_found(self):
-        with self.assertRaises(ItemNotFoundError):
-            self.shopping.add_item("random string", 1)
+        # with self.assertRaises(ItemNotFoundError):
+        #     self.shopping.add_item("random string", 1)
+        for sku in ["random string", "SKU-111"]:
+            with self.assertRaises(ItemNotFoundError):
+                self.shopping.add_item(sku, 1)
 
     # add item exceptions, bad quantity 
     def test_add_item_invalid_quantity(self):
-        with self.assertRaises(InvalidQuantityError):
-            self.shopping.add_item("SKU-001", -1)
+        for q in [0, -1, -100]:
+            with self.assertRaises(InvalidQuantityError):
+                self.shopping.add_item("SKU-001", q)
     
     # add item exceptions, low stock
     @patch.object(InventoryService, "_query_inventory_db")
     def test_add_item_insufficient_stock(self, mock_query):
-        mock_query.return_value = 2
-        with self.assertRaises(InsufficientStockError):
-            self.shopping.add_item("SKU-001", 1000)
-
-    # add item exceptions, no stock
-    @patch.object(InventoryService, "_query_inventory_db")
-    def test_add_item_no_stock(self, mock_query):
-        mock_query.return_value = 0
-        with self.assertRaises(InsufficientStockError):
-            self.shopping.add_item("SKU-001", 1000)
+        for stock in [0, 2, 500]:
+            mock_query.return_value = stock
+            with self.assertRaises(InsufficientStockError):
+                self.shopping.add_item("SKU-001", 1000)
 
     # VALID: remove item from cart
     def test_remove_item(self):
@@ -64,8 +62,9 @@ class TestItemManagement(unittest.TestCase):
 
     # remove item exception, no item
     def test_remove_item_cart_not_found(self):
-        with self.assertRaises(CartItemNotFoundError):
-            self.shopping.remove_item("random string")
+        for sku in ["random string", "SKU-111"]:
+            with self.assertRaises(CartItemNotFoundError):
+                self.shopping.remove_item(sku)
 
     # VALID: update quantity
     @patch.object(InventoryService, "_query_inventory_db")
@@ -79,36 +78,29 @@ class TestItemManagement(unittest.TestCase):
 
     # update quantity exceptions, no item
     def test_update_quantity_cart_not_found(self):
-        with self.assertRaises(CartItemNotFoundError):
-            self.shopping.update_quantity("random string", 1)
+        for sku in ["random string", "SKU-111"]:
+            with self.assertRaises(CartItemNotFoundError):
+                self.shopping.update_quantity(sku, 1)
 
     # update quantity exceptions, bad quantity
     def test_update_quantity_invalid_quantity(self):
         self.shopping._items["SKU-001"] = {
             "quantity": 2
         }
-        with self.assertRaises(InvalidQuantityError):    
-            self.shopping.update_quantity("SKU-001", -1)
+        for q in [0, -1, -100]:
+            with self.assertRaises(InvalidQuantityError):    
+                self.shopping.update_quantity("SKU-001", q)
 
     # update quantity exceptions, low stock
     @patch.object(InventoryService, "_query_inventory_db")
     def test_update_quantity_insufficient_stock(self, mock_query):
-        mock_query.return_value = 50
-        self.shopping._items["SKU-001"] = {
-            "quantity": 2
-        }
-        with self.assertRaises(InsufficientStockError):    
-            self.shopping.update_quantity("SKU-001", 1000)
-
-    # update quantity exceptions, no stock
-    @patch.object(InventoryService, "_query_inventory_db")
-    def test_update_quantity_no_stock(self, mock_query):
-        mock_query.return_value = 0
-        self.shopping._items["SKU-001"] = {
-            "quantity": 2
-        }
-        with self.assertRaises(InsufficientStockError):    
-            self.shopping.update_quantity("SKU-001", 1000)   
+        for stock in [0, 2, 500]:
+            mock_query.return_value = stock
+            self.shopping._items["SKU-001"] = {
+                "quantity": 2
+            }
+            with self.assertRaises(InsufficientStockError):    
+                self.shopping.update_quantity("SKU-001", 1000)
 
 class TestInventoryService(unittest.TestCase):
     def setUp(self):
@@ -138,6 +130,37 @@ class TestInventoryService(unittest.TestCase):
             self.shopping.add_item("SKU-001", 1000)
         mock_query.assert_called_once_with("SKU-001")   
 
+    @patch.object(InventoryService, "_query_inventory_db")
+    def test_failed_inventory(self, mock_query):
+        mock_query.side_effect = [ConnectionError("No inventory database."), 999]
+        with self.assertRaises(ConnectionError):
+            self.shopping.add_item("SKU-001", 1)
+        self.shopping.add_item("SKU-001", 1)
+        self.assertEqual(self.shopping._items["SKU-001"]["quantity"], 1)
+        self.assertEqual(mock_query.call_count, 2)
+
+class TestPricingService(unittest.TestCase):
+    def setUp(self):
+        self.shopping = ShoppingCart()
+        self.mock_price = MagicMock()
+        self.shopping = ShoppingCart(pricing_service=self.mock_price)
+        self.shopping._items["SKU-001"] = {
+            "sku": "SKU-001",
+            "name": "Wireless Keyboard",
+            "unit_price": 50.00,
+            "quantity": 2,
+            "category": "Electronics"
+        }
+
+    def TestCheckoutCalls(self):
+        self.mock_pricing.validate_discount_code.return_value = None
+        self.mock_pricing.apply_discount.return_value = 100.00
+        self.mock_pricing.calculate_tax.return_value = 10.00
+        self.shopping.apply_discount_code("SAVE20")
+        self.shopping.checkout()
+        self.mock_pricing.apply_discount.assert_called_with(100.00, "SAVE20")
+        self.mock_pricing.calculate_tax.assert_called()
+
 class TestDiscountCodes(unittest.TestCase):
     def setUp(self):
         self.shopping = ShoppingCart()
@@ -162,12 +185,12 @@ class TestDiscountCodes(unittest.TestCase):
 
     # VALID: discount ends up being under 0
     def test_apply_discount_under_zero(self):
-        self.shopping._items["SKU-001"] = {
+        self.shopping._items["SKU-005"] = {
             "quantity": 1,
-            "unit_price": 49.99
+            "unit_price": 12.99
         }
         self.shopping.apply_discount_code("FLAT15")
-        self.assertEqual(self.shopping.get_discount_amount(), 15.00)
+        self.assertEqual(self.shopping.get_discount_amount(), 12.99)
 
     # VALID: get discount, no discount
     def test_get_discount_none(self):
@@ -179,8 +202,9 @@ class TestDiscountCodes(unittest.TestCase):
 
     # apply discount exceptions, invalid
     def test_apply_discount_invalid(self):
-        with self.assertRaises(InvalidDiscountCodeError):
-            self.shopping.apply_discount_code("random string")
+        for sku in ["random string", "SKU-111"]:
+            with self.assertRaises(InvalidDiscountCodeError):
+                self.shopping.apply_discount_code(sku)
 
     # apply discount exceptions, expired
     def test_apply_discount_expired(self):
@@ -249,7 +273,7 @@ class TestCheckoutEdgeCases(unittest.TestCase):
         self.assertIn("total", order)
         self.assertIn("item_count", order)
 
-        self.assertEqual(order["items"], {"SKU-003": {"sku": "SKU-003", "name": "Ergonomic Mouse", "unit_price": 39.99, "quantity": 2, "category": "Electronics"}})
+        self.assertEqual(order["items"], [{"sku": "SKU-003", "name": "Ergonomic Mouse", "unit_price": 39.99, "quantity": 2, "category": "Electronics"}])
         self.assertEqual(order["subtotal"], 79.98)
         self.assertEqual(order["discount_code"], "SAVE20")
         self.assertEqual(order["discount_amount"], 16.00)
@@ -277,24 +301,22 @@ class TestCheckoutEdgeCases(unittest.TestCase):
 
     # add item exceptions, no item
     def test_add_item_not_found(self):
-        with self.assertRaises(ItemNotFoundError):
-            self.shopping.add_item("random string", 1)
+        # with self.assertRaises(ItemNotFoundError):
+        #     self.shopping.add_item("random string", 1)
+        for sku in ["random string", "SKU-111"]:
+            with self.assertRaises(ItemNotFoundError):
+                self.shopping.add_item(sku, 1)
 
     # add item exceptions, bad quantity 
     def test_add_item_invalid_quantity(self):
-        with self.assertRaises(InvalidQuantityError):
-            self.shopping.add_item("SKU-001", -1)
+        for q in [0, -1, -100]:
+            with self.assertRaises(InvalidQuantityError):
+                self.shopping.add_item("SKU-001", q)
     
     # add item exceptions, low stock
     @patch.object(InventoryService, "_query_inventory_db")
     def test_add_item_insufficient_stock(self, mock_query):
-        mock_query.return_value = 2
-        with self.assertRaises(InsufficientStockError):
-            self.shopping.add_item("SKU-001", 1000)
-
-    # add item exceptions, no stock
-    @patch.object(InventoryService, "_query_inventory_db")
-    def test_add_item_no_stock(self, mock_query):
-        mock_query.return_value = 0
-        with self.assertRaises(InsufficientStockError):
-            self.shopping.add_item("SKU-001", 1000)
+        for stock in [0, 2, 500]:
+            mock_query.return_value = stock
+            with self.assertRaises(InsufficientStockError):
+                self.shopping.add_item("SKU-001", 1000)
