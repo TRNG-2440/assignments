@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from cart import ShoppingCart
 from cart_exceptions import CartError
+from inventory import InventoryService
 
 class TestShoppingCart(unittest.TestCase):
     def setUp(self):
@@ -29,7 +30,17 @@ class TestShoppingCart(unittest.TestCase):
         shopping_cart.remove_item("SKU-004")
         self.assertTrue(shopping_cart.is_empty)
 
-    
+    class TestInventoryChecks(unittest.TestCase):
+        def setUp(self):
+            self.shopping_cart = ShoppingCart()
+            self.inventory_service = InventoryService()
+
+        def tearDown(self):
+            self.shopping_cart.clear()
+
+        def test_sufficient_stock(self):
+            self.shopping_cart.add_item
+
 if __name__ == "__main__":
     unittest.main()
 
