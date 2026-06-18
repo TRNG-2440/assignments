@@ -15,21 +15,23 @@ class TestItemManagement(unittest.TestCase):
         pricing_service: PricingService = None,
         customer_id: str = None,)"""
         self.shopping = ShoppingCart()
-
-
         self.assert_sku7 =  {'sku': 'SKU-007',"name": "Monitor Stand","unit_price": 44.99,"quantity": 1,"category": "Electronics"}
-        
+        self.assert_sku7_multi =  {'sku': 'SKU-007',"name": "Monitor Stand","unit_price": 44.99,"quantity": 4,"category": "Electronics"}
     def test_add_item(self):
-        
+        """test add item functionality"""
         self.shopping.add_item( "SKU-007", 1)
-
-        items = self.shopping.get_items() #returns list of dicts in items
- 
-        self.assertEqual(items[0],self.assert_sku7)
+        items2 = self.shopping.get_items() #returns list of dicts in items
+        self.assertEqual(items2[0],self.assert_sku7_multi)
 
 
         #try adding two of same sk
         #assert quantity increases
+        """test add multiple items functionality"""
+        self.shopping.add_item( "SKU-007", 1)
+        self.shopping.add_item( "SKU-007", 1)
+        self.shopping.add_item( "SKU-007", 2)
+        items = self.shopping.get_items() #returns list of dicts in items
+        self.assertEqual(items[0],self.assert_sku7)
 
 
 
