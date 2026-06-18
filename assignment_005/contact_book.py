@@ -1,35 +1,35 @@
-contacts []
+contacts = []
 
 while True:
-   print("\nCONTACT BOOK")
-   print("1. Add Contact")
-   print("2. View all Contacts")
-   print("3. Search for a contact")
-   print("4. Delete a contact")
-   print("5. Exit")
+    print("CONTACT BOOK")
+    print("1. Add a contact")
+    print("2. View all contacts")
+    print("3. Search for a contact")
+    print("4. Delete a contact")
+    print("0. Exit")
 
-   choice = input("Select an option: ")
+    choice = input("Select an option: ")
 
-   if choice == "1":
-      name = input("Enter your name:")
-      phone = input("Enter phone: ")
-      email = input("Enter email: ")
-      
-      contact = (name, phone, email)
-      contacts.append(contact)
+    if choice == "1":
+        name = input("Enter name  : ")
+        phone = input("Enter phone : ")
+        email = input("Enter email : ")
 
-      print(f"Contact added: {name}")
+        contact = (name, phone, email)
+        contacts.append(contact)
+
+        print(f"Contact added: {name}")
 
     elif choice == "2":
-      if not contacts:
-         print("No contacts found.")
-      else:
-         print(\n"All Contacts: ")
-               
-         for i, contact in enumerate(contacts, start=1):
-            name, phone, email = contact
+        if not contacts:
+            print("No contacts found.")
+        else:
+            print("\nAll Contacts:")
 
-            print(f"{i}. Name  : {name}")
+            for i, contact in enumerate(contacts, start=1):
+                name, phone, email = contact
+
+                print(f"{i}. Name  : {name}")
                 print(f"   Phone : {phone}")
                 print(f"   Email : {email}")
 
@@ -39,18 +39,18 @@ while True:
         found = False
 
         for contact in contacts:
-           name, phone, email = contact
+            name, phone, email = contact
 
-           if name.lower() == search_name.lower():
-               print(f"Name : {name}")
-               print(f"Phone : {phone}")
-               print(f"Email : {email}")
-               found = True
-            
-        if not found: 
+            if name.lower() == search_name.lower():
+                print(f"Name  : {name}")
+                print(f"Phone : {phone}")
+                print(f"Email : {email}")
+                found = True
+
+        if not found:
             print("Contact not found.")
-        
-        elif choice == "4":
+
+    elif choice == "4":
         if not contacts:
             print("No contacts available to delete.")
         else:
