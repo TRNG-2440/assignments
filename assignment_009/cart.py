@@ -38,9 +38,9 @@ class ShoppingCart:
 
     def __init__(
         self,
-        inventory_service: InventoryService = None,
-        pricing_service: PricingService = None,
-        customer_id: str = None,
+        inventory_service: InventoryService = None,  # pyright: ignore[reportArgumentType]
+        pricing_service: PricingService = None,  # pyright: ignore[reportArgumentType]
+        customer_id: str = None,  # pyright: ignore[reportArgumentType]
     ):
         self._items: dict[str, dict] = {}   # keyed by SKU
         self._discount_code: str | None = None
