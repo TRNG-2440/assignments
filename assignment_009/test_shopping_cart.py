@@ -38,47 +38,47 @@ class TestShoppingCart(unittest.TestCase):
         shopping_cart.remove_item("SKU-004")
         self.assertTrue(shopping_cart.is_empty)
 
-    class TestInventoryChecks(unittest.TestCase):
-        def setUp(self):
-            self.shopping_cart = ShoppingCart()
-            self.inventory_service = InventoryService()
+class TestInventoryChecks(unittest.TestCase):
+    def setUp(self):
+        self.shopping_cart = ShoppingCart()
+        self.inventory_service = InventoryService()
 
-        def tearDown(self):
-            self.shopping_cart.clear()
+    def tearDown(self):
+        self.shopping_cart.clear()
 
-        @patch.object(InventoryService, "get_stock")
-        def test_sufficient_stock(self, mock_stock):
-            """
-            Tests add_item by mocking the stock count with a sufficient count
-            """
-            shopping_cart = self.shopping_cart
-            mock_stock.return_value = 10
-            
+    @patch.object(InventoryService, "get_stock")
+    def test_sufficient_stock(self, mock_stock):
+        """
+        Tests add_item by mocking the stock count with a sufficient count
+        """
+        shopping_cart = self.shopping_cart
+        mock_stock.return_value = 10
+        
+        shopping_cart.add_item("SKU-001", 5)
+        self.assertEqual(shopping_cart.get_item_count(), 5)
+        mock_stock.assert_called_once_with("SKU-001")
+
+    @patch.object(InventoryService, "get_stock")
+    def test_stock_unavailable(self, mock_stock):
+        """
+        Tests add_item by mocking the stock count with a insufficient count
+        """
+        shopping_cart = self.shopping_cart
+        mock_stock.return_value = 0
+        
+        with self.assertRaises(InsufficientStockError):
+            shopping_cart.add_item("SKU-001", 1)
+
+    @patch.object(InventoryService, "get_stock")
+    def test_low_stock_level(self, mock_stock):
+        """
+        Tests add_item by mocking the stock count with a insufficient count that is not zero
+        """
+        shopping_cart = self.shopping_cart
+        mock_stock.return_value = 2
+        
+        with self.assertRaises(InsufficientStockError):
             shopping_cart.add_item("SKU-001", 5)
-            self.assertEqual(shopping_cart.get_item_count(), 5)
-            mock_stock.assert_called_once_with("SKU-001")
-
-        @patch.object(InventoryService, "get_stock")
-        def test_stock_unavailable(self, mock_stock):
-            """
-            Tests add_item by mocking the stock count with a insufficient count
-            """
-            shopping_cart = self.shopping_cart
-            mock_stock.return_value = 0
-            
-            with self.assertRaises(InsufficientStockError):
-                shopping_cart.add_item("SKU-001", 1)
-
-        @patch.object(InventoryService, "get_stock")
-        def test_low_stock_level(self, mock_stock):
-            """
-            Tests add_item by mocking the stock count with a insufficient count that is not zero
-            """
-            shopping_cart = self.shopping_cart
-            mock_stock.return_value = 2
-            
-            with self.assertRaises(InsufficientStockError):
-                shopping_cart.add_item("SKU-001", 5)
 
 class TestDiscountCodes(unittest.TestCase):
     def setUp(self):
