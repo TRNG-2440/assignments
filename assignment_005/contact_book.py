@@ -46,7 +46,7 @@ from time import sleep
 
 
 def clear_console():
-    print("\033[2J\033[H", end="")
+    print("\033[2J\033[H", end="", flush=True)
 
 
 def add_contact(contacts):

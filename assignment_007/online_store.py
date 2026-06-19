@@ -222,7 +222,7 @@ class Order:
 
 
 def clear_console():
-    print("\033[2J\033[H", end="")
+    print("\033[2J\033[H", end="", flush=True)
 
 
 def print_order_summary(order):
@@ -472,6 +472,7 @@ def main():
             clear_console()
             print("Thanks for visiting! Byee")
             break
+
 
 
 if __name__ == "__main__":
