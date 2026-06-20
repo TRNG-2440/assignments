@@ -1,13 +1,21 @@
 from pydantic import BaseModel, Field
 from typing import Optional
-
+from datetime import datetime
+from activity import Activity
 
 class LogEntryCreate(BaseModel):
-    name: str = Field(min_length=2, max_length=100)
+    activity: Activity
+    description: str = Field(min_length=2, max_length=255)
+    location: str = Field(min_length=1, max_length= 64)
 
 class LogEntryResponse(BaseModel):
-    id: int
-    name: str
+    id: str
+    created_at: str
+    activity: Activity
+    description: str
+    location: str
 
 class LogEntryUpdate(BaseModel):
-    name: Optional[str] = None
+    activity: Optional[Activity] = None
+    description: Optional[str] = None
+    location: Optional[str] = None
