@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 # --------------- Enums ---------------
 
+# Enum - day of week 
 class DAY(str, Enum):
   MONDAY = "Monday"
   TUESDAY = "Tuesday"
@@ -16,6 +17,7 @@ class DAY(str, Enum):
   SATURDAY = "Saturday"
   SUNDAY = "Sunday"
 
+# Enum - type of meal
 class MEAL(str, Enum):
   BREAKFAST = "Breakfast"
   LUNCH = "Lunch"
@@ -24,18 +26,21 @@ class MEAL(str, Enum):
 
 # ------- Ingredient Models ------- 
 
+# Ingredient used in each meal
 class Ingredient(BaseModel):
   name: str
   quantity: float
   unit: str
   amount: str
 
+# Meal instructions
 class Instructions(BaseModel):
   name: str
   instructions: str
 
 # ------- Recipe Models ------- 
 
+# Produce recipe
 class CreateRecipe(BaseModel):
   name: str
   created_at: datetime
@@ -43,12 +48,14 @@ class CreateRecipe(BaseModel):
   instructions: Optional[str] = None
   servings: int
 
+# Update each recipe
 class UpdateRecipe(BaseModel):
   name: Optional[str] = None
   ingredients: Optional[list[Ingredient]] = None
   instructions: Optional[str] = None
   servings: Optional[int] = None
 
+# Response of each recipe
 class RecipeResponse(BaseModel):
   recipe_id: str
   name: str
@@ -61,6 +68,7 @@ class RecipeResponse(BaseModel):
   
 # ------- Meal Plan Models ------- 
 
+# Produce meal plan
 class CreateMealPlan(BaseModel):
   name: str
   meal_id: str
@@ -69,6 +77,7 @@ class CreateMealPlan(BaseModel):
   day: DAY
   meal: MEAL
 
+# Update meal plan
 class UpdateMealPlan(BaseModel):
   name: str
   meal_id: Optional[str]
@@ -76,6 +85,7 @@ class UpdateMealPlan(BaseModel):
   day: Optional[DAY]
   meal: Optional[MEAL]
 
+# Response of each meal plan
 class MealPlanResponse(BaseModel):
   name: str
   meal_id: str
@@ -86,6 +96,7 @@ class MealPlanResponse(BaseModel):
 
 # ------- List Models ------- 
 
+# List of all meals combined
 class ShoppingList(BaseModel):
   total_meals: int
   meals: list[CreateMealPlan]
