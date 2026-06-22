@@ -1,23 +1,30 @@
 [
     {
-        "id": "abd10cf2-34df-422a-bf57-75b9a58f1450",
-        "created_at": "2026-06-20 13:57:03.101131",
-        "activity": "Starting",
-        "description": "first",
-        "location": "bed 1"
-    },
-    {
-        "id": "ada40234-bfaf-47a8-ad43-27834946f8fe",
-        "created_at": "2026-06-20 13:57:29.008651",
-        "activity": "Maintenance",
-        "description": "second",
+        "id": "32f6dc9d-ba49-4cbf-a302-4353336be8f7",
+        "created_at": "2026-06-21 18:27:03.100803",
+        "activity": "harvesting",
+        "description": "harvesting tomatoes",
         "location": "bed 2"
     },
     {
-        "id": "6117d059-7f91-41fa-9c8a-cdc09da18c6c",
-        "created_at": "2026-06-20 13:57:44.412980",
-        "activity": "Harvesting",
-        "description": "third",
-        "location": "bed 3"
+        "id": "475bde39-71f8-4949-a16d-e3fc437c7635",
+        "created_at": "2026-06-21 18:27:39.982572",
+        "activity": "planting",
+        "description": "planting carrots",
+        "location": "bed 2"
+    },
+    {
+        "id": "0f46c0f6-a2e0-4a5a-8b85-2368e73ad08f",
+        "created_at": "2026-06-21 18:31:25.117298",
+        "activity": "maintenance",
+        "description": "watering all beds",
+        "location": "all beds"
+    },
+    {
+        "id": "00b225ab-9151-463b-8a7c-cba507cd5bfd",
+        "created_at": "2026-06-21 18:32:16.517869",
+        "activity": "observation",
+        "description": "checking soil conditions for water and pH level",
+        "location": "bed 1 - 4"
     }
 ]
