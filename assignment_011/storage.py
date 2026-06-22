@@ -10,7 +10,7 @@ DATA_PATH = Path(__file__).parent / "Data"
 RECIPE_PATH = DATA_PATH / "recipes.json"
 
 # Declare file path of JSON meal plan file in JSON format
-RECIPE_PATH = DATA_PATH / "mealPlans.json"
+MEAL_PLAN_PATH = DATA_PATH / "mealPlans.json"
 
 # Extract data from a json file into data structure
 def readFile(filePath: Path) -> list[dict[str, Any]]:
