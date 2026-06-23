@@ -1,20 +1,21 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from h11 import Request
-from exceptions.auth import (
+from exceptions import (
     AuthenticationError,
     FilePathNotSpecifiedError,
+    InvalidDateRangeError,
     InvalidPasswordError,
     UserAlreadyExistsError,
     UserDoesNotExistError,
 )
 from logger import logger
-from routes.auth import router as users
+from routes import users, budgets
 
 app = FastAPI(title="Personal Finance Tracker API", version="1.0.0")
 
 # Register routes
 app.include_router(users, prefix="/users", tags=["Users"])
+app.include_router(budgets, prefix="/budgets", tags=["Budgets"])
 
 
 # Register exception handlers
@@ -76,7 +77,19 @@ async def user_already_exists_handler(
 async def user_doesnt_exists_handler(
     request: Request, exc: UserDoesNotExistError
 ) -> JSONResponse:
-    logger.warning(f"User with username: {exc.username} does not exsist!")
+    logger.warning(f"User with username: {exc.username} does not exist!")
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": exc.detail},
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+@app.exception_handler(InvalidDateRangeError)
+async def invalid_date_range_handler(
+    request: Request, exc: InvalidDateRangeError
+) -> JSONResponse:
+    logger.warning(f"Invalid date range {exc.start_date} - {exc.end_date} provided!")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

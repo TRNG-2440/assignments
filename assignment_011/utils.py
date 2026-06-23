@@ -6,6 +6,51 @@ from typing import Any, Union
 
 import bcrypt
 
+from enum import Enum
+
+from logger import logger
+
+
+class Currency(Enum):
+    symbol: str  # currency symbol
+    # Members definition: CODE = (CODE, SYMBOL)
+    USD = ("USD", "$")
+    EUR = ("EUR", "€")
+    GBP = ("GBP", "£")
+    JPY = ("JPY", "¥")
+    CHF = ("CHF", "CHF")
+    AUD = ("AUD", "A$")
+    CAD = ("CAD", "C$")
+    CNY = ("CNY", "¥")
+    INR = ("INR", "₹")
+    MXN = ("MXN", "$")
+    BRL = ("BRL", "R$")
+    KRW = ("KRW", "₩")
+    SGD = ("SGD", "S$")
+    HKD = ("HKD", "HK$")
+    NOK = ("NOK", "kr")
+    SEK = ("SEK", "kr")
+    DKK = ("DKK", "kr")
+    NZD = ("NZD", "NZ$")
+    ZAR = ("ZAR", "R")
+    RUB = ("RUB", "₽")
+    TRY = ("TRY", "₺")
+    PLN = ("PLN", "zł")
+    THB = ("THB", "฿")
+    IDR = ("IDR", "Rp")
+    MYR = ("MYR", "RM")
+    PHP = ("PHP", "₱")
+    CZK = ("CZK", "Kč")
+    ILS = ("ILS", "₪")
+    AED = ("AED", "د.إ")
+    SAR = ("SAR", "﷼")
+
+    def __new__(cls, code: str, symbol: str):
+        obj = object.__new__(cls)
+        obj._value_ = code  # Sets .value to the string code
+        obj.symbol = symbol  # Sets .symbol to currency symbol
+        return obj
+
 
 def read_json_file(file_path: Union[str, Path], key: str) -> Any:
     """
@@ -32,15 +77,15 @@ def read_json_file(file_path: Union[str, Path], key: str) -> Any:
                 return [json.loads(item) for item in data]
 
     except FileNotFoundError:
-        print(f"Error: The file at {file_path} was not found.")
+        logger.error(f"Error: The file at {file_path} was not found.")
         raise
     except json.JSONDecodeError as e:
-        print(
+        logger.error(
             f"Error: Failed to decode JSON. Invalid syntax on line {e.lineno}, col {e.colno}."
         )
         raise
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
         raise
 
 

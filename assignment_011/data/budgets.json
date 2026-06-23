@@ -1,0 +1,6 @@
+{
+    "budgets": [
+        "{\"id\":\"d8e77535fbb84e36973fcded4d48e46f\",\"user_id\":\"1e71ec2595c3461b9681f58b0b2b55f5\",\"title\":\"June 2026 - July 2026 Budget\",\"start_date\":\"2026-06-01\",\"end_date\":\"2026-07-01\",\"currency_symbol\":\"$\",\"currency_code\":\"USD\",\"created_at\":\"2026-06-22T17:54:27.859377\",\"last_updated_at\":\"2026-06-22T17:54:27.859422\"}",
+        "{\"id\":\"b11e8783fbe9483b88f0499f75ee8ccb\",\"user_id\":\"1e71ec2595c3461b9681f58b0b2b55f5\",\"title\":\"June 2026 - July 2026 Budget (1)\",\"start_date\":\"2026-06-01\",\"end_date\":\"2026-07-01\",\"currency_symbol\":\"$\",\"currency_code\":\"USD\",\"created_at\":\"2026-06-22T18:16:55.960263\",\"last_updated_at\":\"2026-06-22T18:16:55.960447\"}"
+    ]
+}

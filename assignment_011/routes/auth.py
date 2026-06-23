@@ -16,7 +16,7 @@ def authenticate_login(
     return user
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/user", status_code=status.HTTP_201_CREATED)
 def create_user(
     user: Annotated[UserResponse, Depends(validate_and_create_user)],
 ) -> UserResponse:
