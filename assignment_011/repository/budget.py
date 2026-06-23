@@ -81,6 +81,22 @@ class BudgetRepository:
         ]
         return filtered_budgets
 
+    def delete_budget(self, budget_id: str) -> None:
+        all_budgets_all_users = self._read_all()
+        delete_budget = [
+            budget for budget in all_budgets_all_users if budget.id != budget_id
+        ]
+        if self._file_path and self._key:
+            write_all_records_to_json(
+                self._file_path,
+                self._key,
+                [budget.model_dump_json() for budget in delete_budget],
+            )
+        else:
+            raise FilePathNotSpecifiedError(
+                detail="File path for BUDGET_DATA or key not specified!"
+            )
+
     def _read_all(self) -> List[BudgetDAO]:
         if self._file_path and self._key:
             data = read_json_file(self._file_path, self._key)
@@ -135,6 +151,22 @@ class BudgetGoalsRepository:
             goal for goal in all_budgets_all_goals if goal.budget_id == budget_id
         ]
         return filtered_goals
+
+    def delete_budget_goals(self, budget_id: str) -> None:
+        all_budgets_all_goals = self._read_all()
+        delete_goals = [
+            goal for goal in all_budgets_all_goals if goal.budget_id != budget_id
+        ]
+        if self._file_path and self._key:
+            write_all_records_to_json(
+                self._file_path,
+                self._key,
+                [goal.model_dump_json() for goal in delete_goals],
+            )
+        else:
+            raise FilePathNotSpecifiedError(
+                detail="File path for BUDGET_DATA or key not specified!"
+            )
 
     @staticmethod
     def _get_goal_type_key(goal: BudgetGoalDAO) -> Tuple[str, str, Any]:

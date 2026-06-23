@@ -1,8 +1,9 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from services.budget import (
+    delete_user_budget,
     get_user_budget,
     get_user_budgets,
     upsert_budget_goals,
@@ -52,4 +53,10 @@ def get_budgets(
     return budgets
 
 
-# summary/insight endpoint
+@router.delete(
+    "/budget/{budget_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_budget(result=Depends(delete_user_budget)) -> Response:
+    return result

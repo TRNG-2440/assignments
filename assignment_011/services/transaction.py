@@ -57,7 +57,7 @@ def delete_trnx(
 ) -> None:
     # check transaction exists
     if not trnx_repo.is_trnx(id):
-        raise ResourceNotFoundError("transaction", id)
+        return  # delete is idempotent
     # check trnx belongs to user
     if not trnx_repo.is_trnx_owner_user(user.id, id):
         raise UnauthorizedAccessError(user.id, "transaction", id)

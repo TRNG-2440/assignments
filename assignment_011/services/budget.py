@@ -137,6 +137,23 @@ def _calculate_summary_insights(
     return BudgetSummaryInsights.model_validate(response_dict)
 
 
+def delete_user_budget(
+    budget_id: str,
+    user: Annotated[UserResponse, Depends(verify_credentials)],
+    budget_repo: Annotated[BudgetRepository, Depends()],
+    budget_goals_repo: Annotated[BudgetGoalsRepository, Depends()],
+) -> None:
+    # Valid budget check
+    if not budget_repo.has_budget(budget_id):
+        return  # delete is idempotent
+    # Valid budget_id for user check
+    if not budget_repo.is_user_budget_owner(user.id, budget_id):
+        raise UnauthorizedAccessError(user.id, "budget", budget_id)
+
+    budget_goals_repo.delete_budget_goals(budget_id)
+    budget_repo.delete_budget(budget_id)
+
+
 def _create_budgets_records(budgets: List[BudgetDAO]) -> List[BudgetUpsertResponse]:
     return [
         BudgetUpsertResponse.model_validate(budget.model_dump()) for budget in budgets
