@@ -7,7 +7,24 @@
             "rating": 9.9,
             "genre": "Animated",
             "created_at": "2026-06-23T15:15:27.572835+00:00"
+        },
+        {
+            "id": "3deeefb7-9026-4224-ba35-74cb322ab366",
+            "title": "Cars 2",
+            "status": "watched",
+            "rating": 5.5,
+            "genre": "Animated",
+            "created_at": "2026-06-23T17:39:19.448528+00:00"
         }
     ],
-    "bob": []
+    "bob": [
+        {
+            "id": "e93dcc54-d360-4fc4-b99c-1d5db6a0e30c",
+            "title": "Cars 3",
+            "status": "watched",
+            "rating": 6.7,
+            "genre": "Kids movie",
+            "created_at": "2026-06-23T17:40:31.936843+00:00"
+        }
+    ]
 }
