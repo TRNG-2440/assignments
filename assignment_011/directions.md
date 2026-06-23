@@ -235,9 +235,9 @@ The team will give a **5 minute walkthrough** of the API using Swagger UI. Every
 
 ## Requirements Checklist
 
-- [ ] A Team Captain has been elected
-- [ ] A project topic has been selected and confirmed with the facilitator
-- [ ] The API is built using FastAPI and runs with `uvicorn`
+- [x] A Team Captain has been elected
+- [x] A project topic has been selected and confirmed with the facilitator
+- [x] The API is built using FastAPI and runs with `uvicorn`
 - [ ] All data is persisted to and read from JSON files
 - [ ] Pydantic models are defined for all request bodies and responses
 - [ ] Every record has an auto-generated `id` and `created_at` field

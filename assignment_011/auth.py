@@ -1,33 +1,25 @@
 """
-Basic HTTP username:password authentication for Movie Watchlist API
+Basic API key authentication
 """
 
 # libraries
 import secrets
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import APIKeyHeader
+from exceptions import InvalidAPIKeyException
+from main import logger
 
-# security scheme
-security = HTTPBasic()
+# map of valid api keys to specific user
+# would be stored in a database in a real app
+VALID_API_KEY = "gogauchos"
 
-# user store
-USERS = {
-    "Will": "gogauchos"
-}
+# api key header for authentication
+api_key_header = APIKeyHeader(name = "x-api-key", auto_error = False)
 
-# credential comparison
-def get_current_user(credentials: HTTPBasicCredentials = Depends(security)) -> str:
-    stored_password = USERS.get(credentials.username, "")
-    password_correct = secrets.compare_digest(
-        credentials.password.encode("utf-8"),
-        stored_password.encode("utf-8")
-    )
-
-    if not password_correct:
-        raise HTTPException(
-            status_code = status.HTTP_401_UNAUTHORIZED,
-            detail = "Invalid username or password",
-            headers = {"WWW-Authenticate": "Basic"}
-        )
-    
-    return credentials.username
+# verify a key
+def verify_api_key(request: Request, api_key: str = Depends(api_key_header)):
+    if not api_key or api_key != VALID_API_KEY:
+        logger.warning(f"Failed API key attempt - path: {request.url.path}")
+        raise InvalidAPIKeyException()
+    logger.info(f"API key validated - path: {request.url.path}")
+    return api_key

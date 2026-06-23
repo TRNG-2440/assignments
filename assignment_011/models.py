@@ -2,23 +2,23 @@
 Models
 """
 # dependencies
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 # -- Pydantic Models --
 # request model for movie
 class MovieCreate(BaseModel):
-    title: str
+    title: str = Field(min_length = 1, max_length = 100)
     status: str
-    rating: float
+    rating: float | None
     genre: str
 
 # response model for movie
 class MovieResponse(BaseModel):
-    id: int
+    id: str
     title: str
     status: str
-    rating: float
+    rating: float | None
     genre: str
 
 # partial update model - all fields optional
