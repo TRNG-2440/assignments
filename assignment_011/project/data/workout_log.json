@@ -1,0 +1,50 @@
+{
+    "users": [
+        {
+            "api_key": "123",
+            "user_id": 0,
+            "user_name": "Admin1",
+            "workout_count": 0,
+            "admin": true
+        },
+        {
+            "api_key": "57869b92-d9a0-45cf-ba4f-479ecdf3190e",
+            "user_id": 67,
+            "user_name": "Johnny Test",
+            "workout_count": 0,
+            "admin": false
+        },
+        {
+            "api_key": "69be4736-cbb3-4592-8f6d-e8d6b8ea2e55",
+            "user_id": 123456,
+            "user_name": "John Doe",
+            "workout_count": 0,
+            "admin": false
+        },
+        {
+            "api_key": "cad7e363-1eb5-44f5-8593-52497e52d25e",
+            "user_id": 12345,
+            "user_name": "Jane Doe",
+            "workout_count": 0,
+            "admin": true
+        }
+    ],
+    "workouts": [
+        {
+            "workout_id": 1,
+            "user_id": 123456,
+            "exercise_name": "Bench Press",
+            "sets": 3,
+            "reps": 10,
+            "weight": 225.0
+        },
+        {
+            "workout_id": 2,
+            "user_id": 67,
+            "exercise_name": "Hammer Curls",
+            "sets": 4,
+            "reps": 8,
+            "weight": 75.0
+        }
+    ]
+}
