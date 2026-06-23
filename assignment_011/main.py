@@ -6,7 +6,7 @@ from logging_config import logger
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from exceptions import InvalidAPIKeyException
-from auth import verify_api_key
+from auth import VALID_API_KEY, verify_api_key
 from starlette import status
 
 # application instance
@@ -44,7 +44,7 @@ async def invalid_api_key_handler(request: Request, exc: InvalidAPIKeyException)
 
 # authentication route
 @app.post("/auth", tags = ["Auth"])
-def authenticate(request: Request, response: JSONResponse = None, api_key: str = Depends(verify_api_key)):  # pyright: ignore[reportArgumentType]
+def authenticate(request: Request, response: JSONResponse = None, username: str = Depends(verify_api_key)):  # pyright: ignore[reportArgumentType]
     logger.info("Authentication successful — session cookie issued")
 
     resp = JSONResponse(
@@ -53,7 +53,7 @@ def authenticate(request: Request, response: JSONResponse = None, api_key: str =
     )
     resp.set_cookie(
         key="session",
-        value="authenticated",
+        value=username,
         httponly=True,
         max_age=3600,
         samesite="lax"
@@ -65,7 +65,9 @@ def require_session(request: Request):
     # Reads the session cookie set by POST /auth.
     # Any route that depends on this will be blocked if the
     # cookie is absent — the client must authenticate first.
-    session = request.cookies.get("session")
-    if not session or session != "authenticated":
+    username = request.cookies.get("session")
+    if not username or username not in VALID_API_KEY.values():
         logger.warning(f"Request without valid session cookie — path: {request.url.path}")
         raise InvalidAPIKeyException()
+    logger.info(f"Session validated for {username} - path: {request.url.path}")
+    return username
