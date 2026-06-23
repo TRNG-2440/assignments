@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, List, Union
 
 import bcrypt
 
@@ -128,6 +128,16 @@ def append_record_to_json(
     # Write back to the file
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
+
+
+def write_all_records_to_json(
+    file_path: Union[str, Path], key: str, records: List[Any]
+) -> None:
+    path = Path(file_path)
+    data = {}
+    data[key] = records
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 def hash_password(password: str) -> str:

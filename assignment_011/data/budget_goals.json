@@ -1,0 +1,8 @@
+{
+    "goals": [
+        "{\"goal_amount\":1500.0,\"id\":\"16251c0faa3a45e38cfafc78d3437c9c\",\"budget_id\":\"d8e77535fbb84e36973fcded4d48e46f\",\"created_at\":\"2026-06-23T00:28:11.057789\",\"last_updated_at\":\"2026-06-23T00:28:11.057794\",\"type\":\"expense\",\"category\":\"housing\"}",
+        "{\"goal_amount\":2500.0,\"id\":\"c90e5cf38a90487693636fc229cff2eb\",\"budget_id\":\"d8e77535fbb84e36973fcded4d48e46f\",\"created_at\":\"2026-06-23T00:28:11.057821\",\"last_updated_at\":\"2026-06-23T00:28:11.057822\",\"type\":\"expense\",\"category\":null}",
+        "{\"goal_amount\":100.0,\"id\":\"895dea08e03d49198c76e077f5bcf7dc\",\"budget_id\":\"d8e77535fbb84e36973fcded4d48e46f\",\"created_at\":\"2026-06-23T00:28:11.057839\",\"last_updated_at\":\"2026-06-23T00:28:11.057840\",\"type\":\"expense\",\"category\":\"food\"}",
+        "{\"goal_amount\":150.0,\"id\":\"4e239a98d71649a3b4c755bc850e73ca\",\"budget_id\":\"d8e77535fbb84e36973fcded4d48e46f\",\"created_at\":\"2026-06-23T00:28:11.057859\",\"last_updated_at\":\"2026-06-23T00:28:58.896536\",\"type\":\"expense\",\"category\":\"transport\"}"
+    ]
+}

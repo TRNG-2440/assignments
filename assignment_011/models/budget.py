@@ -1,9 +1,11 @@
 from datetime import date, datetime
+from enum import StrEnum
 import inspect
-from typing import Annotated, Optional
+from typing import Annotated, List, Literal, Optional, Union
 from uuid import uuid4
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from models.expense import ExpenseCategory
 from exceptions.budget import InvalidDateRangeError
 from utils import Currency
 
@@ -117,3 +119,56 @@ class BudgetResponse(BaseModel):
     last_updated_at: Annotated[
         datetime, Field(description="Timestamp at which budget is last updated")
     ]
+
+
+class GoalType(StrEnum):
+    EXPENSE = "expense"
+
+
+class BaseGoalCreate(BaseModel):
+    goal_amount: Annotated[
+        float, Field(description="The target amount for this goal", gt=0)
+    ]
+
+
+class ExpenseGoalCreate(BaseGoalCreate):
+    type: Literal[GoalType.EXPENSE] = GoalType.EXPENSE
+    category: Annotated[
+        Optional[ExpenseCategory],
+        Field(
+            default=None, description="The specific expense category this goal targets"
+        ),
+    ]
+
+
+BudgetGoalCreate = Annotated[Union[ExpenseGoalCreate], Field(discriminator="type")]
+
+
+class BaseGoalDAO(BaseGoalCreate):
+    id: str = Field(
+        default_factory=lambda: uuid4().hex, description="Id of budget goal"
+    )
+    budget_id: Annotated[
+        str, Field(description="Id of the budget, the goal is associated with")
+    ]
+    created_at: datetime = Field(
+        default_factory=datetime.now,
+        description="Timestamp at which budget goal is created",
+    )
+    last_updated_at: datetime = Field(
+        default_factory=datetime.now,
+        description="Timestamp at which budget goal is last updated",
+    )
+
+
+class ExpenseGoalDAO(BaseGoalDAO):
+    type: Literal[GoalType.EXPENSE] = GoalType.EXPENSE
+    category: Annotated[
+        Optional[ExpenseCategory],
+        Field(
+            default=None, description="The specific expense category this goal targets"
+        ),
+    ]
+
+
+BudgetGoalDAO = Annotated[Union[ExpenseGoalDAO], Field(discriminator="type")]

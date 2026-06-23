@@ -20,8 +20,8 @@ class UsersRepository:
 
     def __init__(self):
         """Load storage configuration from environment variables."""
-        self.file_path = os.getenv("USERS_DATA")
-        self.key = os.getenv("USERS_DATA_KEY")
+        self._file_path = os.getenv("USERS_DATA")
+        self._key = os.getenv("USERS_DATA_KEY")
 
     def check_unique_user(self, username: str, email: str) -> bool:
         """
@@ -32,8 +32,8 @@ class UsersRepository:
         :return: True if neither the username nor the email is already in use.
         :raises FilePathNotSpecifiedError: If storage location is not configured.
         """
-        if self.file_path and self.key:
-            all_users: list[dict] = read_json_file(self.file_path, self.key)
+        if self._file_path and self._key:
+            all_users: list[dict] = read_json_file(self._file_path, self._key)
             has_username = any(
                 user for user in all_users if user.get("username") == username
             )
@@ -51,8 +51,8 @@ class UsersRepository:
         :param user: The fully-populated user (with hashed password) to store.
         :raises FilePathNotSpecifiedError: If storage location is not configured.
         """
-        if self.file_path and self.key:
-            append_record_to_json(self.file_path, self.key, user.model_dump_json())
+        if self._file_path and self._key:
+            append_record_to_json(self._file_path, self._key, user.model_dump_json())
         else:
             raise FilePathNotSpecifiedError(
                 detail="File path for USERS_DATA or key not specified!"
@@ -67,8 +67,8 @@ class UsersRepository:
         :raises FilePathNotSpecifiedError: If storage location is not configured.
         :raises UserDoesNotExistError: If no user with that username exists.
         """
-        if self.file_path and self.key:
-            all_users: list[dict] = read_json_file(self.file_path, self.key)
+        if self._file_path and self._key:
+            all_users: list[dict] = read_json_file(self._file_path, self._key)
             filtered_users: list[dict] = [
                 user for user in all_users if user.get("username") == username
             ]

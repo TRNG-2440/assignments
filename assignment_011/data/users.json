@@ -1,5 +1,6 @@
 {
-  "users": [
-    "{\"id\":\"1e71ec2595c3461b9681f58b0b2b55f5\",\"username\":\"testuser\",\"email\":\"testuser@email.com\",\"password\":\"$2b$12$0SHTxfv01cR19uM3fs8yQuaFWeMbM1LFjqARmqCtj7ESCr3vUT6wu\"}"
-  ]
+    "users": [
+        "{\"id\":\"1e71ec2595c3461b9681f58b0b2b55f5\",\"username\":\"testuser\",\"email\":\"testuser@email.com\",\"password\":\"$2b$12$0SHTxfv01cR19uM3fs8yQuaFWeMbM1LFjqARmqCtj7ESCr3vUT6wu\"}",
+        "{\"id\":\"41ce071363634dfb98b15a16f77010f7\",\"username\":\"testuser2\",\"email\":\"testuser2@email.com\",\"password\":\"$2b$12$bI0xxrAEWJsyPk1ZXUU5m.C/gPab1Os1.giWXV.xRUieJiwHk6qBW\"}"
+    ]
 }

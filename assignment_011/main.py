@@ -5,8 +5,10 @@ from exceptions import (
     FilePathNotSpecifiedError,
     InvalidDateRangeError,
     InvalidPasswordError,
+    ResourceNotFoundError,
     UserAlreadyExistsError,
     UserDoesNotExistError,
+    UnauthorizedAccessError,
 )
 from logger import logger
 from routes import users, budgets
@@ -90,6 +92,32 @@ async def invalid_date_range_handler(
     request: Request, exc: InvalidDateRangeError
 ) -> JSONResponse:
     logger.warning(f"Invalid date range {exc.start_date} - {exc.end_date} provided!")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.detail},
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+@app.exception_handler(UnauthorizedAccessError)
+async def unauthorized_access_handler(
+    request: Request, exc: UnauthorizedAccessError
+) -> JSONResponse:
+    logger.warning(
+        f"User: {exc.user_id} is not authorized to access {exc.resource}: {exc.resource_id}!"
+    )
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": exc.detail},
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+@app.exception_handler(ResourceNotFoundError)
+async def resource_not_found_handler(
+    request: Request, exc: ResourceNotFoundError
+) -> JSONResponse:
+    logger.warning(f"Resource {exc.resource}: {exc.resource_id} not found!")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},
