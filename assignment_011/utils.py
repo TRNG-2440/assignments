@@ -130,6 +130,47 @@ def append_record_to_json(
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
+def append_records_to_json(
+    file_path: Union[str, Path], key: str, new_records: List[Any]
+) -> None:
+    """
+    Appends multiple records to an array inside a JSON file containing a specific key.
+    Creates a new file if it does not exist.
+
+    :param file_path: Path to the target JSON file.
+    :param key: The dictionary key where the array is stored.
+    :param new_records: A list of data items to append to the array.
+    :raises json.JSONDecodeError: If the existing file contains invalid JSON.
+    :raises TypeError: If the value currently stored under `key` is not a list.
+    """
+    path = Path(file_path)
+    data = {}
+
+    # Read existing data if the file exists
+    if path.exists() and path.stat().st_size > 0:
+        try:
+            with open(path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error: Existing file contains invalid JSON ({e}).")
+            raise
+
+    # Ensure the key exists and points to a list
+    if key not in data:
+        data[key] = []
+    elif not isinstance(data[key], list):
+        raise TypeError(
+            f"The value for key '{key}' is a {type(data[key])}, not a list."
+        )
+
+    # Extend the list with the multiple new records
+    data[key].extend(new_records)
+
+    # Write back to the file
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+
+
 def write_all_records_to_json(
     file_path: Union[str, Path], key: str, records: List[Any]
 ) -> None:

@@ -11,13 +11,14 @@ from exceptions import (
     UnauthorizedAccessError,
 )
 from logger import logger
-from routes import users, budgets
+from routes import users, budgets, transactions
 
 app = FastAPI(title="Personal Finance Tracker API", version="1.0.0")
 
 # Register routes
 app.include_router(users, prefix="/users", tags=["Users"])
 app.include_router(budgets, prefix="/budgets", tags=["Budgets"])
+app.include_router(transactions, prefix="/transactions", tags=["Transactions"])
 
 
 # Register exception handlers

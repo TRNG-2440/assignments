@@ -4,6 +4,7 @@ from typing import Any, List, Tuple
 from dotenv import load_dotenv
 from pydantic import TypeAdapter
 
+from exceptions import ResourceNotFoundError
 from exceptions import FilePathNotSpecifiedError
 from models.budget import BudgetDAO, BudgetGoalDAO, GoalType
 from utils import append_record_to_json, read_json_file, write_all_records_to_json
@@ -61,6 +62,25 @@ class BudgetRepository:
                 return new_title
             counter += 1
 
+    def get_budget(self, user_id: str, id: str) -> BudgetDAO:
+        all_budgets_all_users = self._read_all()
+        filtered_budgets = [
+            budget
+            for budget in all_budgets_all_users
+            if budget.user_id == user_id and budget.id == id
+        ]
+        if len(filtered_budgets) > 1 or len(filtered_budgets) == 0:
+            raise ResourceNotFoundError("budget", id)
+
+        return filtered_budgets[0]
+
+    def get_budgets(self, user_id: str) -> List[BudgetDAO]:
+        all_budgets_all_users = self._read_all()
+        filtered_budgets = [
+            budget for budget in all_budgets_all_users if budget.user_id == user_id
+        ]
+        return filtered_budgets
+
     def _read_all(self) -> List[BudgetDAO]:
         if self._file_path and self._key:
             data = read_json_file(self._file_path, self._key)
@@ -108,6 +128,13 @@ class BudgetGoalsRepository:
                 detail="File path for BUDGET_DATA or key not specified!"
             )
         return merged_goals
+
+    def get_budget_goals(self, budget_id: str) -> List[BudgetGoalDAO]:
+        all_budgets_all_goals = self._read_all()
+        filtered_goals = [
+            goal for goal in all_budgets_all_goals if goal.budget_id == budget_id
+        ]
+        return filtered_goals
 
     @staticmethod
     def _get_goal_type_key(goal: BudgetGoalDAO) -> Tuple[str, str, Any]:

@@ -1,11 +1,12 @@
 from datetime import date, datetime
 from enum import StrEnum
 import inspect
-from typing import Annotated, List, Literal, Optional, Union
+from typing import Annotated, Dict, List, Literal, Optional, Union
 from uuid import uuid4
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from models.expense import ExpenseCategory
+from models.transaction import TransactionResponse
+from models.categories import ExpenseCategory
 from exceptions.budget import InvalidDateRangeError
 from utils import Currency
 
@@ -102,7 +103,7 @@ class BudgetDAO(BaseModel):
     ]
 
 
-class BudgetResponse(BaseModel):
+class BudgetUpsertResponse(BaseModel):
     id: Annotated[str, Field(description="Identifier for the budget")]
     title: Annotated[str, Field(description="Title of the budget")]
     start_date: Annotated[date, Field(description="The start date of the budget")]
@@ -172,3 +173,18 @@ class ExpenseGoalDAO(BaseGoalDAO):
 
 
 BudgetGoalDAO = Annotated[Union[ExpenseGoalDAO], Field(discriminator="type")]
+
+
+class BudgetSummaryInsights(BaseModel):
+    total_income: float
+    total_expenses: float
+    total_savings_or_deficit: float
+    expenses_per_category: Dict[ExpenseCategory, float]
+    goal_achieved_or_not: Dict[str, bool]
+
+
+class BudgetResponse(BaseModel):
+    budget: BudgetUpsertResponse
+    goals: List[BudgetGoalDAO]
+    transactions: List[TransactionResponse]
+    summary_insights: BudgetSummaryInsights

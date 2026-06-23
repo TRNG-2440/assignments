@@ -13,3 +13,8 @@ class ExpenseCategory(StrEnum):
     PERSONAL = "personal grooming"
     EDUCATION = "education"
     OTHER = "other"
+
+
+class BudgetCategory(StrEnum):
+    INCOME = "income"
+    EXPENSE = "expense"
