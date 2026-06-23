@@ -2,11 +2,10 @@
 Movie Watchlist API
 """
 # depedencies
-from logging_config import logger
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from exceptions import InvalidAPIKeyException
-from auth import VALID_API_KEY, verify_api_key
+from routers import router as movies_router
 from starlette import status
 
 # application instance
@@ -15,16 +14,21 @@ app = FastAPI(
     version = "1.0.0"
 )
 
+# register endpoint routers
+app.include_router(movies_router)
+
 
 # ========================================================================
 # EXTRA - NOT REALLY NEEDED, but why not
 # basic (synchronous) route to confirm app works
-@app.get("/")
+@app.get("/", tags = ["Public"], summary = "Welcome message",
+         description = "Public welcome route. No authentication required.")
 def read_root():
     return {"message": "Welcome to the Movie Watchlist API"}
 
-# asynchronous status route 
-@app.get("/status")
+# asynchronous status route
+@app.get("/status", tags = ["Public"], summary = "Service status",
+         description = "Public route reporting the running status and version. No authentication required.")
 async def get_status():
     return {"status": "running", "version": "1.0.0"}
 # ========================================================================
@@ -41,33 +45,3 @@ async def invalid_api_key_handler(request: Request, exc: InvalidAPIKeyException)
             }
         }
     )
-
-# authentication route
-@app.post("/auth", tags = ["Auth"])
-def authenticate(request: Request, response: JSONResponse = None, username: str = Depends(verify_api_key)):  # pyright: ignore[reportArgumentType]
-    logger.info("Authentication successful — session cookie issued")
-
-    resp = JSONResponse(
-        content = {"message": "Authenticated successful, session cookie set."},
-        status_code = status.HTTP_200_OK
-    )
-    resp.set_cookie(
-        key="session",
-        value=username,
-        httponly=True,
-        max_age=3600,
-        samesite="lax"
-    )
-    return resp
-
-# cookie validation helper
-def require_session(request: Request):
-    # Reads the session cookie set by POST /auth.
-    # Any route that depends on this will be blocked if the
-    # cookie is absent — the client must authenticate first.
-    username = request.cookies.get("session")
-    if not username or username not in VALID_API_KEY.values():
-        logger.warning(f"Request without valid session cookie — path: {request.url.path}")
-        raise InvalidAPIKeyException()
-    logger.info(f"Session validated for {username} - path: {request.url.path}")
-    return username

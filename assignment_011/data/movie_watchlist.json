@@ -1,0 +1,13 @@
+{
+    "william": [
+        {
+            "id": "e9425a97-5fdd-4c41-a435-a07255535732",
+            "title": "string",
+            "status": "string",
+            "rating": 0.0,
+            "genre": "string",
+            "created_at": "2026-06-23T04:43:56.009590+00:00"
+        }
+    ],
+    "bob": []
+}

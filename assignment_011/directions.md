@@ -238,15 +238,15 @@ The team will give a **5 minute walkthrough** of the API using Swagger UI. Every
 - [x] A Team Captain has been elected
 - [x] A project topic has been selected and confirmed with the facilitator
 - [x] The API is built using FastAPI and runs with `uvicorn`
-- [ ] All data is persisted to and read from JSON files
-- [ ] Pydantic models are defined for all request bodies and responses
-- [ ] Every record has an auto-generated `id` and `created_at` field
-- [ ] Authentication is implemented using either HTTP Basic Auth or API Key
-- [ ] All non-public endpoints are protected and return `401`/`403` for unauthenticated requests
-- [ ] CRUD endpoint categories are implemented (create, read all, read one, update, delete)
-- [ ] Every endpoint has a Swagger summary, description, and declared response codes
-- [ ] The team has prepared a 5-minute Swagger walkthrough
-- [ ] Every team member presents at least one point during the walkthrough
+- [x] All data is persisted to and read from JSON files
+- [x] Pydantic models are defined for all request bodies and responses
+- [x] Every record has an auto-generated `id` and `created_at` field
+- [x] Authentication is implemented using either HTTP Basic Auth or API Key
+- [x] All non-public endpoints are protected and return `401`/`403` for unauthenticated requests
+- [x] CRUD endpoint categories are implemented (create, read all, read one, update, delete)
+- [x] Every endpoint has a Swagger summary, description, and declared response codes
+- [x] The team has prepared a 5-minute Swagger walkthrough
+- [x] Every team member presents at least one point during the walkthrough
 
 ---
 
