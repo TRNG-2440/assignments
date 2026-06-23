@@ -2,22 +2,12 @@
 Movie Watchlist API
 """
 # depedencies
-import logging
+from logging_config import logger
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
-from assignment_011.exceptions import InvalidAPIKeyException
+from exceptions import InvalidAPIKeyException
 from auth import verify_api_key
 from starlette import status
-
-# logger
-logging.basicConfig(
-    level = logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-
-# create logger in main module
-logger = logging.getLogger(__name__)
 
 # application instance
 app = FastAPI(

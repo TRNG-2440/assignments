@@ -7,7 +7,7 @@ import secrets
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import APIKeyHeader
 from exceptions import InvalidAPIKeyException
-from main import logger
+from logging_config import logger
 
 # map of valid api keys to specific user
 # would be stored in a database in a real app
