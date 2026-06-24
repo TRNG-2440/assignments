@@ -73,7 +73,7 @@ class SavingsAccount(Account):
         self.withdraws_used = withdraws_used
     
     def withdraw(self, amount: float):
-        if amount < 0:
+        if amount <= 0:
             raise ValueError("Withdraw amount must be at least $0.01")
         elif self.withdraws_used >= self.withdraws_limit:
             raise WithdrawsUsedError("Monthly withdraws limit reached.") 
