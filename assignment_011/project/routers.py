@@ -7,7 +7,7 @@ from typing import Optional
 repository = JsonRepository()
 
 
-# AUTH
+# Auth
 
 security = HTTPBearer()
 
@@ -21,7 +21,7 @@ def get_current_user(
             return user
     raise HTTPException(status_code=401, detail="Invalid API key")
 
-# USERS
+# Users
 
 user_router = APIRouter(
     prefix="/users",
@@ -36,9 +36,8 @@ def get_users(current_user: UserProfile = Depends(get_current_user)):
 
 @user_router.get("/{user_id}")
 def get_user(user_id: int, current_user: UserProfile = Depends(get_current_user)):
-    if not current_user.admin:
+    if not current_user.admin and current_user.user_id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
     return repository.get_user(user_id)
 
 @user_router.post("/")
@@ -72,21 +71,15 @@ def delete_user(user_id: int, current_user: UserProfile = Depends(get_current_us
     success = repository.delete_user(user_id)
     return {"success": success}
 
-# WORKOUTS
+# Workouts
 
 workout_router = APIRouter(
     prefix="/workouts",
     tags=["Workouts"]
 )
 
-@workout_router.get("/")
-def get_workouts(current_user: UserProfile = Depends(get_current_user)):
-    all_workouts = repository.get_workouts()
-    return [w for w in all_workouts if w.user_id == current_user.user_id]
-
 @workout_router.post("/")
-def create_workout(
-    workout: WorkoutCreate, current_user: UserProfile = Depends(get_current_user)):
+def create_workout( workout: WorkoutCreate, current_user: UserProfile = Depends(get_current_user)):
     new_workout = Workout(
         workout_id=0,  # overwritten in repository
         user_id=current_user.user_id,
@@ -97,11 +90,26 @@ def create_workout(
     )
     return repository.create_workout(new_workout)
 
+@workout_router.get("/")
+def get_workouts(current_user: UserProfile = Depends(get_current_user)):
+    all_workouts = repository.get_workouts()
+    return [w for w in all_workouts if w.user_id == current_user.user_id]
+
+@workout_router.get("/{workout_id}")
+def get_workout(
+    workout_id: int, current_user: UserProfile = Depends(get_current_user)):
+    workout = repository.get_workout(workout_id)
+    if workout is None:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    if not current_user.admin and workout.user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return workout
+
 @workout_router.put("/")
 def update_workout(workout: Workout, current_user: UserProfile = Depends(get_current_user)):
     existing = repository.get_workout(workout.workout_id)
     if not existing:
-        return {"success": False}
+        raise HTTPException(status_code=404, detail="Workout not found")
     if not current_user.admin and existing.user_id != current_user.user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     repository.update_workout(workout)
@@ -111,7 +119,7 @@ def update_workout(workout: Workout, current_user: UserProfile = Depends(get_cur
 def delete_workout(workout_id: int, current_user: UserProfile = Depends(get_current_user)):
     workout = repository.get_workout(workout_id)
     if not workout:
-        return {"success": False}
+                raise HTTPException(status_code=404, detail="Workout not found")
     if not current_user.admin and workout.user_id != current_user.user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     repository.delete_workout(workout_id)

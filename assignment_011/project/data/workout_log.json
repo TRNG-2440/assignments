@@ -22,11 +22,11 @@
             "admin": false
         },
         {
-            "api_key": "cad7e363-1eb5-44f5-8593-52497e52d25e",
-            "user_id": 12345,
-            "user_name": "Jane Doe",
+            "api_key": "bb58ff47-1a9b-4a3f-a7ba-0865bb3adfdc",
+            "user_id": 12,
+            "user_name": "James",
             "workout_count": 0,
-            "admin": true
+            "admin": false
         }
     ],
     "workouts": [
