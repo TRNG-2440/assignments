@@ -1,0 +1,1 @@
+INSERT INTO books VALUES (DEFAULT, 'Why I Write', 1002, 1946, 128);
