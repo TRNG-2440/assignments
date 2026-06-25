@@ -1,8 +1,9 @@
 # Endpoint definitions
 import uuid
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from auth import VerifyUser
-from models import CreateRecipe, RecipeResopnse, UpdateRecipe, CreateMealPlan, MealPlanResponse, UpdateMealPlan
+from models import CreateRecipe, RecipeResponse, UpdateRecipe, CreateMealPlan, MealPlanResponse, UpdateMealPlan
 from storage import RECIPE_PATH, MEAL_PLAN_PATH, readFile, writeFile
 
 # Declare router object
@@ -13,7 +14,7 @@ mealPlanRouter = APIRouter(tags=["MealPlan"])
 # -----------------------------------------------------------------------------
 # POST route decerator - Create new recipe
 @recipeRouter.post("/recipes", 
-  response_model = RecipeResopnse,
+  response_model = RecipeResponse,
   status_code = status.HTTP_201_CREATED,
   summary = "Create new recipe",
   description = "Add new recipe",
@@ -40,10 +41,9 @@ def Create_Recipe(
     recipeDict = {
       "recipe_id": str(uuid.uuid4()),
       "name": recipe.name,
-      "created_at": recipe.created_at.isoformat(),
+      "created_at": datetime.now().isoformat(),
       "ingredients": [i.model_dump() for i in recipe.ingredients],
       "instructions": recipe.instructions,
-      "servings": recipe.servings,
     }
 
     # Insert recipe dictionary to file object
@@ -57,8 +57,8 @@ def Create_Recipe(
 # GET route decerator - Read all recipes
 @recipeRouter.get("/recipes", 
                   
-  # Declare list through RecipeResopnse model               
-  response_model = list[RecipeResopnse],
+  # Declare list through RecipeResponse model               
+  response_model = list[RecipeResponse],
 
   # Verify status code
   status_code = status.HTTP_200_OK,
@@ -92,19 +92,14 @@ def Get_All_Recipes(
 # GET route decorator - Read specific receipe by recipe_id
 @recipeRouter.get("/recipes/{recipe_id}",
                   
-    # Declare response_model object
-    response_model = RecipeResopnse,
+    response_model = RecipeResponse,
 
-    # Verify status code
     status_code = status.HTTP_200_OK,
 
-    # Declare summary 
     summary="Retrieve one recipe",
 
-     # Declare description
     description="Retreive a single recipe after user inputs their recipe_id.",
 
-     # Declare response for status code
     responses={
         401: {"description": "Unauthorized — invalid credentials"},
 
@@ -115,14 +110,11 @@ def Get_All_Recipes(
 # Retreive a specific recipe through recipe_id
 def Get_Single_Recipe(
     
-    # Declare recipe_id
     recipe_id: str,
 
-    # Declare username
     username: str = Depends(VerifyUser),
 ):
     
-    # Declare file object
     recipeFile = readFile(RECIPE_PATH)
 
     # Search for recipe in file
@@ -142,16 +134,12 @@ def Get_Single_Recipe(
 # PUT route decorator - modify single receipe by recipe_id
 @recipeRouter.put("/recipes/{recipe_id}",
                   
-    # Declare response_model object
-    response_model = RecipeResopnse,
+    response_model = RecipeResponse,
 
-    # Declare summary 
     summary="Update recipe",
 
-     # Declare description
     description="Modify a single recipe through recipe_id.",
 
-     # Declare response for status code
     responses={
         401: {"description": "Unauthorized — invalid credentials"},
 
@@ -162,12 +150,10 @@ def Get_Single_Recipe(
 # Retreive a specific recipe through recipe_id
 def Update_Recipe(
     
-    # Declare response_id
     recipe_id: str,
 
     updates: UpdateRecipe,
 
-    # Declare username
     username: str = Depends(VerifyUser),
 ):
     
@@ -203,13 +189,10 @@ def Update_Recipe(
 @recipeRouter.delete(
     "/recipes/{recipe_id}",
     
-    # Declare summary 
     summary="Delete recipe",
 
-     # Declare description
     description="Delete a single recipe through recipe_id.",
 
-     # Declare response for status code
     responses={
         401: {"description": "Unauthorized — invalid credentials"},
 
@@ -217,11 +200,9 @@ def Update_Recipe(
     },
   )
 def Delete_Recipe(
-    
-     # Declare response_id
+
     recipe_id: str,
 
-    # Declare username
     username: str = Depends(VerifyUser),
     
 ):
@@ -245,7 +226,7 @@ def Delete_Recipe(
     if(isFound):
         writeFile(RECIPE_PATH,recipeFile)
 
-        return {"\nMessage": f"Recipe {recipe_id} has been successfully deleted.\n"}
+        return {"message": f"Recipe {recipe_id} has been successfully deleted."}
 
 
     # Throw excepption if recipe is not found
@@ -286,13 +267,30 @@ def Create_Meal_Plan(
     # Read JSON text from file
     mealPlanFile = readFile(MEAL_PLAN_PATH)
 
+    # Open file for recipe path
+    recipeFile = readFile(RECIPE_PATH)
+
+    # Recipe list
+    recipe = None
+
+    # Traverse through recipe to find name of meal
+    for r in recipeFile:
+      if r["recipe_id"] == meal_plan.recipe_id:
+        recipe = r
+        break
+
+    if recipe is None:
+      raise HTTPException(status_code=404, detail="Recipe not found")
+
     # Declare recipe dictionary
     mealPlanDict = {
-      "meal_id": meal_plan.meal_id,
-      "created_at": meal_plan.created_at.isoformat(),
+      "name": meal_plan.name,
+      "recipe": recipe,
+      "meal_id": str(uuid.uuid4()),
+      "recipe_id": meal_plan.recipe_id,
+      "created_at": datetime.now().isoformat(),
       "day": meal_plan.day.value,
       "meal": meal_plan.meal.value,
-
     }
 
     # Insert recipe dictionary to file object
@@ -305,20 +303,15 @@ def Create_Meal_Plan(
 # -----------------------------------------------------------------------------
 # GET route decerator - Read all meal plans
 @mealPlanRouter.get("/mealPlan", 
-
-  # Declare list through RecipeResopnse model                 
+             
   response_model = list[MealPlanResponse],
 
-  # Verify status code
   status_code = status.HTTP_200_OK,
 
-  # Declare summary
   summary = "Retreive all meal plan",
 
-  # Declare description
   description = "Retreive all meal plans on current file",
 
-  # Declare repsonse status codes
   responses =
   {
     401: {"description": "Unauthorized — invalid credentials"},
@@ -337,23 +330,19 @@ def Get_All_Meal_Plans(
 # -----------------------------------------------------------------------------
 # GET route decerator - Read specific meal plan by meal_id
 @mealPlanRouter.get("/mealPlan/{meal_id}", 
-
-  # Declare list through RecipeResopnse model                 
+            
   response_model = MealPlanResponse,
 
-  # Verify status code
   status_code = status.HTTP_200_OK,
 
-  # Declare summary
   summary = "Retreive all one meal plan",
 
-  # Declare description
   description = "Retreive a single meal plan after user inputs their meal plan id.",
 
-  # Declare repsonse status codes
   responses =
   {
     401: {"description": "Unauthorized — invalid credentials"},
+
     422: {"description": "Validation error — request body did not match schema"},
   },
 )
@@ -387,16 +376,12 @@ def Get_Single_Meal_Plan(
 # PUT route decorator - modify single receipe by recipe_id
 @mealPlanRouter.put("/mealPlan/{meal_id}",
                   
-    # Declare response_model object
     response_model = MealPlanResponse,
 
-    # Declare summary 
     summary="Update meal plan",
 
-     # Declare description
     description="Modify a single meal plan through meal_id.",
 
-     # Declare response for status code
     responses={
         401: {"description": "Unauthorized — invalid credentials"},
 
@@ -407,12 +392,10 @@ def Get_Single_Meal_Plan(
 # Update a specific meal plan through meal_id
 def Update_Meal_Plan(
     
-    # Declare response_id
     meal_id: str,
 
     updates: UpdateMealPlan,
 
-    # Declare username
     username: str = Depends(VerifyUser),
 ):
     
@@ -448,13 +431,10 @@ def Update_Meal_Plan(
 @mealPlanRouter.delete(
     "/mealPlan/{meal_id}",
     
-    # Declare summary 
     summary = "Delete meal plan",
 
-     # Declare description
     description = "Delete a single meal plan through meal_id.",
 
-     # Declare response for status code
     responses={
         401: {"description": "Unauthorized — invalid credentials"},
 
@@ -464,10 +444,8 @@ def Update_Meal_Plan(
 
 def Delete_Meal_Plan(
     
-     # Declare response_id
     meal_id: str,
 
-    # Declare username
     username: str = Depends(VerifyUser),
     
 ):

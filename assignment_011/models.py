@@ -28,10 +28,9 @@ class MEAL(str, Enum):
 
 # Ingredient used in each meal
 class Ingredient(BaseModel):
-  name: str
-  quantity: float
-  unit: str
-  amount: str
+  ingredient_name: str
+  measurement: Optional[str]
+  notes: Optional[str]
 
 # Meal instructions
 class Instructions(BaseModel):
@@ -43,63 +42,44 @@ class Instructions(BaseModel):
 # Produce recipe
 class CreateRecipe(BaseModel):
   name: str
-  created_at: datetime
   ingredients: list[Ingredient]
   instructions: Optional[str] = None
-  servings: int
 
 # Update each recipe
 class UpdateRecipe(BaseModel):
   name: Optional[str] = None
   ingredients: Optional[list[Ingredient]] = None
   instructions: Optional[str] = None
-  servings: Optional[int] = None
 
 # Response of each recipe
 class RecipeResponse(BaseModel):
   recipe_id: str
   name: str
-  created_at: datetime
-  day: DAY
-  meal: MEAL
   ingredients: list[Ingredient]
   instructions: Optional[str] = None
-  servings: int
-  
+
 # ------- Meal Plan Models ------- 
 
 # Produce meal plan
 class CreateMealPlan(BaseModel):
   name: str
-  meal_id: str
   recipe_id: str
-  created_at: datetime
   day: DAY
   meal: MEAL
 
 # Update meal plan
 class UpdateMealPlan(BaseModel):
   name: str
-  meal_id: Optional[str]
-  created_at: datetime
   day: Optional[DAY]
   meal: Optional[MEAL]
 
 # Response of each meal plan
 class MealPlanResponse(BaseModel):
   name: str
-  meal_id: str
   recipe_id: Optional[str]
-  created_at: datetime
   day: DAY
   meal: MEAL
 
-# ------- List Models ------- 
-
-# List of all meals combined
-class ShoppingList(BaseModel):
-  total_meals: int
-  meals: list[CreateMealPlan]
-  ingredients: list[Ingredient]
+  
 
 

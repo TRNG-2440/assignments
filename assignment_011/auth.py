@@ -8,7 +8,7 @@ security = HTTPBasic()
 
 # Hard code user list for simplicity
 USERS = {
-  "Administrator": "GoA's321",
+  "Administrator": "Hello123",
   "Kdawg": "Berk02394"
 }
 

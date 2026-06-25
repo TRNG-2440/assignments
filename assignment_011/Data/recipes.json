@@ -1,0 +1,30 @@
+[
+  {
+    "recipe_id": "9d3db87f-ac30-48ce-aa89-6a8a143fbafe",
+    "name": "Pasta Piseli",
+    "created_at": "2026-06-23T14:26:47.199896",
+    "ingredients": [
+      {
+        "ingredient_name": "Ditalini",
+        "measurement": "Half a bag",
+        "notes": "Use however much you think is suitable"
+      },
+      {
+        "ingredient_name": "White onion",
+        "measurement": "Half an onion",
+        "notes": "Minced"
+      },
+      {
+        "ingredient_name": "Peas",
+        "measurement": "A bag",
+        "notes": "N/A"
+      },
+      {
+        "ingredient_name": "Parmasean/Pecorino",
+        "measurement": "Use at your risk",
+        "notes": "Minced"
+      }
+    ],
+    "instructions": "Saute onions and pancetta at medium heat until mostly cooked, then add peas for several minutes. Add a cup of water. Take half the mixture out and blend until pureed. Add Ditalini to the pot, return puree, and cook 15-20 minutes adding water as needed."
+  }
+]
