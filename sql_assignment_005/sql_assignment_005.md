@@ -3,7 +3,8 @@
 Given the following tables, provide an SQL statement that will return the total page count of all books written by Stephen King.
 
 Author
-|author_id|author_name| 
+
+|author_id|author_name|
 |-|-|
 |1001|Agatha Christie|
 |1002|George Orwell|
@@ -12,6 +13,7 @@ Author
 |1005|Stephen King|
 
 Books
+
 |book_id|title|author|publication|page_count|
 |-|-|-|-|-|
 |3050|Murder on the Orient Express|1001|1934|256|
