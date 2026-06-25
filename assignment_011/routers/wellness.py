@@ -14,7 +14,7 @@ from auth import verify_api_key
 
 router = APIRouter(
     prefix="/wellness",
-    tags=["wellness Tracker"],
+    tags=["Wellness Tracker"],
     dependencies=[Depends(verify_api_key)]
 )
 
@@ -41,7 +41,7 @@ def create_entry(payload: WellnessCreate):
 
     new_entry = {
     "id": f"ENT-{next_id}",
-    "created_at": datetime.now().isoformat(),
+    "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
     "date": payload.date.isoformat(),
     "sleep_hours": payload.sleep_hours,
     "water_intake": payload.water_intake,
@@ -106,6 +106,7 @@ def update_entry(entry_id: str, payload: WellnessUpdate):
             data[index] = updated_entry
             write_data(FILE_PATH, data)
 
+            
             return updated_entry
 
     raise HTTPException(
@@ -117,7 +118,7 @@ def update_entry(entry_id: str, payload: WellnessUpdate):
 @router.delete(
     "/{entry_id}",
     summary="Delete wellness entry",
-    description="Deletes an existing wellness entry.")
+    description="Deletes an existing wellness entry by ID.")
 
 def delete_entry(entry_id: str):
     data = read_data(FILE_PATH)
@@ -139,7 +140,7 @@ def delete_entry(entry_id: str):
 ##SUMMARY
 @router.get("/summary", response_model=WellnessSummary,
             summary="Get wellness Summary",
-            description="Returns a wellness Summary")
+            description="Returns a Wellness Summary")
 
 def get_summary():
     data = read_data(FILE_PATH)
@@ -147,18 +148,25 @@ def get_summary():
     if not data:
         return {
             "total_entries": 0,
+            "best_sleep": 0,
+            "worst_sleep": 0,
             "average_sleep": 0,
             "average_water_intake": 0,
             "average_exercise": 0
         }
     
     total_entries = len(data)
+    best_sleep = max(entry["sleep_hours"] for entry in data)
+    worst_sleep = min(entry["sleep_hours"] for entry in data)
     average_sleep = sum(entry["sleep_hours"] for entry in data) / total_entries
     average_water = sum(entry["water_intake"] for entry in data) / total_entries
     average_exercise = sum(entry["exercise_time"] for entry in data) / total_entries
+    
 
     return {
         "total_entries": total_entries,
+        "best_sleep": best_sleep,
+        "worst_sleep": worst_sleep,
         "average_sleep": round(average_sleep, 2), 
         "average_water_intake": round(average_water, 2), 
         "average_exercise": round(average_exercise, 2)

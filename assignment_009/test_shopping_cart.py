@@ -1,3 +1,13 @@
+# Mark White
+# 06/14/26
+# Shopping Cart Unit Testing
+
+# This file contains unit tests for the e-commerce shopping cart application.
+# it checks item management, inventory with mocks, discount codes, pricing and tax, 
+# as well as checkout and edge cases.
+
+
+
 import unittest
 from unittest.mock import patch, MagicMock
 

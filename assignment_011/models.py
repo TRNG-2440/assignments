@@ -17,7 +17,6 @@ class WellnessUpdate(BaseModel):
     exercise_time: int = Field(ge=0, le=1000)
     notes: str = Field(max_length=1000)
 
-
 class WellnessResponse(BaseModel):
     id: str
     created_at: datetime
@@ -30,6 +29,8 @@ class WellnessResponse(BaseModel):
 
 class WellnessSummary(BaseModel):
     total_entries: int
+    best_sleep: float
+    worst_sleep: float
     average_sleep: float
     average_water_intake: float
     average_exercise: float
