@@ -1,18 +1,23 @@
-CREATE TABLE Principal(
-    name VARCHAR(50) PRIMARY KEY,
-    hire_date DATE,
-    salary INT
-);
-
-CREATE TABLE School(
-    name VARCHAR(50) PRIMARY KEY,
-    FOREIGN KEY (name) REFERENCES Principal(name)
-);
-
-CREATE TABLE Student(
+CREATE TABLE Principal (
+    principal_id INT PRIMARY KEY,
     name VARCHAR(50),
-    grade INT,
-    home_address VARCHAR(50),
-    phone INT,
-    FOREIGN KEY (name) REFERENCES School(name)
+    hire_date DATE,
+    salary DECIMAL(10, 2)
+);
+
+CREATE TABLE School (
+    school_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    principal_id INT,
+    FOREIGN KEY (principal_id) REFERENCES Principal(principal_id)
+);
+
+CREATE TABLE Student (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    grade VARCHAR(10),
+    home_address VARCHAR(100),
+    emergency_contact_phone VARCHAR(20),
+    school_id INT,
+    FOREIGN KEY (school_id) REFERENCES School(school_id)
 );
