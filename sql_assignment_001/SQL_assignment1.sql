@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS doctor(
     last_name TEXT,
     specialty TEXT,
     phone TEXT,
-    FOREIGN KEY department_id REFERENCES department(department_id)
+    FOREIGN KEY (department_id) REFERENCES department(department_id)
 );
 
 CREATE TABLE IF NOT EXISTS patient(
@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS patient(
     date_of_birth DATE,
     phone TEXT,
     address TEXT
+);
 
 CREATE TABLE IF NOT EXISTS room(
     room_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +32,7 @@ CREATE TABLE IF NOT EXISTS room(
     room_number TEXT,
     room_type TEXT,
     is_available INTEGER NOT NULL CHECK(is_available IN (0, 1)),
-    FOREIGN KEY department_id REFERENCES department(department_id)
+    FOREIGN KEY (department_id) REFERENCES department(department_id)
 );
 
 CREATE TABLE IF NOT EXISTS appointment(
@@ -42,8 +43,8 @@ CREATE TABLE IF NOT EXISTS appointment(
     appointment_time TEXT, 
     REASON TEXT,
     STATUS TEXT,
-    FOREIGN KEY patient_id REFERENCES patient(patient_id),
-    FOREIGN KEY doctor_id REFERENCES doctor(doctor_id)
+    FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id)
 );
 
 CREATE TABLE IF NOT EXISTS perscription(
@@ -52,5 +53,6 @@ CREATE TABLE IF NOT EXISTS perscription(
     medication_name TEXT,
     dosage TEXT,
     instructions TEXT,
-    FOREIGN KEY appointment_id REFERENCES appointment(appointment_id)
+    FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id)
 );
+
