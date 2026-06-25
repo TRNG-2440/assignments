@@ -3,7 +3,8 @@
 Given the following tables, provide an SQL statement that will find players who play football with a salary over 200000.
 
 State
-|state_id|state_name| 
+
+|state_id|state_name|
 |-|-|
 |10001|New York|
 |10002|Texas|
@@ -12,6 +13,7 @@ State
 |10005|California|
 
 Team
+
 |team_id|team_name|state_id|sport_id|
 |-|-|-|-|
 |20001|Los Angeles Clippers|10005|40002|
@@ -25,9 +27,8 @@ Team
 |20009|Miami Heat|10004|40002|
 |20010|Buffalo Bills|10001|40001|
 
-
-
 Player
+
 |player_id|team_id|player_name|player Salary|
 |-|-|-|-|
 |30001|20006|Terry Lennie|185000|
@@ -62,6 +63,7 @@ Player
 |30030|20004|Parker Emery|202000|
 
 Sport
+
 |sport_id|sport_name|
 |-|-|
 |40001|Foot Ball|

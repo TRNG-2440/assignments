@@ -7,6 +7,7 @@ Given the following tables, provide an SQL statement that returns the names of a
 **Stretch Goal:** Add a second query that returns the names of all doctors who have no **currently scheduled** appointments. *Note: this will require filtering on `status`.*
 
 Department
+
 |department_id|department_name|location|
 |-|-|-|
 |1|Cardiology|Building A|
@@ -15,6 +16,7 @@ Department
 |4|Pediatrics|Building D|
 
 Doctor
+
 |doctor_id|department_id|first_name|last_name|specialty|phone|
 |-|-|-|-|-|-|
 |1|1|James|Mercer|Cardiologist|555-1001|
@@ -26,6 +28,7 @@ Doctor
 |7|4|Tom|Finch|Pediatrician|555-1007|
 
 Appointment
+
 |appointment_id|patient_id|doctor_id|appointment_date|appointment_time|reason|status|
 |-|-|-|-|-|-|-|
 |101|1|1|2025-03-10|09:00|Chest pain|Completed|

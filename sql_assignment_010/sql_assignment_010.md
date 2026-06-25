@@ -5,6 +5,7 @@ Given the following tables, produce a result that shows each musician alongside 
 **Stretch Goal:** Write a second query that returns only musicians who play in a Rock band. *Note: consider which table holds the genre name you want to filter on.*
 
 Genre
+
 |genre_id|genre_name|
 |-|-|
 |1|Rock|
@@ -13,6 +14,7 @@ Genre
 |4|Folk|
 
 Band
+
 |band_id|genre_id|band_name|
 |-|-|-|
 |1|1|The Midnight Echo|
@@ -22,6 +24,7 @@ Band
 |5|4|Cedar & Pine|
 
 Musician
+
 |musician_id|band_id|musician_name|instrument|
 |-|-|-|-|
 |1|1|Dana Reeves|Guitar|
