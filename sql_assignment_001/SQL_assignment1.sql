@@ -1,5 +1,4 @@
 -- SQLite
-PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS department(
     department_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,8 +40,8 @@ CREATE TABLE IF NOT EXISTS appointment(
     doctor_id INTEGER,
     appointment_date DATE,
     appointment_time TEXT, 
-    REASON TEXT,
-    STATUS TEXT,
+    reason TEXT,
+    status TEXT,
     FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
     FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id)
 );
