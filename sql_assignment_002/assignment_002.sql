@@ -21,6 +21,8 @@ CREATE TABLE assignment_002.school (
 CREATE TABLE assignment_002.student (
     id SERIAL PRIMARY KEY,
     school_id INT,
+    first_name VARCHAR(32),
+    last_name VARCHAR(32),
     grade VARCHAR(4),
     address VARCHAR(64),
     emergency_phone CHAR(10),
