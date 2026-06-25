@@ -6,28 +6,30 @@ Given the following ERD, provide SQL statements that will create each of the six
 
 **Tables to create:** Department, Doctor, Patient, Appointment, Prescription, Room
 
-**ERD Relationship Summary**
+## ERD Relationship Summary
 
 | Relationship | Type |
-|-|-|
+| --- | --- |
 | Department → Doctor | One-to-many |
 | Department → Room | One-to-many |
 | Doctor → Appointment | One-to-many |
 | Patient → Appointment | One-to-many |
 | Appointment → Prescription | One-to-many |
 
-**Column Reference**
+## Column Reference
 
-Department
+### Department
+
 | column | type |
-|-|-|
+| --- | --- |
 | department_id | int |
 | department_name | varchar |
 | location | varchar |
 
-Doctor
+### Doctor
+
 | column | type |
-|-|-|
+| --- | --- |
 | doctor_id | int |
 | department_id | int (FK → Department) |
 | first_name | varchar |
@@ -35,9 +37,10 @@ Doctor
 | specialty | varchar |
 | phone | varchar |
 
-Patient
+### Patient
+
 | column | type |
-|-|-|
+| --- | --- |
 | patient_id | int |
 | first_name | varchar |
 | last_name | varchar |
@@ -45,9 +48,10 @@ Patient
 | phone | varchar |
 | address | varchar |
 
-Appointment
+### Appointment
+
 | column | type |
-|-|-|
+| --- | --- |
 | appointment_id | int |
 | patient_id | int (FK → Patient) |
 | doctor_id | int (FK → Doctor) |
@@ -56,18 +60,20 @@ Appointment
 | reason | varchar |
 | status | varchar |
 
-Prescription
+### Prescription
+
 | column | type |
-|-|-|
+| --- | --- |
 | prescription_id | int |
 | appointment_id | int (FK → Appointment) |
 | medication_name | varchar |
 | dosage | varchar |
 | instructions | varchar |
 
-Room
+### Room
+
 | column | type |
-|-|-|
+| --- | --- |
 | room_id | int |
 | department_id | int (FK → Department) |
 | room_number | varchar |
