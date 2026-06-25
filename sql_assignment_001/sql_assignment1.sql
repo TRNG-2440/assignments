@@ -60,7 +60,3 @@ CREATE TABLE hospital.rooms (
     room_type VARCHAR(20),
     is_available BOOLEAN
 );
-
--- insert data
-
---- test
