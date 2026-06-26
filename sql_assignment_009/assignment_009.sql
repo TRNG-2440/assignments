@@ -1,4 +1,4 @@
-SELECT d.doctor_name FROM doctor d
+SELECT d.first_name, d.last_name FROM doctor d
 WHERE d.doctor_id NOT IN (
 	SELECT a.doctor_id
 	FROM appointment a
@@ -7,7 +7,7 @@ WHERE d.doctor_id NOT IN (
 	HAVING COUNT(a.doctor_id) > 0
 );
 
-SELECT d.doctor_name FROM doctor d
+SELECT d.first_name, d.last_name FROM doctor d
 WHERE d.doctor_id NOT IN (
 	SELECT a.doctor_id
 	FROM appointment a
