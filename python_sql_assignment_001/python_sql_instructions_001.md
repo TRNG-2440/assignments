@@ -12,11 +12,13 @@ You may use **SQLite, PostgreSQL, or another SQL RDBMS** of your choice. Do not 
 
 Your database must implement the following four tables. Column names, types, and constraints are yours to decide, but the tables must capture at minimum the fields described below.
 
-**Genre**
+### Genre
+
 - A unique identifier
 - A genre name (e.g. Fiction, Non-Fiction, Mystery)
 
-**Book**
+### Book
+
 - A unique identifier
 - A title
 - An author name
@@ -24,13 +26,15 @@ Your database must implement the following four tables. Column names, types, and
 - A reference to a Genre
 - A total copy count (how many physical copies the library owns)
 
-**Member**
+### Member
+
 - A unique identifier
 - A full name
 - An email address
 - A join date
 
-**Loan**
+### Loan
+
 - A unique identifier
 - A reference to a Book
 - A reference to a Member
@@ -52,28 +56,32 @@ Create a module or class responsible for managing the database connection. It sh
 
 Implement a separate DAO class for each of the four tables: `GenreDAO`, `BookDAO`, `MemberDAO`, and `LoanDAO`. Each DAO must implement the following CRUD operations:
 
-**GenreDAO**
+#### GenreDAO
+
 - `create(name)` — insert a new genre, return the created record
 - `get_by_id(genre_id)` — return a single genre by its ID
 - `get_all()` — return all genres
 - `update(genre_id, name)` — update the genre name, return the updated record
 - `delete(genre_id)` — delete a genre by its ID
 
-**BookDAO**
+#### BookDAO
+
 - `create(title, author, publication_year, genre_id, copy_count)` — insert a new book, return the created record
 - `get_by_id(book_id)` — return a single book by its ID
 - `get_all()` — return all books
 - `update(book_id, title, author, publication_year, genre_id, copy_count)` — update all fields on a book, return the updated record
 - `delete(book_id)` — delete a book by its ID
 
-**MemberDAO**
+#### MemberDAO
+
 - `create(full_name, email, join_date)` — insert a new member, return the created record
 - `get_by_id(member_id)` — return a single member by their ID
 - `get_all()` — return all members
 - `update(member_id, full_name, email, join_date)` — update all fields on a member, return the updated record
 - `delete(member_id)` — delete a member by their ID
 
-**LoanDAO**
+#### LoanDAO
+
 - `create(book_id, member_id, loan_date, due_date)` — insert a new loan record, return the created record
 - `get_by_id(loan_id)` — return a single loan by its ID
 - `get_all()` — return all loans
@@ -112,28 +120,32 @@ Wire your DAO layer to a REST API using **FastAPI**. For each DAO, implement HTT
 
 Your API must include at minimum:
 
-**Genre**
+### Genre**
+
 - `GET /genres` — return all genres
 - `GET /genres/{genre_id}` — return a single genre
 - `POST /genres` — create a new genre
 - `PUT /genres/{genre_id}` — update a genre
 - `DELETE /genres/{genre_id}` — delete a genre
 
-**Book**
+### Book 2
+
 - `GET /books` — return all books
 - `GET /books/{book_id}` — return a single book
 - `POST /books` — create a new book
 - `PUT /books/{book_id}` — update a book
 - `DELETE /books/{book_id}` — delete a book
 
-**Member**
+### Member 2
+
 - `GET /members` — return all members
 - `GET /members/{member_id}` — return a single member
 - `POST /members` — create a new member
 - `PUT /members/{member_id}` — update a member
 - `DELETE /members/{member_id}` — delete a member
 
-**Loan**
+### Loan 2
+
 - `GET /loans` — return all loans
 - `GET /loans/active` — return all active loans
 - `GET /loans/{loan_id}` — return a single loan
@@ -151,14 +163,14 @@ Create SQL views for each of the following statistics. The SQL statements to cre
 
 For each view, also implement a corresponding Python method that queries it and returns the result.
 
-**1. Most Frequently Loaned Genre**
+### Most Frequently Loaned Genre
 
 Create a view that returns each genre alongside the total number of times a book of that genre has been loaned, ordered from most to least loaned. *Note: this will require joining across Loan, Book, and Genre.*
 
-**2. Most Active Members**
+### Most Active Members
 
 Create a view that returns each member alongside their total loan count, ordered from most to least active. Members with no loans should still appear in the result with a count of zero.
 
-**3. Overdue Loans**
+### Overdue Loans
 
 Create a view that returns all loans which are currently overdue — that is, loans where the return date is null and the due date has passed. The result should include the member's name, the book title, the due date, and the number of days the loan is overdue. *Note: date arithmetic syntax varies between databases — for example, PostgreSQL uses `CURRENT_DATE - due_date`, SQLite uses `julianday('now') - julianday(due_date)`, and MySQL uses `DATEDIFF(CURDATE(), due_date)`. Refer to the documentation for your chosen database.*
