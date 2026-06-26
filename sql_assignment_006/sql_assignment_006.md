@@ -28,7 +28,7 @@ Team
 
 
 Player
-|player_id|team_id|player_name|player Salary|
+|player_id|team_id|player_name|player_salary|
 |-|-|-|-|
 |30001|20006|Terry Lennie|185000|
 |30002|20002|Ellis Sidney|101000|
