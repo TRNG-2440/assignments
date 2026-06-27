@@ -89,9 +89,9 @@ All SQL statements must use **parameterized queries** for values — do not use 
 
 Provide a `main.py` (or equivalent entry point) that demonstrates each DAO in action. It should:
 
-- Initialize the database
-- Insert at least two records into each table
-- Demonstrate a read, update, and delete operation on at least one table
+<!-- - Initialize the database -->
+<!-- - Insert at least two records into each table -->
+<!-- - Demonstrate a read, update, and delete operation on at least one table -->
 
 ---
 
@@ -99,10 +99,10 @@ Provide a `main.py` (or equivalent entry point) that demonstrates each DAO in ac
 
 Your submission should include at minimum:
 
-- DDL statements (`.sql` file or `initialize_db()` function)
+<!-- - DDL statements (`.sql` file or `initialize_db()` function)
 - One module per DAO class, or a single module containing all four
 - A `main.py` entry point demonstrating the DAO layer
-- A `requirements.txt` if any third-party packages are used
+- A `requirements.txt` if any third-party packages are used -->
 
 ---
 

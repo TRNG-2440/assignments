@@ -235,7 +235,7 @@ class LoanDAO():
             )
             return cur.fetchall()
     
-    def update(self, loan_id, book_id, member_id, loan_date, due_date):
+    def update(self, loan_id, book_id, member_id, loan_date, due_date, return_date):
         with self.db.cursor() as cur:
             cur.execute(
                 """
@@ -244,10 +244,11 @@ class LoanDAO():
                     book_id = %s,
                     member_id = %s,
                     loan_date = %s,
-                    due_date = %s
+                    due_date = %s,
+                    return_date = %s
                 WHERE loan_id = %s;
                 """,
-                (book_id, member_id, loan_date, due_date, loan_id)
+                (book_id, member_id, loan_date, due_date, return_date, loan_id)
             )
         self.db.commit()
     

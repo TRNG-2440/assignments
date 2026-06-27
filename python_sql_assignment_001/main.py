@@ -1,6 +1,11 @@
-from datetime import date
+# from datetime import date
+from fastapi import FastAPI
+
 from database import Database
 from dao import GenreDAO, BookDAO, MemberDAO, LoanDAO
+from crud import endpoints
+
+app = FastAPI()
 
 def initialize_db(db):
     with db.cursor() as cur:
@@ -45,49 +50,55 @@ def trunc_DB(db):
             """
         )
     db.commit()
+    
+db = Database()
+trunc_DB(db)
 
-def Main():
-    db = Database()
-    trunc_DB(db)
+initialize_db(db)
 
-    try:
-        initialize_db(db)
+genre = GenreDAO(db)
+book = BookDAO(db)
+member = MemberDAO(db)
+loan = LoanDAO(db)
 
-        genre = GenreDAO(db)
-        book = BookDAO(db)
-        member = MemberDAO(db)
-        loan = LoanDAO(db)
-        
-        genre_id = genre.create("Testing")
-        print(genre.get_all())
-        genre.update(genre_id, "Science Fiction")
-        print(genre.get_by_id(genre_id))
+endpoints(app, genre, book, member, loan)
 
-        book_id = book.create("Testing", "Veronica Roth", 2011, genre_id, 3)
-        print(book.get_all())
-        book.update(book_id, "Divergent", "Veronica Roth", 2011, genre_id, 3)
-        print(book.get_by_id(book_id))
-        
-        member_id = member.create("Bob Ross", "example@gmail.com", date(2026, 6, 27))
-        print(member.get_all())
-        member.update(member_id, "Bob Ross", "example@gmail.com", date(2026, 6, 27))
-        print(member.get_by_id(member_id))
-        
-        loan_id = loan.create(book_id, member_id, date(2026, 6, 27), date(2026, 7, 8))
-        print(loan.get_all())
-        loan.update(loan_id, book_id, member_id, date(2026, 6, 27), date(2026, 7, 4))
-        print(loan.get_by_id(loan_id))
-        
-        loan.delete(loan_id)
-        member.delete(member_id)
-        book.delete(book_id)
-        genre.delete(genre_id)
-        
-        print(loan.get_all())
-        print(member.get_all())
-        print(book.get_all())
-        print(genre.get_all())
-    finally:
-        db.close()
-        
-Main()
+db.close()
+
+    # genre_id = genre.create("Testing")
+    # genre_id_other = genre.create("TEST")
+    # print(genre.get_all())
+    # genre.update(genre_id, "Science Fiction")
+    # print(genre.get_by_id(genre_id))
+
+    # book_id = book.create("Testing", "Veronica Roth", 2011, genre_id, 3)
+    # book_id_other = book.create("TEST", "TEST", 1000, genre_id_other, 1)
+    # print(book.get_all())
+    # book.update(book_id, "Divergent", "Veronica Roth", 2011, genre_id, 3)
+    # print(book.get_by_id(book_id))
+    
+    # member_id = member.create("Bob Ross", "example@gmail.com", date(2026, 6, 27))
+    # member_id_other = member.create("TEST", "TEST", date(2000, 1, 1))
+    # print(member.get_all())
+    # member.update(member_id, "Bob Ross", "example@gmail.com", date(2026, 6, 27))
+    # print(member.get_by_id(member_id))
+    
+    # loan_id = loan.create(book_id, member_id, date(2026, 6, 27), date(2026, 7, 8))
+    # loan_id_other = loan.create(book_id_other, member_id_other, date(2000, 1, 1), date(2000, 1, 1))        
+    # print(loan.get_all())
+    # loan.update(loan_id, book_id, member_id, date(2026, 6, 27), date(2026, 7, 4), date(2026, 7, 1))
+    # print(loan.get_by_id(loan_id))
+    
+    # loan.delete(loan_id)
+    # loan.delete(loan_id_other)
+    # member.delete(member_id)
+    # member.delete(member_id_other)
+    # book.delete(book_id)
+    # book.delete(book_id_other)
+    # genre.delete(genre_id)
+    # genre.delete(genre_id_other)
+    
+    # print(loan.get_all())
+    # print(member.get_all())
+    # print(book.get_all())
+    # print(genre.get_all())
