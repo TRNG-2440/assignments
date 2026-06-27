@@ -68,3 +68,6 @@ Sport
 |-|-|
 |40001|Foot Ball|
 |40002|Basket Ball|
+
+select * from player
+where player_name like `%jo`;

@@ -66,3 +66,8 @@ Sport
 |-|-|
 |40001|Foot Ball|
 |40002|Basket Ball|
+
+select player.player_salary, sport.sport_name from player
+join team on team.team_id = player.team_id
+join sport on sport.sport_id = team.sport_id
+order by player.player_salary desc limit 1;
