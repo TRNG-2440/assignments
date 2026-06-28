@@ -8,8 +8,8 @@ from model import Genre
 
 
 class GenreDAO:
-    def __init__(self):
-        self._db_manager = DatabaseManager()
+    def __init__(self, db_manager: DatabaseManager):
+        self._db_manager = db_manager
 
     def create(self, genre_name: str) -> Genre:
         """
@@ -34,7 +34,7 @@ class GenreDAO:
                         raise ValueError("Error encountered on db operation!")
                     return result
 
-    def get_by_id(self, genre_id) -> Genre:
+    def get_by_id(self, genre_id: int) -> Genre:
         """
         Retrieve a single genre record by its primary key.
 
@@ -98,7 +98,7 @@ class GenreDAO:
                         raise ValueError("Error encountered on db operation!")
                     return result
 
-    def delete(self, genre_id) -> None:
+    def delete(self, genre_id: int) -> None:
         """
         Delete a genre record from the database by its primary key.
 
