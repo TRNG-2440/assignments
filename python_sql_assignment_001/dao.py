@@ -38,7 +38,7 @@ class GenreDAO:
                     """
                     INSERT INTO library.genre (genre_name)
                     VALUES (%s)
-                    RETURNING genre_id
+                    RETURNING genre_id, genre_name
                     """,
                     (genre_name, )
                 )

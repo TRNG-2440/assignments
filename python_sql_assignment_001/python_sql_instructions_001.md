@@ -17,6 +17,8 @@ Your database must implement the following four tables. Column names, types, and
 - A unique identifier
 - A genre name (e.g. Fiction, Non-Fiction, Mystery)
 
+
+
 ### Book
 
 - A unique identifier
@@ -26,12 +28,16 @@ Your database must implement the following four tables. Column names, types, and
 - A reference to a Genre
 - A total copy count (how many physical copies the library owns)
 
+
+
 ### Member
 
 - A unique identifier
 - A full name
 - An email address
 - A join date
+
+
 
 ### Loan
 
@@ -42,11 +48,15 @@ Your database must implement the following four tables. Column names, types, and
 - A due date
 - A return date (nullable — null indicates the book has not yet been returned)
 
-*Your submission must include the DDL statements that create these tables. These may be provided as a standalone `.sql` file, or as an `initialize_db()` function called from your Python code.*
+*Your submission must include the DDL statements that create these tables. These may be provided as a standalone* `.sql` *file, or as an* `initialize_db()` *function called from your Python code.*
 
 ---
 
+
+
 ## Requirements
+
+
 
 ### 1. Database Connection
 
@@ -64,6 +74,8 @@ Implement a separate DAO class for each of the four tables: `GenreDAO`, `BookDAO
 - `update(genre_id, name)` — update the genre name, return the updated record
 - `delete(genre_id)` — delete a genre by its ID
 
+
+
 #### BookDAO
 
 - `create(title, author, publication_year, genre_id, copy_count)` — insert a new book, return the created record
@@ -71,6 +83,8 @@ Implement a separate DAO class for each of the four tables: `GenreDAO`, `BookDAO
 - `get_all()` — return all books
 - `update(book_id, title, author, publication_year, genre_id, copy_count)` — update all fields on a book, return the updated record
 - `delete(book_id)` — delete a book by its ID
+
+
 
 #### MemberDAO
 
@@ -80,6 +94,8 @@ Implement a separate DAO class for each of the four tables: `GenreDAO`, `BookDAO
 - `update(member_id, full_name, email, join_date)` — update all fields on a member, return the updated record
 - `delete(member_id)` — delete a member by their ID
 
+
+
 #### LoanDAO
 
 - `create(book_id, member_id, loan_date, due_date)` — insert a new loan record, return the created record
@@ -88,6 +104,8 @@ Implement a separate DAO class for each of the four tables: `GenreDAO`, `BookDAO
 - `get_active_loans()` — return all loans where the return date is null
 - `return_book(loan_id, return_date)` — update the return date on a loan record, return the updated record
 - `delete(loan_id)` — delete a loan by its ID
+
+
 
 ### 3. Parameterized Queries
 
@@ -103,6 +121,8 @@ Provide a `main.py` (or equivalent entry point) that demonstrates each DAO in ac
 
 ---
 
+
+
 ## Submission
 
 Your submission should include at minimum:
@@ -114,19 +134,23 @@ Your submission should include at minimum:
 
 ---
 
+
+
 ## Stretch Goal 1 — FastAPI REST Endpoints
 
 Wire your DAO layer to a REST API using **FastAPI**. For each DAO, implement HTTP endpoints that correspond to its CRUD operations, with appropriate request and response models defined using **Pydantic**.
 
 Your API must include at minimum:
 
-### Genre**
+### Genre2
 
 - `GET /genres` — return all genres
 - `GET /genres/{genre_id}` — return a single genre
 - `POST /genres` — create a new genre
 - `PUT /genres/{genre_id}` — update a genre
 - `DELETE /genres/{genre_id}` — delete a genre
+
+
 
 ### Book 2
 
@@ -136,6 +160,8 @@ Your API must include at minimum:
 - `PUT /books/{book_id}` — update a book
 - `DELETE /books/{book_id}` — delete a book
 
+
+
 ### Member 2
 
 - `GET /members` — return all members
@@ -143,6 +169,8 @@ Your API must include at minimum:
 - `POST /members` — create a new member
 - `PUT /members/{member_id}` — update a member
 - `DELETE /members/{member_id}` — delete a member
+
+
 
 ### Loan 2
 
@@ -156,6 +184,8 @@ Your API must include at minimum:
 Each endpoint should return an appropriate HTTP status code. Request and response bodies should be defined as Pydantic models — do not return raw dictionaries or untyped responses.
 
 ---
+
+
 
 ## Stretch Goal 2 — Library Statistics Views
 
@@ -173,4 +203,4 @@ Create a view that returns each member alongside their total loan count, ordered
 
 ### Overdue Loans
 
-Create a view that returns all loans which are currently overdue — that is, loans where the return date is null and the due date has passed. The result should include the member's name, the book title, the due date, and the number of days the loan is overdue. *Note: date arithmetic syntax varies between databases — for example, PostgreSQL uses `CURRENT_DATE - due_date`, SQLite uses `julianday('now') - julianday(due_date)`, and MySQL uses `DATEDIFF(CURDATE(), due_date)`. Refer to the documentation for your chosen database.*
+Create a view that returns all loans which are currently overdue — that is, loans where the return date is null and the due date has passed. The result should include the member's name, the book title, the due date, and the number of days the loan is overdue. *Note: date arithmetic syntax varies between databases — for example, PostgreSQL uses* `CURRENT_DATE - due_date`*, SQLite uses* `julianday('now') - julianday(due_date)`*, and MySQL uses* `DATEDIFF(CURDATE(), due_date)`*. Refer to the documentation for your chosen database.*
