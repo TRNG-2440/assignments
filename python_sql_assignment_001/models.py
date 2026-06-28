@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-import datetime
+from datetime import date
 
 class GenreCreate(BaseModel):
     name: str
@@ -37,34 +37,36 @@ class BookUpdate(BaseModel):
 class MemberCreate(BaseModel):
     full_name: str
     email: str
-    join_date: datetime
+    join_date: date
     
 class MemberResponse(BaseModel):
     member_id: int
     full_name: str
     email: str
-    join_date: datetime
+    join_date: date
     
 class MemberUpdate(BaseModel):
     full_name: Optional[str] = None
     email: Optional[str] = None
-    join_date: Optional[str] = None
+    join_date: Optional[date] = None
 
 class LoanCreate(BaseModel):
     book_id: int
     member_id: int
-    loan_date: datetime
-    due_date: datetime
+    loan_date: date
+    due_date: date
     
 class LoanResponse(BaseModel):
     loan_id: int
     book_id: int
     member_id: int
-    loan_date: datetime
-    due_date: datetime
+    loan_date: date
+    due_date: date
+    return_date: Optional[date] = None
     
 class LoanUpdate(BaseModel):
     book_id: Optional[int] = None
     member_id: Optional[int] = None
-    loan_date: Optional[str] = None
-    due_date: Optional[str] = None
+    loan_date: Optional[date] = None
+    due_date: Optional[date] = None
+    return_date: Optional[date] = None

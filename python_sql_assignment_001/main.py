@@ -52,7 +52,7 @@ def trunc_DB(db):
     db.commit()
     
 db = Database()
-trunc_DB(db)
+# trunc_DB(db)
 
 initialize_db(db)
 
@@ -62,8 +62,6 @@ member = MemberDAO(db)
 loan = LoanDAO(db)
 
 endpoints(app, genre, book, member, loan)
-
-db.close()
 
     # genre_id = genre.create("Testing")
     # genre_id_other = genre.create("TEST")
@@ -102,3 +100,5 @@ db.close()
     # print(member.get_all())
     # print(book.get_all())
     # print(genre.get_all())
+
+    # db.close()
