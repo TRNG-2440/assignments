@@ -1,7 +1,7 @@
 from datetime import date
 
-from assignments.python_sql_assignment_001.librarydao import GenreDao, BookDao, MemberDao, LoanDao
-from assignments.python_sql_assignment_001.records import GenreRecord, BookRecord, Member, Loan
+from librarydao import GenreDao, BookDao, MemberDao, LoanDao
+from records import GenreRecord, BookRecord, Member, Loan
 from db import Database
 
 if __name__ == "__main__":

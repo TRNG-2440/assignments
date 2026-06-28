@@ -7,8 +7,8 @@ from typing import Optional
 
 from psycopg import Cursor, ProgrammingError
 
-from assignments.python_sql_assignment_001.db import Database
-from assignments.python_sql_assignment_001.records import GenreRecord, BookRecord, Member, Loan
+from db import Database
+from records import GenreRecord, BookRecord, Member, Loan
 
 
 #https://typing.python.org/en/latest/reference/generics.html
