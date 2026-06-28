@@ -1,35 +1,35 @@
 --clean up
-DROP SCHEMA book CASCADE
+DROP SCHEMA books CASCADE
 --setup
-CREATE SCHEMA book;
+CREATE SCHEMA books;
 
 --create tables
-CREATE TABLE book.genres (
+CREATE TABLE books.genre (
     genre_id SERIAL PRIMARY KEY,
     genre_name VARCHAR(50) NOT NULL
 
 );
 
-CREATE TABLE book.books (
+CREATE TABLE books.book (
     book_id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
     pub_year INT NOT NULL,
-    genre_id INT NOT NULL REFERENCES book.genres (genre_id),
+    genre_id INT NOT NULL REFERENCES books.genre (genre_id),
     copies INT DEFAULT 1
 );
 
-CREATE TABLE book.members (
+CREATE TABLE books.member (
     member_id SERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
     date_joined DATE NOT NULL
 );
 
-CREATE TABLE book.loan (
+CREATE TABLE books.loan (
     loan_id SERIAL PRIMARY KEY,
-    book_id INT NOT NULL REFERENCES book.books (book_id),
-    member_id INT NOT NULL REFERENCES book.members (member_id),
+    book_id INT NOT NULL REFERENCES books.book (book_id),
+    member_id INT NOT NULL REFERENCES books.member (member_id),
     loan_date DATE NOT NULL,
     due_date DATE NOT NULL,
     return_date DATE NULL
