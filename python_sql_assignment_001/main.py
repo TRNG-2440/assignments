@@ -9,8 +9,9 @@ from db_util import get_conn_string
 def main():
   with psycopg.connect(get_conn_string()) as conn:
     intialize_db(conn)
-    genre_dao = GenreDAO(conn)
+    #genre_dao = GenreDAO(conn)
     book_dao = BookDAO(conn)
+
 
 
 
