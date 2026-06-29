@@ -1,48 +1,44 @@
-------------- DDL setup -------------
-
-set foreign_key_checks = 0;
-
-drop database if exists Library;
-
-create database Library;
-
-use Library;
-
-set foreign_key_checks = 1;
-
 ------------- Schema ----------------
 
-Create table if not exists Genre 
-(
-genre_id int identity(1,1),
-genre_name varchar(255) not null unique
-
-primary_key (genre_id)
+-- Genre table
+CREATE TABLE IF NOT EXISTS Genre (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(255) NOT NULL UNIQUE
 );
 
 ---------------------------------------------------------
 
-Create table if not exists Book 
-(
-  book_id int identity(1,1),
-  title varchar(255) not null,
-  author varchar(255) not null, 
-  publication_year varchar(255) not null, 
-  genre_id int not null,
-  total_copy_count int not null default 1,
-
-  primary_key(book_id),
-  foreign key (genre_id) references Genre(genre_id)
+-- Book table
+CREATE TABLE IF NOT EXISTS Book (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    publication_year INT NOT NULL,
+    genre_id INT NOT NULL,
+    copy_count INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (genre_id) REFERENCES Genre (genre_id)
 );
 
 ---------------------------------------------------------
 
-Create table if not exists member
-(
-  member_id int identity(1,1),
-  full_name varchar(255) not null,
-  email varchar(255) not null,
-  join_date date not null
-) ;
+-- Member table
+CREATE TABLE IF NOT EXISTS Member (
+    member_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    join_date DATE NOT NULL
+);
 
 ---------------------------------------------------------
+
+-- Loan table
+CREATE TABLE IF NOT EXISTS Loan (
+    loan_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT NOT NULL,
+    member_id INT NOT NULL,
+    loan_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    return_date DATE NULL,
+    FOREIGN KEY (book_id) REFERENCES Book (book_id),
+    FOREIGN KEY (member_id) REFERENCES Member (member_id)
+);
