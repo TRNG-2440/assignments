@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from exceptions import (
+    BookIsLoanedError,
+    BookNotFoundError,
     BooksWithGenreExistsError,
     GenreExistsError,
     GenreNotFoundError,
@@ -8,13 +10,14 @@ from exceptions import (
     MemberHasLoansError,
     MemberNotFoundError,
 )
-from routes import genres, members
+from routes import genres, members, books
 from logger import logger
 
 app = FastAPI(title="Library API", version="1.0.0")
 
 app.include_router(genres, prefix="/genres", tags=["Genres"])
 app.include_router(members, prefix="/members", tags=["Members"])
+app.include_router(books, prefix="/books", tags=["Books"])
 
 
 @app.exception_handler(GenreNotFoundError)
@@ -33,6 +36,17 @@ async def member_not_found_handler(
     request: Request, exc: MemberNotFoundError
 ) -> JSONResponse:
     logger.warning(f"No record found for member_id: {exc.member_id}!")
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(BookNotFoundError)
+async def book_not_found_handler(
+    request: Request, exc: BookNotFoundError
+) -> JSONResponse:
+    logger.warning(f"No record found for book_id: {exc.book_id}!")
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.detail},
@@ -75,6 +89,17 @@ async def member_has_loans_handler(
     request: Request, exc: MemberHasLoansError
 ) -> JSONResponse:
     logger.warning(f"Member id: {exc.member_id} has borrowed books!")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(BookIsLoanedError)
+async def book_is_loaned_handler(
+    request: Request, exc: BookIsLoanedError
+) -> JSONResponse:
+    logger.warning(f"Book id: {exc.book_id} has been borrowed!")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

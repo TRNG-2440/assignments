@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Optional
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from models.model import Book
+from models.book import Book
 from logger import logger
 
 
@@ -60,14 +60,13 @@ class BookDAO:
                         raise ValueError("Error encountered on db operation!")
                     return result
 
-    def get_by_id(self, book_id) -> Book:
+    def get_by_id(self, book_id) -> Optional[Book]:
         """
         Retrieve a single book record by its primary key.
 
         :param book_id: The primary key of the book to fetch.
         :returns: The Book object matching the given ID.
-        :rtype: Book
-        :raises ValueError: If no book record is found for the given ID.
+        :rtype: Book | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -75,10 +74,6 @@ class BookDAO:
                     query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
                         FROM book WHERE book_id = %s"""
                     result = cur.execute(query, (book_id,)).fetchone()
-
-                    if not result:
-                        logger.error(f"No record found for book_id: {book_id}")
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
     def get_all(self) -> List[Book]:
@@ -87,7 +82,6 @@ class BookDAO:
 
         :returns: A list of all Book objects stored in the book table.
         :rtype: List[Book]
-        :raises ValueError: If no book records are found or the table is empty.
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -95,10 +89,6 @@ class BookDAO:
                     query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
                         FROM book"""
                     result = cur.execute(query).fetchall()
-
-                    if not result:
-                        logger.error("No records found!")
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
     def update(

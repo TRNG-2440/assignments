@@ -3,7 +3,8 @@ from typing import List, Optional
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from models.model import Book, Loan
+from models.model import Loan
+from models.book import Book
 from logger import logger
 from dao.book_dao import BookDAO
 
@@ -46,7 +47,7 @@ class LoanDAO:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
                     if not return_date:
-                        loan_book: Book = self._book_dao.get_by_id(book_id)
+                        loan_book: Optional[Book] = self._book_dao.get_by_id(book_id)
                         updated_book = self._book_dao.update_available_copies(
                             book_id, loan_book.available_copies - 1
                         )
@@ -190,6 +191,16 @@ class LoanDAO:
                         raise ValueError("Error encountered on db operation!")
 
     def get_by_member_id(self, member_id) -> List[Loan]:
+        """
+        Retrieve all loan records associated with a specific member.
+
+        Unlike other read methods, an empty result is not treated as an error,
+        as having no loans under a given member is a valid state.
+
+        :param member_id: The foreign key of the member to filter loans by.
+        :returns: A list of Loan objects matching the given member, or an empty list if none exist.
+        :rtype: List[Loan]
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -197,3 +208,20 @@ class LoanDAO:
                         FROM loan WHERE member_id = %s"""
                     result = cur.execute(query, (member_id,)).fetchall()
                     return result
+
+    def delete_book_loan_history(self, book_id) -> None:
+        """
+        Delete all completed loan records associated with a specific book.
+
+        Only removes loans where a return_date is present, preserving any
+        active loans. Intended to be called prior to deleting a book record
+        to avoid orphaned loan history.
+
+        :param book_id: The foreign key of the book whose loan history should be cleared.
+        :returns: None
+        """
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor() as cur:
+                    query = "DELETE FROM loan WHERE book_id = %s AND return_date IS NOT NULL"
+                    cur.execute(query, (book_id,))

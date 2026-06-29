@@ -10,6 +10,12 @@ class MemberNotFoundError(Exception):
         self.detail = detail
 
 
+class BookNotFoundError(Exception):
+    def __init__(self, book_id, detail) -> None:
+        self.book_id = book_id
+        self.detail = detail
+
+
 class GenreExistsError(Exception):
     def __init__(self, genre_name, detail) -> None:
         self.genre_name = genre_name
@@ -31,4 +37,10 @@ class BooksWithGenreExistsError(Exception):
 class MemberHasLoansError(Exception):
     def __init__(self, member_id, detail) -> None:
         self.member_id = member_id
+        self.detail = detail
+
+
+class BookIsLoanedError(Exception):
+    def __init__(self, book_id, detail) -> None:
+        self.book_id = book_id
         self.detail = detail

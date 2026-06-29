@@ -7,7 +7,7 @@ from dao.genre_dao import GenreDAO
 from models.genre import Genre, GenreCreate, GenreResponse
 from exceptions import BooksWithGenreExistsError, GenreExistsError, GenreNotFoundError
 from dao.book_dao import BookDAO
-from models.model import Book
+from models.book import Book
 
 
 class GenreService:
