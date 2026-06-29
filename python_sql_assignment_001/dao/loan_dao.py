@@ -21,6 +21,27 @@ class LoanDAO:
         due_date: date,
         return_date: Optional[date] = None,
     ) -> Loan:
+        """
+        Insert a new loan record into the database.
+
+        If no return_date is provided, the book's available copy count is
+        decremented by 1 before the loan record is inserted, reflecting that
+        the book is now on loan.
+
+        :param book_id: The primary key of the book being loaned.
+        :type book_id: int
+        :param member_id: The primary key of the member borrowing the book.
+        :type member_id: int
+        :param loan_date: The date the book was loaned out.
+        :type loan_date: date
+        :param due_date: The date by which the book must be returned.
+        :type due_date: date
+        :param return_date: The date the book was returned, or None if still on loan.
+        :type return_date: Optional[date]
+        :returns: The newly created Loan object with its assigned ID and all fields.
+        :rtype: Loan
+        :raises ValueError: If the insert operation returns no result.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -45,6 +66,14 @@ class LoanDAO:
                     return result
 
     def get_by_id(self, loan_id) -> Loan:
+        """
+        Retrieve a single loan record by its primary key.
+
+        :param loan_id: The primary key of the loan to fetch.
+        :returns: The Loan object matching the given ID.
+        :rtype: Loan
+        :raises ValueError: If no loan record is found for the given ID.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -58,6 +87,13 @@ class LoanDAO:
                     return result
 
     def get_all(self) -> List[Loan]:
+        """
+        Retrieve all loan records from the database, including both active and returned loans.
+
+        :returns: A list of all Loan objects stored in the loan table.
+        :rtype: List[Loan]
+        :raises ValueError: If no loan records are found or the table is empty.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -71,6 +107,16 @@ class LoanDAO:
                     return result
 
     def get_active_loans(self) -> List[Loan]:
+        """
+        Retrieve all loan records where the book has not yet been returned.
+
+        Active loans are identified by a NULL return_date. Unlike other read
+        methods, an empty result is not treated as an error, as having no
+        active loans is a valid state.
+
+        :returns: A list of active Loan objects, or an empty list if none exist.
+        :rtype: List[Loan]
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -80,6 +126,21 @@ class LoanDAO:
                     return result
 
     def return_book(self, loan_id: int, return_date: date) -> Loan:
+        """
+        Record a book return by setting the return_date on an existing loan.
+
+        Fetches the loan and its associated book, increments the book's available
+        copy count by 1, then updates the loan record with the provided return date.
+
+        :param loan_id: The primary key of the loan being closed.
+        :type loan_id: int
+        :param return_date: The date the book was returned.
+        :type return_date: date
+        :returns: The updated Loan object with the return_date populated.
+        :rtype: Loan
+        :raises ValueError: If the loan record is not found, or if the update
+            operation returns no result.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
@@ -107,6 +168,17 @@ class LoanDAO:
                     return result
 
     def delete(self, loan_id) -> None:
+        """
+        Delete a loan record from the database by its primary key.
+
+        Permanently removes the row from the loan table. A ValueError is
+        raised if the given ID does not match any existing record, detected
+        by checking the cursor's rowcount after execution.
+
+        :param loan_id: The primary key of the loan to delete.
+        :returns: None
+        :raises ValueError: If no loan record is found for the given ID.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor() as cur:
