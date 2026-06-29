@@ -10,6 +10,6 @@ def get_conn_string() -> str:
         f"dbname={os.getenv('DB_NAME')} "
         f"user={os.getenv('DB_USER')} "
         f"password={os.getenv('DB_PASSWORD')} "
-        f"port={os.getenv('DB_PORT')}"
-        f"connect_timeout=i{os.getenv('DB_TIMEOUT')}"
+        f"port={os.getenv('DB_PORT')} "
+        f"connect_timeout={os.getenv('DB_TIMEOUT')}"
     )
