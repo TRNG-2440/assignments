@@ -188,3 +188,12 @@ class LoanDAO:
                     if cur.rowcount == 0:
                         logger.error(f"No record found for loan_id: {loan_id}")
                         raise ValueError("Error encountered on db operation!")
+
+    def get_by_member_id(self, member_id) -> List[Loan]:
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=class_row(Loan)) as cur:
+                    query = """SELECT loan_id, book_id, member_id, loan_date, due_date, return_date
+                        FROM loan WHERE member_id = %s"""
+                    result = cur.execute(query, (member_id,)).fetchall()
+                    return result

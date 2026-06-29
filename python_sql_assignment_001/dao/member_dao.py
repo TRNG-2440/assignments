@@ -1,9 +1,9 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from models.model import Member
+from models.member import Member
 from logger import logger
 
 
@@ -11,7 +11,7 @@ class MemberDAO:
     def __init__(self, db_manager: DatabaseManager):
         self._db_manager = db_manager
 
-    def create(self, full_name: str, email: str, join_date: date) -> Member:
+    def create(self, full_name: str, email: str, join_date: date) -> Optional[Member]:
         """
         Insert a new member record into the database.
 
@@ -22,8 +22,7 @@ class MemberDAO:
         :param join_date: The date the member joined the library.
         :type join_date: date
         :returns: The newly created Member object with its assigned ID and all fields.
-        :rtype: Member
-        :raises ValueError: If the insert operation returns no result.
+        :rtype: Member | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -34,22 +33,15 @@ class MemberDAO:
                     result = cur.execute(
                         query, (full_name, email, join_date)
                     ).fetchone()
-
-                    if not result:
-                        logger.error(
-                            f"Error encountered while creating new record for {email}!"
-                        )
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
-    def get_by_id(self, member_id) -> Member:
+    def get_by_id(self, member_id) -> Optional[Member]:
         """
         Retrieve a single member record by its primary key.
 
         :param member_id: The primary key of the member to fetch.
         :returns: The Member object matching the given ID.
-        :rtype: Member
-        :raises ValueError: If no member record is found for the given ID.
+        :rtype: Member | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -57,10 +49,22 @@ class MemberDAO:
                     query = """SELECT member_id, name, email, join_date
                         FROM member WHERE member_id = %s"""
                     result = cur.execute(query, (member_id,)).fetchone()
+                    return result
 
-                    if not result:
-                        logger.error(f"No record found for member_id: {member_id}")
-                        raise ValueError("Error encountered on db operation!")
+    def get_by_email(self, email) -> Optional[Member]:
+        """
+        Retrieve a single member record by its primary key.
+
+        :param email: The email of the member to fetch.
+        :returns: The Member object matching the given email.
+        :rtype: Member | None
+        """
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=class_row(Member)) as cur:
+                    query = """SELECT member_id, name, email, join_date
+                        FROM member WHERE email = %s"""
+                    result = cur.execute(query, (email,)).fetchone()
                     return result
 
     def get_all(self) -> List[Member]:
@@ -69,7 +73,6 @@ class MemberDAO:
 
         :returns: A list of all Member objects stored in the member table.
         :rtype: List[Member]
-        :raises ValueError: If no member records are found or the table is empty.
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -77,13 +80,9 @@ class MemberDAO:
                     query = """SELECT member_id, name, email, join_date
                         FROM member"""
                     result = cur.execute(query).fetchall()
-
-                    if not result:
-                        logger.error("No records found!")
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
-    def update(self, member_id, full_name, email, join_date) -> Member:
+    def update(self, member_id, full_name, email, join_date) -> Optional[Member]:
         """
         Update all fields of an existing member record.
 
@@ -95,8 +94,7 @@ class MemberDAO:
         :param join_date: The new join date to assign to the member.
         :type join_date: date
         :returns: The updated Member object reflecting all new field values.
-        :rtype: Member
-        :raises ValueError: If no member record is found for the given ID.
+        :rtype: Member | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -111,12 +109,6 @@ class MemberDAO:
                         query,
                         (full_name, email, join_date, member_id),
                     ).fetchone()
-
-                    if not result:
-                        logger.error(
-                            f"Error encountered while updating member_id: {member_id}!"
-                        )
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
     def delete(self, member_id) -> None:

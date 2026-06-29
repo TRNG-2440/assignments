@@ -3,14 +3,6 @@ from datetime import date
 
 
 @dataclass
-class Member:
-    member_id: int
-    name: str
-    email: str
-    join_date: date
-
-
-@dataclass
 class Book:
     book_id: int
     title: str

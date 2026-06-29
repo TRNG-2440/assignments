@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from models.genre import GenreCreate, GenreResponse
 from dependencies import get_genre_service
-from services.genre import GenreService
+from services import GenreService
 
 router = APIRouter()
 
