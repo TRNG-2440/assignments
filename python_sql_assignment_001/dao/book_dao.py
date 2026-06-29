@@ -38,11 +38,19 @@ class BookDAO:
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
-                    query = """INSERT INTO book(title, author_name, publication_year, genre_id, total_copies) 
-                        VALUES(%s, %s, %s, %s, %s) 
-                        RETURNING book_id, title, author_name, publication_year, genre_id, total_copies"""
+                    query = """INSERT INTO book(title, author_name, publication_year, genre_id, total_copies, available_copies) 
+                        VALUES(%s, %s, %s, %s, %s, %s) 
+                        RETURNING book_id, title, author_name, publication_year, genre_id, total_copies, available_copies"""
                     result = cur.execute(
-                        query, (title, author, publication_year, genre_id, copy_count)
+                        query,
+                        (
+                            title,
+                            author,
+                            publication_year,
+                            genre_id,
+                            copy_count,
+                            copy_count,
+                        ),
                     ).fetchone()
 
                     if not result:
@@ -64,7 +72,7 @@ class BookDAO:
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
-                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies
+                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
                         FROM book WHERE book_id = %s"""
                     result = cur.execute(query, (book_id,)).fetchone()
 
@@ -84,7 +92,7 @@ class BookDAO:
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
-                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies
+                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
                         FROM book"""
                     result = cur.execute(query).fetchall()
 
@@ -125,7 +133,7 @@ class BookDAO:
                                     total_copies = %s
                                 WHERE book_id = %s 
                                 RETURNING book_id, title, author_name, 
-                                    publication_year, genre_id, total_copies"""
+                                    publication_year, genre_id, total_copies, available_copies"""
                     result = cur.execute(
                         query,
                         (
@@ -143,6 +151,32 @@ class BookDAO:
                             f"Error encountered while updating book_id: {book_id}!"
                         )
                         raise ValueError("Error encountered on db operation!")
+                    return result
+
+    def update_available_copies(self, book_id: int, available_copies: int) -> Book:
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=class_row(Book)) as cur:
+                    query = """UPDATE book 
+                                SET available_copies = %s
+                                WHERE book_id = %s 
+                                RETURNING book_id, title, author_name, 
+                                    publication_year, genre_id, total_copies, available_copies"""
+                    result = cur.execute(
+                        query,
+                        (
+                            available_copies,
+                            book_id,
+                        ),
+                    ).fetchone()
+
+                    if not result:
+                        logger.error(
+                            f"Error encountered while updating book_id: {book_id}!"
+                        )
+                        raise ValueError("Error encountered on db operation!")
+
+                    logger.info(f"Updated available copies for book_id: {book_id}...")
                     return result
 
     def delete(self, book_id) -> None:

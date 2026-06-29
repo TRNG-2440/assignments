@@ -7,6 +7,7 @@ from dao.genre_dao import GenreDAO
 from db.database import DatabaseManager
 from dao.book_dao import BookDAO
 from dao.member_dao import MemberDAO
+from dao.loan_dao import LoanDAO
 
 load_dotenv()
 
@@ -126,6 +127,39 @@ def main():
     # Get all records
     members = member.get_all()
     logger.info(f"Fetched records: {members}")
+
+    # Insert records for Loan table
+    loan = LoanDAO(db_manager, book)
+    inserted_loan = loan.create(
+        1, 1, date(2026, 6, 15), date(2026, 6, 22), date(2026, 6, 20)
+    )
+    logger.info(f"Inserted loan: {inserted_loan}")
+
+    inserted_loan = loan.create(1, 2, date(2026, 6, 22), date(2026, 6, 29))
+    logger.info(f"Inserted loan: {inserted_loan}")
+
+    inserted_loan = loan.create(2, 1, date(2026, 6, 24), date(2026, 7, 1))
+    logger.info(f"Inserted loan: {inserted_loan}")
+
+    # Get record by id
+    selected_loan = loan.get_by_id(1)
+    logger.info(f"Fetched loan: {selected_loan}")
+
+    active_loans = loan.get_active_loans()
+    logger.info(f"Fetched active loans : {active_loans}")
+
+    # Update record
+    returned_loan = loan.return_book(2, date(2026, 6, 28))
+    logger.info(f"Returned loan: {returned_loan}")
+
+    # Delete record
+    loan.delete(2)
+    logger.info("Deleted record with loan_id: 2")
+
+    # Get all records
+    loans = loan.get_all()
+    logger.info(f"Fetched records: {loans}")
+
     # Close db connection
     db_manager.close_all()
 

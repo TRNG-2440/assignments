@@ -24,6 +24,7 @@ class Book:
     publication_year: str
     genre_id: int
     total_copies: int
+    available_copies: int
 
 
 @dataclass

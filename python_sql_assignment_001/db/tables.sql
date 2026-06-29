@@ -22,7 +22,9 @@ CREATE TABLE book (
     publication_year CHAR(4) NOT NULL,
     genre_id INTEGER NOT NULL,
     total_copies INTEGER NOT NULL,
-    FOREIGN KEY(genre_id) REFERENCES genre(genre_id)
+    available_copies INTEGER NOT NULL,
+    FOREIGN KEY(genre_id) REFERENCES genre(genre_id),
+    CONSTRAINT valid_available_copies_check CHECK (available_copies >= 0 AND available_copies <= total_copies)
 );
 
 DROP TABLE IF EXISTS loan CASCADE;
