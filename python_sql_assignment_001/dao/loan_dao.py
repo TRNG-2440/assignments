@@ -3,7 +3,7 @@ from typing import List, Optional
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from model import Book, Loan
+from models.model import Book, Loan
 from logger import logger
 from dao.book_dao import BookDAO
 

@@ -3,12 +3,6 @@ from datetime import date
 
 
 @dataclass
-class Genre:
-    genre_id: int
-    genre_name: str
-
-
-@dataclass
 class Member:
     member_id: int
     name: str

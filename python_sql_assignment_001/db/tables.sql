@@ -38,3 +38,20 @@ CREATE TABLE loan (
     FOREIGN KEY(book_id) REFERENCES book(book_id),
     FOREIGN KEY(member_id) REFERENCES member(member_id)
 );
+
+-- Sample data
+INSERT INTO genre (genre_name) VALUES
+    ('Mystery'),
+    ('Romance');
+
+INSERT INTO member (name, email, join_date) VALUES
+    ('Tom Cruise', 'tomcruz@email.com', '2010-09-22'),
+    ('Elizabeth Benett', 'lizbenett@email.com', '1945-03-12');
+
+INSERT INTO book (title, author_name, publication_year, genre_id, total_copies, available_copies) VALUES
+    ('The Rosie Project', 'Graeme Simsion', 2013, 2, 1, 0),
+    ('The Devotion of Suspect X', 'Higashino Keigo', 2005, 1, 3, 3);
+
+INSERT INTO loan (book_id, member_id, loan_date, due_date, return_date) VALUES
+    (1, 1, '2026-06-15', '2026-06-22', '2026-06-20'),
+    (2, 1, '2026-06-24', '2026-07-01', NULL);

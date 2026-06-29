@@ -2,7 +2,7 @@ from typing import List
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from model import Book
+from models.model import Book
 from logger import logger
 
 
@@ -200,3 +200,22 @@ class BookDAO:
                     if cur.rowcount == 0:
                         logger.error(f"No record found for book_id: {book_id}")
                         raise ValueError("Error encountered on db operation!")
+
+    def get_by_genre_id(self, genre_id) -> List[Book]:
+        """
+        Retrieve all book records belonging to a specific genre.
+
+        Unlike other read methods, an empty result is not treated as an error,
+        as having no books under a given genre is a valid state.
+
+        :param genre_id: The foreign key of the genre to filter books by.
+        :returns: A list of Book objects matching the given genre, or an empty list if none exist.
+        :rtype: List[Book]
+        """
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=class_row(Book)) as cur:
+                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
+                        FROM book WHERE genre_id = %s"""
+                    result = cur.execute(query, (genre_id,)).fetchall()
+                    return result

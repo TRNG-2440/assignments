@@ -15,6 +15,7 @@ class DatabaseManager:
     _instance: Optional["DatabaseManager"] = None
     _conn: Optional[psycopg.Connection] = None
     _db_url = os.getenv("CONN_STR")
+    _initialized = False
 
     def __new__(cls):
         """Standard Singleton pattern implementation using __new__."""
@@ -23,15 +24,21 @@ class DatabaseManager:
         return cls._instance
 
     def __init__(self):
+        if type(self)._initialized:
+            return
+
         self._init_script = os.getenv("INIT_TABLES_SCRIPT")
         if not self._init_script:
             raise ValueError("Database init script not specified!")
+
         with self.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor() as cur:
                     with open(self._init_script, "r", encoding="utf-8") as f:
                         sql_script = f.read()
                         cur.execute(SQL(sql_script))  # type: ignore
+
+        type(self)._initialized = True
 
     def _get_persistent_connection(self) -> psycopg.Connection:
         """Returns the single persistent connection, creating it or reconnecting if necessary."""

@@ -3,7 +3,7 @@ from typing import List
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from model import Member
+from models.model import Member
 from logger import logger
 
 
