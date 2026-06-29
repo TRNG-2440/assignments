@@ -111,8 +111,8 @@ class GenreDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    DELETE FROM lfields001.Genre g WHERE g.genre_id = %s
-                    RETURNING g.genre_id
+                    DELETE FROM lfields001.Genre WHERE genre_id = %s
+                    RETURNING genre_id
                     """,
                     (genre_id,)
                 )
@@ -202,8 +202,8 @@ class BookDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    DELETE FROM lfields001.Book g WHERE g.book_id = %s
-                    RETURNING g.book_id
+                    DELETE FROM lfields001.Book WHERE book_id = %s
+                    RETURNING book_id
                     """,
                     (book_id,)
                 )
@@ -248,8 +248,8 @@ class MemberDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    SELECT m.member_id, m.member_name, m.email, m.date_joined
-                    FROM lfields001.Member m
+                    SELECT member_id, member_name, email, date_joined
+                    FROM lfields001.Member
                     """
                 )
                 return [self._convert_row(row) for row in cur.fetchall()]
@@ -260,8 +260,8 @@ class MemberDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    SELECT m.member_id, m.member_name, m.email, m.date_joined FROM lfields001.Member m
-                    WHERE m.member_id = %s
+                    SELECT member_id, member_name, email, date_joined FROM lfields001.Member
+                    WHERE member_id = %s
                     """,
                     (id,)
                 )
@@ -274,10 +274,10 @@ class MemberDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    UPDATE lfields001.Member m
-                    SET m.member_name = %s, m.email = %s, m.date_joined = %s
-                    WHERE m.member_id = %s
-                    RETURNING m.member_id, m.member_name, m.email, m.date_joined
+                    UPDATE lfields001.Member
+                    SET member_name = %s, email = %s, date_joined = %s
+                    WHERE member_id = %s
+                    RETURNING member_id, member_name, email, date_joined
                     """,
                     (rec.member_name, rec.email, rec.date_joined, rec.member_id)
                 )
@@ -290,8 +290,8 @@ class MemberDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    DELETE FROM lfields001.Member m WHERE m.member_id = %s
-                    RETURNING m.member_id
+                    DELETE FROM lfields001.Member WHERE member_id = %s
+                    RETURNING member_id
                     """,
                     (member_id,)
                 )
@@ -340,8 +340,8 @@ class LoanDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    SELECT l.loan_id, l.book_id, l.member_id, l.date_loaned, l.date_due, l.date_returned
-                    FROM lfields001.Loan l
+                    SELECT loan_id, book_id, member_id, date_loaned, date_due, date_returned
+                    FROM lfields001.Loan
                     """
                 )
                 return [self._convert_row(row) for row in cur.fetchall()]
@@ -352,9 +352,9 @@ class LoanDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    SELECT l.loan_id, l.book_id, l.member_id, l.date_loaned, l.date_due, l.date_returned
-                    FROM lfields001.Loan l
-                    WHERE l.loan_id = %s
+                    SELECT loan_id, book_id, member_id, date_loaned, date_due, date_returned
+                    FROM lfields001.Loan
+                    WHERE loan_id = %s
                     """,
                     (id,)
                 )
@@ -367,10 +367,10 @@ class LoanDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    UPDATE lfields001.Loan l
-                    SET l.book_id = %s, l.member_id = %s, l.date_loaned = %s, l.date_due = %s, l.date_returned = %s
-                    WHERE l.loan_id = %s
-                    RETURNING l.loan_id, l.book_id, l.member_id, l.date_loaned, l.date_due, l.date_returned
+                    UPDATE lfields001.Loan
+                    SET book_id = %s, member_id = %s, date_loaned = %s, date_due = %s, date_returned = %s
+                    WHERE loan_id = %s
+                    RETURNING loan_id, book_id, member_id, date_loaned, date_due, date_returned
                     """,
                     (rec.book_id, rec.member_id, rec.date_loaned, rec.date_due, rec.date_returned, rec.loan_id)
                 )
@@ -383,8 +383,8 @@ class LoanDAO:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    DELETE FROM lfields001.Loan l WHERE l.loan_id = %s
-                    RETURNING l.loan_id
+                    DELETE FROM lfields001.Loan WHERE loan_id = %s
+                    RETURNING loan_id
                     """,
                     (loan_id,)
                 )

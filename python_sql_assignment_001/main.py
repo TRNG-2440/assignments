@@ -40,15 +40,15 @@ loan_dao.create(loan2)
 
 read_member = member_dao.get_by_id(1)
 
-print(read_member.title, read_member.inventory)
+print(read_member.member_name, read_member.email)
 
 
 update_member = D.MemberRecord(1, read_member.member_name, "new@email.com", read_member.date_joined)
 updated = member_dao.update(update_member)
 read_member = member_dao.get_by_id(1)
 
-print(updated.title, updated.inventory)
-print(read_member.title, read_member.inventory)
+print(updated.member_name, updated.email)
+print(read_member.member_name, read_member.email)
 
 deleted = member_dao.delete(1)
 

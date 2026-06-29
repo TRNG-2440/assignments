@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS lfields001.Book (
     publication_year SMALLINT,
     inventory SMALLINT,
     CONSTRAINT genre_id_fk FOREIGN KEY (genre_id) REFERENCES lfields001.Genre(genre_id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS lfields001.Member (
@@ -33,4 +34,5 @@ CREATE TABLE IF NOT EXISTS lfields001.Loan (
     date_returned DATE DEFAULT NULL,
     CONSTRAINT book_id_fk FOREIGN KEY (book_id) REFERENCES lfields001.Book(book_id),
     CONSTRAINT member_id_fk FOREIGN KEY (member_id) REFERENCES lfields001.Member(member_id)
+    ON DELETE CASCADE
 );
