@@ -27,3 +27,10 @@ Books
 |3060|The Shining|1005|1977|447|
 |3061|Salem's Lot|1005|1975|439|
 |3062|Cat's Cradle|1003|1963|304|
+
+```sql
+SELECT SUM(b.page_count)
+FROM Books AS B
+JOIN Author a ON b.author = a.author_id
+WHERE a.author_name = 'Stephen King';
+```

@@ -68,3 +68,13 @@ Sport
 |-|-|
 |40001|Foot Ball|
 |40002|Basket Ball|
+
+```sql
+SELECT *
+FROM Player
+WHERE player_name ILIKE 'jo%';
+
+SELECT *
+FROM Player
+WHERE player_name ILIKE '%a%e%';
+```

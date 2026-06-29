@@ -27,3 +27,12 @@ Books
 |3060|The Shining|1005|1977|447|
 |3061|Salem's Lot|1005|1975|439|
 |3062|Cat's Cradle|1003|1963|304|
+
+```sql
+DELETE FROM Books
+WHERE author = (
+    SELECT author_id
+    FROM Author
+    WHERE author_name = 'Mark Twain'
+);
+```

@@ -25,7 +25,7 @@ CREATE TABLE Patient
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     date_of_birth DATE NOT NULL,
-    phone VARCHAR(8),
+    phone INT,
     address VARCHAR(150)
 );
 

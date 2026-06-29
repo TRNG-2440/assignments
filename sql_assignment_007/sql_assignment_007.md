@@ -66,3 +66,14 @@ Sport
 |-|-|
 |40001|Foot Ball|
 |40002|Basket Ball|
+
+```sql
+SELECT s.sport_name
+FROM Player AS p
+JOIN Team AS t on p.team_id = t.team_id
+JOIN Sport AS s on t.sport_id = s.sport_id
+WHERE p.player_salary = (
+    SELECT MAX(player_salary)
+    FROM Player
+);
+```

@@ -27,3 +27,9 @@ Books
 |3060|The Shining|1005|1977|447|
 |3061|Salem's Lot|1005|1975|439|
 |3062|Cat's Cradle|1003|1963|304|
+
+
+```sql
+INSERT INTO Books (title, author, publication, page_count)
+VALUES ('Coming Up for Air ', 1002, 1939, 290);
+```

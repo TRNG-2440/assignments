@@ -34,3 +34,13 @@ Appointment
 |104|4|5|2025-03-13|11:00|Knee injury|Scheduled|
 |105|5|2|2025-03-14|09:30|Annual check|Scheduled|
 |106|1|4|2025-03-15|13:00|Headaches|Scheduled|
+
+```sql
+SELECT d.first_name, d.last_name
+FROM Doctor AS d
+WHERE d.doctor_id NOT IN (
+    SELECT doctor_id
+    FROM Appointment
+    WHERE status = 'Scheduled'
+);
+```

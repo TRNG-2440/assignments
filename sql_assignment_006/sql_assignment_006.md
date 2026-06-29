@@ -66,3 +66,12 @@ Sport
 |-|-|
 |40001|Foot Ball|
 |40002|Basket Ball|
+
+```sql
+SELECT p.*
+FROM Player AS p
+JOIN Team t ON p.team_id = t.team_id
+JOIN Sport s on t.sport_id = s.sport_id
+WHERE s.sport_name = 'Foot Ball'
+    AND p.player_salary > 200000;
+```
