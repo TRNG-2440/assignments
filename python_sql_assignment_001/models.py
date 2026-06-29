@@ -2,15 +2,15 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
-
+# 
 @dataclass
-class GenreRecord:
+class Genre:
     genre_id: int
     name: str
 
 
 @dataclass
-class BookRecord:
+class Book:
     book_id: int
     title: str
     author: str
@@ -20,7 +20,7 @@ class BookRecord:
 
 
 @dataclass
-class MemberRecord:
+class Member:
     member_id: int
     full_name: str
     email: str
@@ -28,7 +28,7 @@ class MemberRecord:
 
 
 @dataclass
-class LoanRecord:
+class Loan:
     loan_id: int
     book_id: int
     member_id: int
