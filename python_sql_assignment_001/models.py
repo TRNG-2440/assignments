@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
-# 
+# Genre model
 @dataclass
 class Genre:
     genre_id: int
     name: str
 
-
+# Book model
 @dataclass
 class Book:
     book_id: int
@@ -18,7 +18,7 @@ class Book:
     genre_id: int
     copy_count: int
 
-
+# Member model
 @dataclass
 class Member:
     member_id: int
@@ -26,7 +26,7 @@ class Member:
     email: str
     join_date: date
 
-
+# Loan model
 @dataclass
 class Loan:
     loan_id: int
