@@ -15,7 +15,7 @@ class GenreDAO:
     def __init__(self,conn):
         # Connection string is built once at instantiation from environment
         # variables loaded by db_util. All methods reuse this value.
-        self.conn = conn
+        self._conn = conn
 
 
     def _map_row(self, row) -> GenreRecord:
@@ -41,7 +41,7 @@ class GenreDAO:
             with self._conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(
                     "INSERT INTO books.genre(genre_name) VALUES (%s) RETURNING *",
-                    (genre_name)
+                    (genre_name,)
                 )
                 row = cursor.fetchone()
                 return self._map_row(row) if row else None

@@ -46,7 +46,7 @@ class LoanDAO:
                 )
                 return [self._map_row(row) for row in cursor.fetchall()]
             
-    def create(self, book_id:int, member_id:int, loan_date:date, due_date:date, return_date:date) -> Optional[LoanRecord]:
+    def create(self, book_id:int, member_id:int, loan_date:date, due_date:date, return_date:Optional[date]=None) -> Optional[LoanRecord]:
             with self._conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(
                     "INSERT INTO books.loan(book_id, member_id, loan_date, due_date,return_date) VALUES (%s,%s,%s,%s,%s) RETURNING *",
@@ -61,7 +61,7 @@ class LoanDAO:
         with self._conn.transaction():
             with self._conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(
-                    "SELECT book_id, member_id, loan_date, due_date,return_date FROM books.loan WHERE loan_id = %s",
+                    "SELECT loan_id, book_id, member_id, loan_date, due_date, return_date FROM books.loan WHERE loan_id = %s",
                     (loan_id,)
                 )
                 row = cursor.fetchone()
@@ -77,11 +77,11 @@ class LoanDAO:
                 cursor.execute(
                     """
                     UPDATE books.loan
-                    SET title = %s, author = %s, pub_year = %s, genre_id =%s,copies = %s
+                    SET book_id = %s, member_id = %s, loan_date = %s, due_date = %s, return_date = %s
                     WHERE loan_id = %s
                     RETURNING *
                     """,
-                    (book_id, member_id, loan_date, due_date,return_date,loan_id)
+                    (book_id, member_id, loan_date, due_date, return_date, loan_id)
                 )
                 row = cursor.fetchone()
                 return self._map_row(row) if row else None

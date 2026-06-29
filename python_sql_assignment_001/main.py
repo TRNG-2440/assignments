@@ -5,6 +5,8 @@ from loan_dao import LoanDAO
 from member_dao import MemberDAO
 from db_util import get_conn_string
 from datetime import datetime
+import os
+
 
 
 #main
@@ -61,10 +63,13 @@ def main():
 #helper function
 def intialize_db(conn):
     """Initialize the database"""
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    ddl_path = os.path.join(script_dir, "ddl.sql")
     try:
         with conn.transaction():
-            with open("ddl.sql","r") as file:
-                sql = file.read
+            with open(ddl_path,"r") as file:
+                sql = file.read()
                 with conn.cursor() as cur:
                     cur.execute(sql)
                     print("Setup successful")

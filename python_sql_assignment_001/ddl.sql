@@ -1,5 +1,5 @@
 --clean up
-DROP SCHEMA books CASCADE
+DROP SCHEMA IF EXISTS books CASCADE;
 --setup
 CREATE SCHEMA books;
 
