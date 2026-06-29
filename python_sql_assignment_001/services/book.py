@@ -6,7 +6,7 @@ from psycopg import DatabaseError
 from models.book import Book, BookCreate, BookResponse
 from exceptions import BookIsLoanedError, BookNotFoundError, GenreNotFoundError
 from models.genre import Genre
-from models.model import Loan
+from models.loan import Loan
 
 
 class BookService:

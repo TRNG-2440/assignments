@@ -209,3 +209,20 @@ class BookDAO:
                         FROM book WHERE genre_id = %s"""
                     result = cur.execute(query, (genre_id,)).fetchall()
                     return result
+
+    def has_available_copies(self, book_id: int) -> Optional[Book]:
+        """
+        Check whether a book has at least one available copy for loan.
+
+        :param book_id: The primary key of the book to check.
+        :type book_id: int
+        :returns: The Book object if at least one copy is available, or None if all copies are on loan.
+        :rtype: Optional[Book]
+        """
+        with self._db_manager.get_connection() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=class_row(Book)) as cur:
+                    query = """SELECT book_id, title, author_name, publication_year, genre_id, total_copies, available_copies
+                        FROM book WHERE book_id = %s AND available_copies > 0"""
+                    result = cur.execute(query, (book_id,)).fetchone()
+                    return result

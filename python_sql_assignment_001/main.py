@@ -1,16 +1,19 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from exceptions import (
+    ActiveLoanError,
     BookIsLoanedError,
     BookNotFoundError,
     BooksWithGenreExistsError,
     GenreExistsError,
     GenreNotFoundError,
+    LoanNotFoundError,
     MemberExistsError,
     MemberHasLoansError,
     MemberNotFoundError,
+    NoAvailableCopiesError,
 )
-from routes import genres, members, books
+from routes import genres, members, books, loans
 from logger import logger
 
 app = FastAPI(title="Library API", version="1.0.0")
@@ -18,6 +21,7 @@ app = FastAPI(title="Library API", version="1.0.0")
 app.include_router(genres, prefix="/genres", tags=["Genres"])
 app.include_router(members, prefix="/members", tags=["Members"])
 app.include_router(books, prefix="/books", tags=["Books"])
+app.include_router(loans, prefix="/loans", tags=["Loans"])
 
 
 @app.exception_handler(GenreNotFoundError)
@@ -47,6 +51,17 @@ async def book_not_found_handler(
     request: Request, exc: BookNotFoundError
 ) -> JSONResponse:
     logger.warning(f"No record found for book_id: {exc.book_id}!")
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(LoanNotFoundError)
+async def loan_not_found_handler(
+    request: Request, exc: LoanNotFoundError
+) -> JSONResponse:
+    logger.warning(f"No record found for loan_id: {exc.loan_id}!")
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.detail},
@@ -100,6 +115,28 @@ async def book_is_loaned_handler(
     request: Request, exc: BookIsLoanedError
 ) -> JSONResponse:
     logger.warning(f"Book id: {exc.book_id} has been borrowed!")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(NoAvailableCopiesError)
+async def book_has_no_copies_handler(
+    request: Request, exc: NoAvailableCopiesError
+) -> JSONResponse:
+    logger.warning(f"Book id: {exc.book_id} has no copies left to borrow!")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(ActiveLoanError)
+async def loan_is_active_handler(
+    request: Request, exc: ActiveLoanError
+) -> JSONResponse:
+    logger.warning(f"Loan id: {exc.loan_id} is currently active, cannot delete!")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

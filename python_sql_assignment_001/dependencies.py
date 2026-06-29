@@ -7,6 +7,7 @@ from dao.genre_dao import GenreDAO
 from dao.book_dao import BookDAO
 from dao.member_dao import MemberDAO
 from dao.loan_dao import LoanDAO
+from services.loan import LoanService
 from services import GenreService, MemberService, BookService
 
 
@@ -49,3 +50,10 @@ def get_book_service(
     loan_repo: Annotated[LoanDAO, Depends(get_loan_repo)],
 ) -> BookService:
     return BookService(book_repo, genre_repo, loan_repo)
+
+
+def get_loan_service(
+    loan_repo: Annotated[LoanDAO, Depends(get_loan_repo)],
+    book_repo: Annotated[BookDAO, Depends(get_book_repo)],
+) -> LoanService:
+    return LoanService(loan_repo, book_repo)

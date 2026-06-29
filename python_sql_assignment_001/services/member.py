@@ -5,7 +5,7 @@ from psycopg import DatabaseError
 
 from models.member import Member, MemberCreate, MemberResponse
 from exceptions import MemberExistsError, MemberHasLoansError, MemberNotFoundError
-from models.model import Loan
+from models.loan import Loan
 
 
 class MemberService:

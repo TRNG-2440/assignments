@@ -3,7 +3,8 @@ from typing import List, Optional
 from psycopg.rows import class_row
 
 from db.database import DatabaseManager
-from models.model import Loan
+from exceptions import BookNotFoundError
+from models.loan import Loan
 from models.book import Book
 from logger import logger
 from dao.book_dao import BookDAO
@@ -21,7 +22,7 @@ class LoanDAO:
         loan_date: date,
         due_date: date,
         return_date: Optional[date] = None,
-    ) -> Loan:
+    ) -> Optional[Loan]:
         """
         Insert a new loan record into the database.
 
@@ -40,14 +41,15 @@ class LoanDAO:
         :param return_date: The date the book was returned, or None if still on loan.
         :type return_date: Optional[date]
         :returns: The newly created Loan object with its assigned ID and all fields.
-        :rtype: Loan
-        :raises ValueError: If the insert operation returns no result.
+        :rtype: Loan | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
                     if not return_date:
                         loan_book: Optional[Book] = self._book_dao.get_by_id(book_id)
+                        if not loan_book:
+                            raise BookNotFoundError(book_id, "No record found!")
                         updated_book = self._book_dao.update_available_copies(
                             book_id, loan_book.available_copies - 1
                         )
@@ -58,22 +60,15 @@ class LoanDAO:
                     result = cur.execute(
                         query, (book_id, member_id, loan_date, due_date, return_date)
                     ).fetchone()
-
-                    if not result:
-                        logger.error(
-                            f"Error encountered while creating new loan record for {member_id} borrowing {book_id}!"
-                        )
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
-    def get_by_id(self, loan_id) -> Loan:
+    def get_by_id(self, loan_id) -> Optional[Loan]:
         """
         Retrieve a single loan record by its primary key.
 
         :param loan_id: The primary key of the loan to fetch.
         :returns: The Loan object matching the given ID.
-        :rtype: Loan
-        :raises ValueError: If no loan record is found for the given ID.
+        :rtype: Loan | None
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
@@ -81,10 +76,6 @@ class LoanDAO:
                     query = """SELECT loan_id, book_id, member_id, loan_date, due_date, return_date
                         FROM loan WHERE loan_id = %s"""
                     result = cur.execute(query, (loan_id,)).fetchone()
-
-                    if not result:
-                        logger.error(f"No record found for loan_id: {loan_id}")
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
     def get_all(self) -> List[Loan]:
@@ -126,29 +117,33 @@ class LoanDAO:
                     result = cur.execute(query).fetchall()
                     return result
 
-    def return_book(self, loan_id: int, return_date: date) -> Loan:
+    def return_book(
+        self,
+        loan_id: int,
+        book_id: int,
+        available_copies: int,
+        return_date: date = date.today(),
+    ) -> Optional[Loan]:
         """
-        Record a book return by setting the return_date on an existing loan.
+        Record a book return by setting the return_date on an existing loan and
+        incrementing the book's available copy count by 1.
 
-        Fetches the loan and its associated book, increments the book's available
-        copy count by 1, then updates the loan record with the provided return date.
-
-        :param loan_id: The primary key of the loan being closed.
+        :param loan_id: The primary key of the loan to close.
         :type loan_id: int
-        :param return_date: The date the book was returned.
+        :param book_id: The primary key of the book being returned.
+        :type book_id: int
+        :param available_copies: The current available copy count of the book prior to the return.
+        :type available_copies: int
+        :param return_date: The date the book was returned. Defaults to today's date.
         :type return_date: date
-        :returns: The updated Loan object with the return_date populated.
-        :rtype: Loan
-        :raises ValueError: If the loan record is not found, or if the update
-            operation returns no result.
+        :returns: The updated Loan object with the return_date populated, or None if the loan was not found.
+        :rtype: Optional[Loan]
         """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Loan)) as cur:
-                    loan_record: Loan = self.get_by_id(loan_id)
-                    return_book: Book = self._book_dao.get_by_id(loan_record.book_id)
                     updated_book = self._book_dao.update_available_copies(
-                        loan_record.book_id, return_book.available_copies + 1
+                        book_id, available_copies + 1
                     )
                     logger.info(f"Updated book details: {updated_book}")
 
@@ -160,12 +155,6 @@ class LoanDAO:
                         query,
                         (return_date, loan_id),
                     ).fetchone()
-
-                    if not result:
-                        logger.error(
-                            f"Error encountered while updating loan_id: {loan_id}!"
-                        )
-                        raise ValueError("Error encountered on db operation!")
                     return result
 
     def delete(self, loan_id) -> None:

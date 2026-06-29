@@ -16,6 +16,12 @@ class BookNotFoundError(Exception):
         self.detail = detail
 
 
+class LoanNotFoundError(Exception):
+    def __init__(self, loan_id, detail) -> None:
+        self.loan_id = loan_id
+        self.detail = detail
+
+
 class GenreExistsError(Exception):
     def __init__(self, genre_name, detail) -> None:
         self.genre_name = genre_name
@@ -43,4 +49,16 @@ class MemberHasLoansError(Exception):
 class BookIsLoanedError(Exception):
     def __init__(self, book_id, detail) -> None:
         self.book_id = book_id
+        self.detail = detail
+
+
+class NoAvailableCopiesError(Exception):
+    def __init__(self, book_id, detail) -> None:
+        self.book_id = book_id
+        self.detail = detail
+
+
+class ActiveLoanError(Exception):
+    def __init__(self, loan_id, detail) -> None:
+        self.loan_id = loan_id
         self.detail = detail
