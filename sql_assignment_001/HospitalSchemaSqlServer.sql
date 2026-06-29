@@ -1,3 +1,6 @@
+-- Note, this is written specifically in the SQL Server dialect
+-- I ended up swapping to Postgres for all later assignments to align with what is being taught in our course
+
 CREATE TABLE Department
 (
     department_id INT IDENTITY(1,1) PRIMARY KEY,
