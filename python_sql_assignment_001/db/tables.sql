@@ -10,7 +10,8 @@ CREATE TABLE member (
     member_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    join_date DATE NOT NULL
+    join_date DATE NOT NULL,
+    CONSTRAINT email_uniq UNIQUE(email)
 );
 
 DROP TABLE IF EXISTS book CASCADE;

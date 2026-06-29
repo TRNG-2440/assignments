@@ -1,4 +1,3 @@
-from datetime import date
 from typing import List
 from psycopg.rows import class_row
 
@@ -19,6 +18,23 @@ class BookDAO:
         genre_id: int,
         copy_count: int,
     ) -> Book:
+        """
+        Insert a new book record into the database.
+
+        :param title: The title of the book.
+        :type title: str
+        :param author: The full name of the book's author.
+        :type author: str
+        :param publication_year: The year the book was published.
+        :type publication_year: str
+        :param genre_id: The foreign key referencing the book's genre.
+        :type genre_id: int
+        :param copy_count: The total number of copies available.
+        :type copy_count: int
+        :returns: The newly created Book object with its assigned ID and all fields.
+        :rtype: Book
+        :raises ValueError: If the insert operation returns no result.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
@@ -37,6 +53,14 @@ class BookDAO:
                     return result
 
     def get_by_id(self, book_id) -> Book:
+        """
+        Retrieve a single book record by its primary key.
+
+        :param book_id: The primary key of the book to fetch.
+        :returns: The Book object matching the given ID.
+        :rtype: Book
+        :raises ValueError: If no book record is found for the given ID.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
@@ -50,6 +74,13 @@ class BookDAO:
                     return result
 
     def get_all(self) -> List[Book]:
+        """
+        Retrieve all book records from the database.
+
+        :returns: A list of all Book objects stored in the book table.
+        :rtype: List[Book]
+        :raises ValueError: If no book records are found or the table is empty.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
@@ -65,6 +96,24 @@ class BookDAO:
     def update(
         self, book_id, title, author, publication_year, genre_id, copy_count
     ) -> Book:
+        """
+        Update all fields of an existing book record.
+
+        :param book_id: The primary key of the book to update.
+        :param title: The new title to assign to the book.
+        :type title: str
+        :param author: The new author name to assign to the book.
+        :type author: str
+        :param publication_year: The new publication year to assign to the book.
+        :type publication_year: str
+        :param genre_id: The new genre foreign key to assign to the book.
+        :type genre_id: int
+        :param copy_count: The new total copy count to assign to the book.
+        :type copy_count: int
+        :returns: The updated Book object reflecting all new field values.
+        :rtype: Book
+        :raises ValueError: If no book record is found for the given ID.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor(row_factory=class_row(Book)) as cur:
@@ -97,6 +146,17 @@ class BookDAO:
                     return result
 
     def delete(self, book_id) -> None:
+        """
+        Delete a book record from the database by its primary key.
+
+        Unlike a soft delete, this permanently removes the row. A ValueError is
+        raised if the given ID does not match any existing record, detected via
+        checking the cursor's rowcount after execution.
+
+        :param book_id: The primary key of the book to delete.
+        :returns: None
+        :raises ValueError: If no book record is found for the given ID.
+        """
         with self._db_manager.get_connection() as conn:
             with conn.transaction():
                 with conn.cursor() as cur:

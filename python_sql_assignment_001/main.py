@@ -6,6 +6,7 @@ from logger import logger
 from dao.genre_dao import GenreDAO
 from db.database import DatabaseManager
 from dao.book_dao import BookDAO
+from dao.member_dao import MemberDAO
 
 load_dotenv()
 
@@ -92,6 +93,39 @@ def main():
     # Get all records
     books = book.get_all()
     logger.info(f"Fetched records: {books}")
+
+    # Insert records for Member table
+    member = MemberDAO(db_manager)
+    inserted_member = member.create(
+        "Tom Cruise", "tomcruz@email.com", date(2010, 9, 22)
+    )
+    logger.info(f"Inserted member: {inserted_member}")
+
+    inserted_member = member.create(
+        "Elizabeth Benett", "lizbenett@email.com", date(1945, 3, 12)
+    )
+    logger.info(f"Inserted member: {inserted_member}")
+
+    inserted_member = member.create("John Doe", "johndoe@email.com", date(2022, 7, 12))
+    logger.info(f"Inserted member: {inserted_member}")
+
+    # Get record by id
+    selected_member = member.get_by_id(1)
+    logger.info(f"Fetched member: {selected_member}")
+
+    # Update record
+    updated_member = member.update(
+        3, "Indiana Jones", "indyjones@email.com", date(2001, 3, 30)
+    )
+    logger.info(f"Updated member_id: 3 to {updated_member}")
+
+    # Delete record
+    member.delete(3)
+    logger.info("Deleted record with member_id: 3")
+
+    # Get all records
+    members = member.get_all()
+    logger.info(f"Fetched records: {members}")
     # Close db connection
     db_manager.close_all()
 
