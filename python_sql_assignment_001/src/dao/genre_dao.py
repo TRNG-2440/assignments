@@ -1,7 +1,8 @@
 from src.db.connection import get_connection
 
 class GenreDAO:
-    
+
+    #CREATE
     def create(self, genre_name):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -17,7 +18,7 @@ class GenreDAO:
                 conn.commit()
 
                 return row
-            
+     #GET BY ID       
     def get_by_id(self, genre_id):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -31,7 +32,7 @@ class GenreDAO:
                 )
                 return cur.fetchone()
             
-            
+    #GET ALL
     def get_all(self):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -43,7 +44,7 @@ class GenreDAO:
                 )
                 return cur.fetchall()
             
-
+    #UPDATE
     def update(self, genre_id, genre_name):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -59,7 +60,7 @@ class GenreDAO:
                 row = cur.fetchone()
                 conn.commit()
                 return row
-            
+     #DELETE       
     def delete(self, genre_id):
         with get_connection() as conn:
             with conn.cursor() as cur:

@@ -2,6 +2,7 @@ from src.db.connection import get_connection
 
 class MemberDAO:
 
+    # CREATE MEMBER
     def create(self, full_name, email_address, join_date):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -16,7 +17,7 @@ class MemberDAO:
                 row = cur.fetchone()
                 conn.commit()
                 return row
-            
+    #GET MEMBER BY ID      
     def get_by_id(self, member_id):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -30,6 +31,7 @@ class MemberDAO:
                 )
                 return cur.fetchone()
             
+    #GET ALL MEMBERS   
     def get_all(self):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -41,6 +43,7 @@ class MemberDAO:
                 )
                 return cur.fetchall()
             
+    #UPDATE MEMBER         
     def update(self, member_id, full_name, email_address, join_date):
         with get_connection() as conn:
             with conn.cursor() as cur:
@@ -57,6 +60,7 @@ class MemberDAO:
                 conn.commit()
                 return row
             
+    #DELETE MEMBER        
     def delete(self, member_id):
         with get_connection() as conn:
             with conn.cursor() as cur:

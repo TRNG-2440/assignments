@@ -1,3 +1,8 @@
+# #Mark White
+# 2026/06/28
+#Library management system
+
+
 from datetime import date
 
 from src.dao.genre_dao import GenreDAO
@@ -12,15 +17,12 @@ def main():
     loan_dao = LoanDAO()
 
 
-# -------------------
+
     # CREATE GENRE
-    # -------------------
     fiction = genre_dao.create("Fantasy")
     dystopian = genre_dao.create("Dystopian")
 
-    # -------------------
     # CREATE BOOK
-    # -------------------
     book1 = book_dao.create(
         "Harry Potter and the Sorcerer's Stone",
         "J.K. Rowling",
@@ -39,9 +41,8 @@ def main():
     )
     print("Book created:", book2)
 
-    # -------------------
+    
     # CREATE MEMBERS
-    # -------------------
     member = member_dao.create(
         "Alice Anderson",
         "AlAnderson@example.com",
@@ -56,9 +57,8 @@ def main():
     )
     print("Member created:", member2)
 
-    # -------------------
+
     # CREATE LOAN
-    # -------------------
     loan = loan_dao.create(
         book1["book_id"],
         member["member_id"],
@@ -75,27 +75,24 @@ def main():
     )
     print("Loan created:", loan2)
 
-    # -------------------
+   
     # READ DATA
-    # -------------------
     print("\nAll Books:")
     print(book_dao.get_all())
 
     print("\nActive Loans:")
     print(loan_dao.get_active_loans())
 
-    # -------------------
+  
     # RETURN BOOK
-    # -------------------
     returned = loan_dao.return_book(
         loan["loan_id"],
         returned_date=date.today()
     )
     print("\nBook returned:", returned)
 
-    # -------------------
-    # DELETE 
-    # -------------------
+
+    # DELETE LOAN/MEMBER/BOOK/GENRE
     deleted = loan_dao.delete(loan["loan_id"])
     print("\nLoan deleted:", deleted)
 
@@ -108,8 +105,6 @@ def main():
     deleted = genre_dao.delete(fiction["genre_id"])
     print("\nGenre deleted:", deleted)
 
-
-import traceback
 
 if __name__ == "__main__":
     try:
