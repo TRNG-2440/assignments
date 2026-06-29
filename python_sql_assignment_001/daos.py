@@ -1,4 +1,3 @@
-import sqlite3
 
 class GenreDao:
     def __init__(self, conn):
@@ -59,7 +58,7 @@ class BookDAO:
     def create(self, title, author, publication_year, genre_id, copy_count):
         cursor = self.conn.execute(
             '''
-            INSERT INTO book(title, author, publication_year, genre_id, copy_count)
+            INSERT INTO book(book_title, book_author, book_year, book_genre, book_copies)
             VALUES (?,?,?,?,?)
             ''',
             (title, author, publication_year, genre_id, copy_count)
@@ -88,11 +87,11 @@ class BookDAO:
         self.conn.execute(
             '''
             UPDATE book
-            SET title = ?,
-            author = ?,
-            publication_year = ?,
-            genre_id = ?,
-            copy_count = ?
+            SET book_title = ?,
+            book_author = ?,
+            book_year = ?,
+            book_genre = ?,
+            book_copies = ?
             WHERE book_id = ?
             ''',
             (title, author, publication_year, genre_id, copy_count, book_id)
@@ -118,7 +117,7 @@ class MemberDAO:
     def create(self, full_name, email, join_date):
         cursor = self.conn.execute(
             '''
-            INSERT INTO member(full_name, email, join_date)
+            INSERT INTO member(member_name, member_email, join_date)
             VALUES (?,?,?)
             ''',
             (full_name, email, join_date)
@@ -147,8 +146,8 @@ class MemberDAO:
         self.conn.execute(
             '''
             UPDATE member
-            SET full_name = ?,
-            email = ?,
+            SET member_name = ?,
+            member_email = ?,
             join_date = ?
             WHERE member_id = ?
             ''',
@@ -175,7 +174,7 @@ class LoanDAO:
     def create(self, book_id, member_id, loan_date, due_date):
         cursor = self.conn.execute(
             '''
-            INSERT INTO loan(book_id, member_id, loan_date, due_date)
+            INSERT INTO loan(loan_book, loan_member, loan_date, loan_due)
             VALUES (?,?,?,?)
             ''',
             (book_id, member_id, loan_date, due_date)
@@ -203,8 +202,8 @@ class LoanDAO:
     def return_book(self, loan_id, return_date):
         self.conn.execute(
             '''
-            UPDATE member
-            SET return_date = ?
+            UPDATE loan
+            SET loan_return_date = ?
             WHERE loan_id = ?
             ''',
             (return_date, loan_id)
@@ -216,7 +215,7 @@ class LoanDAO:
     def delete(self, loan_id):
         self.conn.execute(
             '''
-            DELETE FROM member
+            DELETE FROM loan
             where loan_id = ?
             ''',
             (loan_id,)
