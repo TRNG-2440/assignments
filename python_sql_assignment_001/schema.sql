@@ -1,4 +1,4 @@
-------------- Schema ----------------
+-- ----------- Schema ----------------
 
 -- Genre table
 CREATE TABLE IF NOT EXISTS Genre (
@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS Genre (
     genre_name VARCHAR(255) NOT NULL UNIQUE
 );
 
----------------------------------------------------------
+-- -------------------------------------------------------
 
 -- Book table
 CREATE TABLE IF NOT EXISTS Book (
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Book (
     FOREIGN KEY (genre_id) REFERENCES Genre (genre_id)
 );
 
----------------------------------------------------------
+-- -------------------------------------------------------
 
 -- Member table
 CREATE TABLE IF NOT EXISTS Member (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS Member (
     join_date DATE NOT NULL
 );
 
----------------------------------------------------------
+-- -------------------------------------------------------
 
 -- Loan table
 CREATE TABLE IF NOT EXISTS Loan (
@@ -42,3 +42,4 @@ CREATE TABLE IF NOT EXISTS Loan (
     FOREIGN KEY (book_id) REFERENCES Book (book_id),
     FOREIGN KEY (member_id) REFERENCES Member (member_id)
 );
+-- -------------------------------------------------------

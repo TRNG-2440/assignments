@@ -58,8 +58,7 @@ class GenreDAO:
     def delete(self, genre_id: int) -> None:
         with Connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "DELETE FROM Genre WHERE genre_id = %s",
                     (genre_id,),
                 )
@@ -90,8 +89,7 @@ class BookDAO:
     ) -> Book:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "INSERT INTO Book (title, author, publication_year, genre_id, copy_count) VALUES (%s, %s, %s, %s, %s)",
                     (title, author, publication_year, genre_id, copy_count),
                 )
@@ -103,8 +101,7 @@ class BookDAO:
     def get_by_id(self, book_id: int) -> Optional[Book]:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "SELECT book_id, title, author, publication_year, genre_id, copy_count FROM Book WHERE book_id = %s",
                     (book_id,),
                 )
@@ -230,8 +227,7 @@ class LoanDAO:
     ) -> Loan:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "INSERT INTO Loan (book_id, member_id, loan_date, due_date) VALUES (%s, %s, %s, %s)",
                     (book_id, member_id, loan_date, due_date),
                 )
@@ -243,9 +239,8 @@ class LoanDAO:
     def get_by_id(self, loan_id: int) -> Optional[Loan]:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
-                    "SELECT loan_id, book_id, member_id, loan_date, due_date, return_date FROM Loan WHERE loan_id = %s",
+                cursor.execute(
+                    "SELECT * FROM Loan WHERE loan_id = %s",
                     (loan_id,),
                 )
                 row = cursor.fetchone()
@@ -255,9 +250,8 @@ class LoanDAO:
     def get_all(self) -> list[Loan]:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
-                    "SELECT loan_id, book_id, member_id, loan_date, due_date, return_date FROM Loan ORDER BY loan_id"
+                cursor.execute(
+                    "SELECT * FROM Loan ORDER BY loan_id"
                 )
 
                 return [self.MapRow(row) for row in cursor.fetchall()]
@@ -266,8 +260,7 @@ class LoanDAO:
     def get_active_loans(self) -> list[Loan]:
         with Connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "SELECT loan_id, book_id, member_id, loan_date, due_date, return_date FROM Loan WHERE return_date IS NULL ORDER BY loan_id"
                 )
                 return [self.MapRow(row) for row in cursor.fetchall()]
@@ -276,8 +269,7 @@ class LoanDAO:
     def return_book(self, loan_id: int, return_date: date) -> Optional[Loan]:
         with Connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute
-                (
+                cursor.execute(
                     "UPDATE Loan SET return_date = %s WHERE loan_id = %s",
                     (return_date, loan_id),
                 )
