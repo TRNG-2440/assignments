@@ -24,44 +24,49 @@ def main():
     loan_dao = LoanDAO(dao)
 
     # Inserting Genres
+    print("Inserting")
     fiction = genre_dao.create("Fiction")
     fantasy = genre_dao.create("Fantasy")
 
     print(fiction)
-    print(fantasy)
+    print(fantasy + "\n")
 
     # Inserting books
     book1 = book_dao.create( "1984", "George Orwell", 1949, fiction[0], 5 )
     book2 = book_dao.create( "The Cat in the Hat", "Dr. Seuss", 1957, fantasy[0], 3 )
 
     print(book1)
-    print(book2)
+    print(book2 + "\n")
 
     # Insert member
     member1 = member_dao.create( "Theodore Roosevelt", "teddy.roosevelt@example.com", "1901-09-14")
     member2 = member_dao.create( "John Fitzgerald Kennedy", "jfk@example.com", "1961-01-20")
 
     print(member1)
-    print(member2)
+    print(member2 + "\n")
 
     # Insert loans
     loan1 = loan_dao.create( book1[0], member1[0], "2026-01-01", "2026-01-15")
     loan2 = loan_dao.create( book1[0], member1[0], "2026-01-02", "2026-01-16")
 
     print(loan1)
-    print(loan2)
+    print(loan2 + "\n")
 
     # Get all Genres
-    print(genre_dao.get_all())
+    print("Genre Get all")
+    print(genre_dao.get_all() + "\n")
 
     # Update Genres
+    print("Upgrade Genres")
     updated_genre = genre_dao.update(fiction[0], "Literary Fiction")
-    print(updated_genre)
+    print(updated_genre + "\n")
 
     # Get all books
-    print(book_dao.get_all())
+    print("Get all books")
+    print(book_dao.get_all() + "\n")
 
     # Update Books
+    print("Update Books")
     updated_book = book_dao.update(
         book1[0],
         "Nineteen Eighty-Four",
@@ -70,44 +75,57 @@ def main():
         fiction[0],
         10
     )
-    print(updated_book)
+    print(updated_book + "\n")
 
     # Delete a book
-    book_dao.delete(book2[0])
+    print("Delete a book")
+    book_dao.delete(book2[0] + "\n")
 
-    print(book_dao.get_all())
+    # Get all books (should only return one)
+    print("Get all books")
+    print(book_dao.get_all() + "\n")
 
     # Get all members
-    print(member_dao.get_all())
+    print("Get all members")
+    print(member_dao.get_all() + "\n")
 
     # Update members
+    print("Update Members")
     updated_member = member_dao.update(
         member1[0],
         "Theodore Roosevelt Jr.",
         "teddy.roosevelt@example.com",
         "1901-09-14"
     )
-    print(updated_member)
+    print(updated_member + "\n")
 
     # Delete members
-    member_dao.delete(member2[0])
+    print("Delete members")
+    member_dao.delete(member2[0] + "\n")
 
-    print(member_dao.get_all())
+    # Get all Members
+    print("Get all members")
+    print(member_dao.get_all() + "\n")
 
     # Get active loans
-    print(loan_dao.get_active_loans())
+    print("Get active loans")
+    print(loan_dao.get_active_loans() + "\n")
 
     # Return book
+    print("Return a book")
     returned = loan_dao.return_book(
         loan1[0],
         "2026-01-10"
     )
-    print(returned)
+    print(returned + "\n")
 
     # Delete Loan
-    loan_dao.delete(loan2[0])
+    print("Delete a loan")
+    loan_dao.delete(loan2[0] + "\n")
 
-    print(loan_dao.get_all())
+    # Get all Loans
+    print("Get all loans")
+    print(loan_dao.get_all() + "\n")
 
 if __name__ == "__main__":
     main()
