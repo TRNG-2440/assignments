@@ -32,7 +32,7 @@ def writeFile(filePath: Path, data: list[dict[str,Any]]) -> None:
       # Ensure parent folder (Data) exists.  If not, create new copy
       filePath.parent.mkdir(parents=True, exist_ok=True)
 
-      # # Open file, then convert content from python readable format to JSON
+      # Open file, then convert content from python readable format to JSON
       with filePath.open("w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
 

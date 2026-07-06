@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 import mysql.connector
 
 # Declare host - localhost
@@ -41,9 +40,6 @@ def Create_Database():
     cursor.execute(f"DROP DATABASE IF EXISTS {DATABASE}")
 
     # Create new database
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE}")
-
-    # Create database if it currently does not exist
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE}")
 
     # Save changes

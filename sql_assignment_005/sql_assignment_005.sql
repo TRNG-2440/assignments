@@ -60,3 +60,11 @@ FROM author
 JOIN books
     ON author.author_id = books.author
 WHERE author.author_id = 1005;
+
+
+SELECT
+    books.author,
+    SUM(books.page_count) AS total_page_count
+FROM books
+WHERE books.author = 1005
+GROUP BY books.author;
