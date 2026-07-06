@@ -1,6 +1,7 @@
 # Exercise 101 - Build a CRUD API
 
 ## Overview
+
 You will build your own FastAPI service that exposes full **CRUD** (Create,
 Read, Update, Delete) over a resource of your choice, backed by an in-memory
 store. This is the "serve" half of Day 1. By the end you will have a running
@@ -11,6 +12,7 @@ You are **not** copying demo 101 line for line. Pick a *different* resource so
 you actually think through the models and routes yourself.
 
 ## Learning Objectives
+
 - Stand up a FastAPI app run by Uvicorn.
 - Model a resource with Pydantic v2, using separate request and response models.
 - Implement list / get-one / create / replace / delete endpoints.
@@ -20,10 +22,12 @@ you actually think through the models and routes yourself.
 - Verify your API through the auto-generated `/docs`.
 
 ## Exercise Mode
+
 **Implementation / Code Lab.** You write and run real code. Deliverables are
 working endpoints you can demonstrate in `/docs` or with `curl`.
 
 ## Prerequisites / Setup
+
 - Python 3.10+ (for the `X | None` type-hint syntax).
 - Read notes **101-104** and skim demo **101** before starting.
 
@@ -36,7 +40,8 @@ pip install "fastapi>=0.135" "uvicorn>=0.42" "pydantic>=2.10"
 
 Suggested layout (a single `main.py` is acceptable for Part 1-2; split into a
 router for Part 5):
-```
+
+```markdown
 my-crud-api/
 +-- app/
 |   +-- __init__.py
@@ -49,6 +54,7 @@ my-crud-api/
 ```
 
 Run your app at any time with:
+
 ```bash
 uvicorn app.main:app --reload      # if using the app/ package layout
 # or, if everything is in one file main.py:
@@ -60,9 +66,11 @@ uvicorn main:app --reload
 **four fields** including one number and one boolean.
 
 ## Part 1 - App skeleton and health check
+
 Create the FastAPI app and a root/health endpoint.
 
 Starter:
+
 ```python
 from fastapi import FastAPI
 
@@ -77,14 +85,17 @@ def read_root():
 JSON body, and `http://127.0.0.1:8000/docs` loads.
 
 **Acceptance criteria:**
+
 - Server runs with `--reload`.
 - `/docs` shows your root endpoint.
 
 ## Part 2 - Pydantic models
+
 Define **two** models for your resource: a create/input model (no id) and an
 output model (with a server-assigned id). Add at least one `Field` constraint.
 
 Starter (adapt the fields to your resource):
+
 ```python
 from pydantic import BaseModel, Field
 
@@ -106,16 +117,20 @@ class BookOut(BaseModel):
 (e.g. `gt`, `min_length`).
 
 **Acceptance criteria:**
+
 - Input model has **no** `id`.
 - Output model **includes** `id`.
 
 ## Part 3 - Create and read
+
 Implement:
+
 - `POST /<resource>` -> creates an item, assigns an id, returns it with `201`.
 - `GET /<resource>/{id}` -> returns one item, or `404` if missing.
 - `GET /<resource>` -> returns the list.
 
 Starter:
+
 ```python
 from fastapi import HTTPException, status
 
@@ -144,19 +159,23 @@ def get_book(book_id: int):
 returns `404`.
 
 **Acceptance criteria:**
+
 - `POST` returns `201` and the created object with an `id`.
 - `GET /<resource>/{id}` returns the item; unknown id returns `404` with a
   `{"detail": ...}` body.
 - Return **dicts or models** - do not call `json.dumps()`.
 
 ## Part 4 - Update, delete, and a query filter
+
 Implement:
+
 - `PUT /<resource>/{id}` -> replaces an existing item, `404` if missing.
 - `DELETE /<resource>/{id}` -> deletes, returns `204 No Content`, `404` if missing.
 - Add a **query parameter** to `GET /<resource>` that filters the list (e.g.
   `?available=true` or `?limit=10`).
 
 Starter:
+
 ```python
 @app.get("/books")
 def list_books(available: bool | None = None, limit: int = 50):
@@ -178,11 +197,13 @@ def delete_book(book_id: int):
 least one filter/pagination query parameter.
 
 **Acceptance criteria:**
+
 - `PUT` replaces an item and returns it; missing id -> `404`.
 - `DELETE` returns `204` with an empty body; missing id -> `404`.
 - The query filter changes the returned list.
 
 ## Part 5 - Refactor to an APIRouter
+
 Move all `<resource>` endpoints into `app/routers/<resource>.py` behind an
 `APIRouter(prefix="/<resource>", tags=["<resource>"])`, and mount it from
 `main.py` with `app.include_router(...)`. See demo 101's structure.
@@ -192,12 +213,14 @@ app and includes the router. Everything still works and is grouped under one
 tag in `/docs`.
 
 **Acceptance criteria:**
+
 - `main.py` contains `app.include_router(...)`.
 - The route paths are unchanged from Part 4 (the prefix supplies the resource
   path).
 - `/docs` shows your endpoints grouped under the resource tag.
 
 ## Definition of Done
+
 - [ ] App runs with `uvicorn ... --reload` and `/docs` loads.
 - [ ] Two Pydantic models (input without id, output with id); at least one `Field` constraint.
 - [ ] All five CRUD endpoints implemented and working.
@@ -207,7 +230,9 @@ tag in `/docs`.
 - [ ] Returns dicts/models (no `json.dumps()` on returns).
 
 ## Submission
+
 Submit your project folder (excluding `.venv/`) containing:
+
 - the `app/` package (or `main.py`),
 - a `requirements.txt` (`pip freeze > requirements.txt`),
 - a short `README.md` with your chosen resource, the run command, and 3-4
@@ -216,9 +241,11 @@ Submit your project folder (excluding `.venv/`) containing:
 Be ready to demo the flow live in `/docs`.
 
 ## Time Estimate
+
 **2.0-2.5 hours.** Parts 1-4 are the core (~90 min); Part 5 refactor (~30 min).
 
 ## Resources
+
 - notes/101-fastapi-and-http-fundamentals.md
 - notes/102-fastapi-routing-and-parameters.md
 - notes/103-pydantic-models-and-validation.md
@@ -229,6 +256,7 @@ Be ready to demo the flow live in `/docs`.
 ## Rubric
 
 | Criterion | Points | What earns full marks |
+
 |-----------|-------:|------------------------|
 | App runs & docs load | 10 | Starts under Uvicorn; `/docs` renders all endpoints |
 | Pydantic models | 15 | Separate input/output models; input has no id; >=1 `Field` constraint |
