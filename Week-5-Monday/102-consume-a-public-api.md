@@ -227,6 +227,7 @@ Submit your project folder (excluding `.venv/`) containing:
 ## Rubric
 
 | Criterion | Points | What earns full marks |
+
 |-----------|-------:|------------------------|
 | Script runs | 10 | Executes top to bottom without unhandled crashes |
 | Basic GET + JSON parsing | 15 | Fetches and parses JSON from the chosen API |
