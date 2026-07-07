@@ -1,3 +1,5 @@
+import os.path
+
 from pandas import DataFrame
 import pandas as pd
 
@@ -29,8 +31,37 @@ if __name__ == "__main__":
     filtered_electronics: DataFrame = df[(df["category"] == "Electronics") & (df["revenue"] > 500)]
     airport_mall_transactions: DataFrame = df.isin(["Airport", "Mall"])
 
-    print(filtered_electronics.sum())
+    print(filtered_electronics["category"].count())
     print(airport_mall_transactions.sum())
 
     #Part 5
     print("Part 5")
+
+    summary: DataFrame = df.groupby("category").agg(
+        txns=("revenue", "size"),
+        total_revenue=("revenue", "sum"),
+        avg_revenue=("revenue", "mean"),
+    )
+    summary["avg_revenue"] = summary["avg_revenue"].round(2)
+    summary = summary.reset_index().sort_values(["total_revenue"], ascending=[False])
+    print(summary.head())
+
+    #Part 6
+    print("Part 6")
+    store_revenue: DataFrame = df.groupby("store").agg(
+        store_revenue=("revenue", "sum"),
+    )
+    store_df: DataFrame = pd.read_csv("stores.csv")
+    store_revenue = pd.merge(store_revenue, store_df, on="store", how="left", validate="one_to_one")
+    store_revenue["revenue_per_rent"] = store_revenue["store_revenue"]/store_revenue["monthly_rent"]
+    store_revenue["revenue_per_rent"] = store_revenue["revenue_per_rent"].round(3)
+
+    print(store_revenue.head())
+
+    #part 7
+    print("Part 7")
+    df.to_parquet("transactions_clean.parquet")
+    print("File Size", os.path.getsize("transactions_clean.parquet"), "bytes")
+    parquet_df = pd.read_parquet("transactions_clean.parquet")
+    print(parquet_df.shape)
+    print(parquet_df["txn_date"].dtype)
