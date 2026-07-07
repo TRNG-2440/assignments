@@ -135,14 +135,24 @@ class LoanDAO:
     def get_all():
         with get_connection() as conn:
             rows = conn.execute("SELECT * FROM Loan").fetchall()
-            return [dict(r) for r in rows]
+        
+        result_list = []
+        for r in rows:
+            result_list.append(dict(r))
+            
+        return result_list
 
-    @staticmethod
-    def get_active_loans():
-        with get_connection() as conn:
-            rows = conn.execute("SELECT * FROM Loan WHERE return_date IS NULL").fetchall()
-            return [dict(r) for r in rows]
-
+@staticmethod
+def get_active_loans():
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM Loan WHERE return_date IS NULL").fetchall()
+        
+        active_loans_list = []
+        for r in rows:
+            active_loans_list.append(dict(r))
+            
+        return active_loans_list
+    
     @staticmethod
     def return_book(loan_id, return_date):
         with get_connection() as conn:
