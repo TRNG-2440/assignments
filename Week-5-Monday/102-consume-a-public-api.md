@@ -1,7 +1,6 @@
 # Exercise 102 - Consume a Public API
 
 ## Overview
-
 You will write a Python client with **`httpx`** that pulls data from a public
 API (no authentication required), handles errors and timeouts robustly, and
 prints and saves a **structured** result. This is the "consume" half of Day 1 -
@@ -12,7 +11,6 @@ A script that hangs forever on a slow server or crashes on a `404` is not
 production-grade; yours will handle both.
 
 ## Learning Objectives
-
 - Make GET (and one POST) requests with `httpx`.
 - Send query parameters and read JSON responses.
 - Apply `raise_for_status()` and always set a **timeout**.
@@ -21,12 +19,10 @@ production-grade; yours will handle both.
 - Transform raw API JSON into a trimmed, structured shape and save it to disk.
 
 ## Exercise Mode
-
 **Implementation / Code Lab.** You write and run a real script. Deliverables
 are working functions and their observable output (console + a saved file).
 
 ## Prerequisites / Setup
-
 - Python 3.10+.
 - Internet access.
 - Read note **105** and skim demo **102** first.
@@ -39,7 +35,6 @@ pip install "httpx>=0.28"
 ```
 
 **Choose a no-auth public API.** Any of these work (pick one as your primary):
-
 - `https://api.github.com` - repos, users, issues (structured, reliable)
 - `https://httpbin.org` - echoes requests (great for POST/params, but flaky)
 - `https://api.publicapis.org/entries` - a directory of public APIs
@@ -48,12 +43,10 @@ pip install "httpx>=0.28"
 If your chosen API is down, fall back to GitHub.
 
 ## Part 1 - A single robust GET
-
 Write a function that fetches one resource and returns parsed JSON, with a
 timeout and `raise_for_status()`.
 
 Starter:
-
 ```python
 import httpx
 
@@ -71,19 +64,16 @@ if __name__ == "__main__":
 explicit `timeout` and `raise_for_status()`.
 
 **Acceptance criteria:**
-
 - Uses `params=` for any query parameters (no hand-built query strings).
 - Sets a `timeout`.
 - Calls `raise_for_status()`.
 
 ## Part 2 - Error handling for both failure modes
-
 Wrap your fetch so it distinguishes a **bad HTTP status** (server reached, e.g.
 `404`/`500`) from a **transport failure** (never reached / timed out), and
 returns `None` on failure instead of crashing.
 
 Starter:
-
 ```python
 def safe_fetch(url: str, params: dict | None = None) -> dict | None:
     try:
@@ -98,7 +88,6 @@ def safe_fetch(url: str, params: dict | None = None) -> dict | None:
 ```
 
 Prove it works by calling it against:
-
 - a valid URL (returns data),
 - a URL that 404s (e.g. `https://api.github.com/repos/encode/does-not-exist-xyz`),
 - an unreachable host (e.g. `https://this-host-does-not-exist.example`).
@@ -107,18 +96,15 @@ Prove it works by calling it against:
 you print a clear message for each.
 
 **Acceptance criteria:**
-
 - `HTTPStatusError` and `RequestError` are caught **separately**.
 - Failures return `None`; the program keeps running.
 
 ## Part 3 - Query parameters and (optionally) a POST
-
 Make at least one request that uses **query parameters** to shape the result
 (pagination, filtering, or search). If your API supports POST (e.g. httpbin),
 also do one POST with a JSON body and confirm what the server received.
 
 Starter:
-
 ```python
 # GET with query params (GitHub issues, 5 per page)
 issues = safe_fetch(
@@ -136,21 +122,17 @@ print(resp.json()["json"])   # httpbin echoes what it received
 or content of results visibly changes when you change the params.
 
 **Acceptance criteria:**
-
 - Query params passed via `params=`.
 - (If applicable) POST sends `json=` and you read the response.
 
 ## Part 4 - Reuse a Client and structure the output
-
 Use an `httpx.Client` context manager (shared `base_url` / `headers` /
 `timeout`) to make **two or more** related calls. Then transform the raw JSON
 into a **trimmed structure** (keep only the fields you care about) and:
-
 1. print the structured result, and
 2. save it to a JSON file on disk.
 
 Starter:
-
 ```python
 import json
 import httpx
@@ -186,14 +168,12 @@ if result:
 printed to the console **and** saved to a `.json` file.
 
 **Acceptance criteria:**
-
 - Uses an `httpx.Client` context manager for at least two calls (or two fetched
   resources).
 - Output is a trimmed structure (not the raw full response).
 - A JSON file is written to disk.
 
 ## Definition of Done
-
 - [ ] Script runs top to bottom with `python <script>.py`.
 - [ ] Every request sets a `timeout` and uses `raise_for_status()` (or handles status).
 - [ ] `HTTPStatusError` and `RequestError` are caught separately; failures don't crash the script.
@@ -202,9 +182,7 @@ printed to the console **and** saved to a `.json` file.
 - [ ] The final result is a trimmed structure, printed and saved to a JSON file.
 
 ## Submission
-
 Submit your project folder (excluding `.venv/`) containing:
-
 - your client script,
 - `requirements.txt` (`pip freeze > requirements.txt`),
 - the generated `output.json`,
@@ -212,11 +190,9 @@ Submit your project folder (excluding `.venv/`) containing:
   what the output represents.
 
 ## Time Estimate
-
 **1.5-2.0 hours.** Parts 1-2 core (~50 min); Parts 3-4 (~50 min).
 
 ## Resources
-
 - notes/105-consuming-apis-with-python-http-client.md
 - demos/102-http-client-consume/ (reference implementation)
 - [httpx QuickStart](https://www.python-httpx.org/quickstart/)
@@ -227,7 +203,6 @@ Submit your project folder (excluding `.venv/`) containing:
 ## Rubric
 
 | Criterion | Points | What earns full marks |
-
 |-----------|-------:|------------------------|
 | Script runs | 10 | Executes top to bottom without unhandled crashes |
 | Basic GET + JSON parsing | 15 | Fetches and parses JSON from the chosen API |
