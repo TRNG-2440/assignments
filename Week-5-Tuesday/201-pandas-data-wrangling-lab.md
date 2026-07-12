@@ -187,6 +187,7 @@ description.
 ## Rubric (100 points)
 
 | Criterion | Points |
+
 |-----------|--------|
 | Part 1 — load with correct dtypes + missing report | 10 |
 | Part 2 — missing values handled correctly (group-mean + constant) | 15 |

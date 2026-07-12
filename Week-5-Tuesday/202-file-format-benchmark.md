@@ -73,7 +73,7 @@ a combined table. Include a **size-ratio-vs-CSV** column for each format.
 
 **Deliverable:** a printed table like:
 
-```
+```text
 rows     format    size_mb   vs_csv   write_s   read_s
 50000    CSV       ...        1.00x    ...       ...
 50000    JSONL     ...        ...      ...       ...
@@ -103,7 +103,7 @@ In a `FINDINGS.md` (150–300 words) answer:
 
 1. Which format was smallest? By roughly what factor vs CSV, at each scale?
 2. Did the **size gap widen** as rows grew from 50k to 500k? Why would columnar
-   + compression scale better than row text?
+   - compression scale better than row text?
 3. Which format read fastest, and why (binary+typed vs text-parse)?
 4. Given your numbers, when would you *still* choose CSV or JSONL over Parquet?
 5. One sentence on the type-preservation result from Part 3 and why it matters
@@ -140,6 +140,7 @@ description. (No need to commit the generated data files.)
 ## Rubric (100 points)
 
 | Criterion | Points |
+
 |-----------|--------|
 | Part 1 — correct harness, all 3 formats written + timed | 25 |
 | Part 2 — two scales, combined table with vs-CSV ratios | 25 |

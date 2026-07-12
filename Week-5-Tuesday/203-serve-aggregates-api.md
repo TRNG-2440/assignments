@@ -138,6 +138,7 @@ screenshot **or** curl transcript of `/by-category`.
 ## Rubric (100 points)
 
 | Criterion | Points |
+
 |-----------|--------|
 | Part 1 — startup load (once) + /health | 15 |
 | Part 2 — /summary with correct JSON-native stats | 15 |
