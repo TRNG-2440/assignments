@@ -162,7 +162,7 @@ returns `404`.
 
 - `POST` returns `201` and the created object with an `id`.
 - `GET /<resource>/{id}` returns the item; unknown id returns `404` with a
-  `{"detail": ...}` body.
+`{"detail": ...}` body.
 - Return **dicts or models** - do not call `json.dumps()`.
 
 ## Part 4 - Update, delete, and a query filter
@@ -172,7 +172,7 @@ Implement:
 - `PUT /<resource>/{id}` -> replaces an existing item, `404` if missing.
 - `DELETE /<resource>/{id}` -> deletes, returns `204 No Content`, `404` if missing.
 - Add a **query parameter** to `GET /<resource>` that filters the list (e.g.
-  `?available=true` or `?limit=10`).
+`?available=true` or `?limit=10`).
 
 Starter:
 
@@ -216,18 +216,18 @@ tag in `/docs`.
 
 - `main.py` contains `app.include_router(...)`.
 - The route paths are unchanged from Part 4 (the prefix supplies the resource
-  path).
+path).
 - `/docs` shows your endpoints grouped under the resource tag.
 
 ## Definition of Done
 
-- [ ] App runs with `uvicorn ... --reload` and `/docs` loads.
-- [ ] Two Pydantic models (input without id, output with id); at least one `Field` constraint.
-- [ ] All five CRUD endpoints implemented and working.
-- [ ] Correct status codes: `201` create, `204` delete, `404` not-found, `422` invalid body.
-- [ ] At least one query parameter filters/pages the list endpoint.
-- [ ] Endpoints organized behind an `APIRouter`.
-- [ ] Returns dicts/models (no `json.dumps()` on returns).
+- [x] App runs with `uvicorn ... --reload` and `/docs` loads.
+- [x] Two Pydantic models (input without id, output with id); at least one `Field` constraint.
+- [x] All five CRUD endpoints implemented and working.
+- [x] Correct status codes: `201` create, `204` delete, `404` not-found, `422` invalid body.
+- [x] At least one query parameter filters/pages the list endpoint.
+- [x] Endpoints organized behind an `APIRouter`.
+- [x] Returns dicts/models (no `json.dumps()` on returns).
 
 ## Submission
 
@@ -236,13 +236,13 @@ Submit your project folder (excluding `.venv/`) containing:
 - the `app/` package (or `main.py`),
 - a `requirements.txt` (`pip freeze > requirements.txt`),
 - a short `README.md` with your chosen resource, the run command, and 3-4
-  example `curl` calls that exercise create / read / update / delete.
+example `curl` calls that exercise create / read / update / delete.
 
 Be ready to demo the flow live in `/docs`.
 
 ## Time Estimate
 
-**2.0-2.5 hours.** Parts 1-4 are the core (~90 min); Part 5 refactor (~30 min).
+**2.0-2.5 hours.** Parts 1-4 are the core (~~90 min); Part 5 refactor (~~30 min).
 
 ## Resources
 
