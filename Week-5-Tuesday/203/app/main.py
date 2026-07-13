@@ -31,5 +31,5 @@ app.include_router(router)
 
 
 @app.get("/health")
-def health():
+def return_health():
     return {"status": "ok", "rows": len(services.load_data())}

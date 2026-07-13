@@ -37,13 +37,12 @@ def _records(df: pd.DataFrame) -> list[dict]:
 
 
 def summary() -> dict:
-    """Overall totals across the whole dataset."""
     df = load_data()
     return {
         "orders": int(len(df)),
-        "total_revenue": round(float(df["revenue"].sum()), 2),  # pyright: ignore[reportArgumentType]
-        "avg_order_revenue": round(float(df["revenue"].mean()), 2),  # pyright: ignore[reportArgumentType]
-        "customers": int(df["customer"].nunique()),  # pyright: ignore[reportArgumentType]
+        "total_revenue": float(df["revenue"].sum()), # pyright: ignore[reportArgumentType]
+        "avg_order_revenue": float(df["revenue"].mean()),  # pyright: ignore[reportArgumentType]
+        "customers": int(df["order_id"].nunique())  # pyright: ignore[reportArgumentType]
     }
 
 
