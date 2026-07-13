@@ -194,12 +194,12 @@ printed to the console **and** saved to a `.json` file.
 
 ## Definition of Done
 
-- [ ] Script runs top to bottom with `python <script>.py`.
-- [ ] Every request sets a `timeout` and uses `raise_for_status()` (or handles status).
-- [ ] `HTTPStatusError` and `RequestError` are caught separately; failures don't crash the script.
-- [ ] At least one request uses query parameters via `params=`.
-- [ ] An `httpx.Client` context manager is used for related calls.
-- [ ] The final result is a trimmed structure, printed and saved to a JSON file.
+- [X] Script runs top to bottom with `python <script>.py`.
+- [X] Every request sets a `timeout` and uses `raise_for_status()` (or handles status).
+- [X] `HTTPStatusError` and `RequestError` are caught separately; failures don't crash the script.
+- [X] At least one request uses query parameters via `params=`.
+- [X] An `httpx.Client` context manager is used for related calls.
+- [X] The final result is a trimmed structure, printed and saved to a JSON file.
 
 ## Submission
 
