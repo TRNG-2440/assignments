@@ -1,76 +1,59 @@
-"""Service layer — all the pandas/data logic lives here.
-
-This layer knows NOTHING about HTTP. It loads the dataset once and exposes plain
-functions that return lists of dicts (JSON-ready). If the data source later
-changes from a CSV to BigQuery, only this file changes.
 """
-
+Service Layer
+"""
 from pathlib import Path
-
 import pandas as pd
 
-DATA_FILE = Path(__file__).parent.parent / "data" / "sales.csv"
+DATA_FILE = Path(__file__).parent.parent / "data" / "transactions.csv"
 
-_DF: pd.DataFrame | None = None
-
+DF: pd.DataFrame | None = None
 
 def load_data() -> pd.DataFrame:
-    """Read the CSV once, cache it, and add a derived `revenue` column.
+    global DF
+    if DF is None:
+        df = pd.read_csv(DATA_FILE, parse_dates = ["txn_date"])
+        df["revenue"] = (df["unit_price"] * df["quantity"]).round(2)
+        DF = df
+    return DF
 
-    Called at startup (see main.py lifespan) so the file is read a single time
-    for the whole process, not on every request.
-    """
-    global _DF
-    if _DF is None:
-        df = pd.read_csv(DATA_FILE, parse_dates=["order_date"])
-        df["revenue"] = (df["quantity"] * df["unit_price"]).round(2)
-        _DF = df
-    return _DF
-
-
-def _records(df: pd.DataFrame) -> list[dict]:
-    """DataFrame -> list of dicts, with NaN turned into None (valid JSON)."""
+def records(df: pd.DataFrame) -> list[dict]:
     df = df.copy()
-    if "order_date" in df.columns:
-        df["order_date"] = df["order_date"].dt.strftime("%Y-%m-%d")
-    return df.where(df.notna(), None).to_dict(orient="records")
-
+    if "txn_date" in df.columns:
+        df["txn_date"] = df["txn_date"].dt.strftime("%Y-%m-%d")
+    return df.where(df.notna(), None).to_dict(orient = "records")
 
 def summary() -> dict:
     df = load_data()
     return {
-        "orders": int(len(df)),
-        "total_revenue": float(df["revenue"].sum()), # pyright: ignore[reportArgumentType]
-        "avg_order_revenue": float(df["revenue"].mean()),  # pyright: ignore[reportArgumentType]
-        "customers": int(df["order_id"].nunique())  # pyright: ignore[reportArgumentType]
+        "transactions": int(len(df)),
+        "total_revenue": round(float(df["revenue"].sum()), 2), # pyright: ignore[reportArgumentType]
+        "avg_txn_revenue": round(float(df["revenue"].mean()), 2), # pyright: ignore[reportArgumentType]
+        "stores": int(df["store"].nunique()), # pyright: ignore[reportArgumentType]
+        "categories": int(df["category"].nunique()) # pyright: ignore[reportArgumentType]
     }
 
-
 def by_category() -> list[dict]:
-    """Aggregate revenue per category (GROUP BY category)."""
     df = load_data()
     agg = (
         df.groupby("category")
-        .agg(orders=("order_id", "count"),
+        .agg(transactions=("txn_id", "count"),
              total_revenue=("revenue", "sum"),
              avg_revenue=("revenue", "mean"))
         .round(2)
-        .reset_index()                        # group key -> column
-        .sort_values("total_revenue", ascending=False)
+        .reset_index()
+        .sort_values("total_revenue", ascending = False)
     )
-    return _records(agg)
+    return records(agg)
 
-
-def orders_page(limit: int, offset: int, region: str | None) -> dict:
-    """Paginated raw orders, with an optional region filter."""
+def transactions_page(limit: int, offset: int, store: str | None) -> dict:
     df = load_data()
-    if region:
-        df = df[df["region"] == region]
+    if store:
+        df = df[df["store"] == store]
     total = len(df)
-    page = df.iloc[offset:offset + limit]
+    page = df.iloc[offset: offset + limit]
     return {
         "total": total,
         "limit": limit,
         "offset": offset,
-        "results": _records(page),
+        "results": records(page)
     }
