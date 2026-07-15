@@ -1,9 +1,10 @@
 import csv
 from dataclasses import dataclass
 import os
-from typing import Any, Dict, Iterable, Iterator, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from pyspark.sql import SparkSession
+import pyspark.sql.functions as F
 
 Outage = Dict[str, Any]
 
@@ -68,6 +69,7 @@ def parse_and_validate_line(line: str) -> ValidationResult:
 
 
 def main():
+    # ----------- Part A ------------
     spark = (
         SparkSession.builder.appName("EnergyUtilityAssignment")
         .master("local[*]")
@@ -79,13 +81,16 @@ def main():
     print(f"Master: {spark.sparkContext.master}")
     print(f"Default parallelism: {spark.sparkContext.defaultParallelism}")
     print(f"CPU count: {os.cpu_count()}")
+    print()
 
+    # ----------- Part B ------------
     sc = spark.sparkContext
     rdd = sc.parallelize([95, 240, 180, 410, 525, 160, 305, 275, 80, 620, 390, 145], 2)
     print(f"Partition count: {rdd.getNumPartitions()}")
     new_rdd = rdd.filter(lambda x: x > 300).map(lambda x: (x, "PEAK"))
     print(f"Peak-reading count: {new_rdd.count()}")
     print(f"First 3 peak readings: {new_rdd.take(3)}")
+    print()
     """
     parallelize: Narrow Transformation
     filter: Narrow Transformation
@@ -93,7 +98,7 @@ def main():
     count: Action
     take: Action
     """
-
+    # ----------- Part C ------------
     raw_lines_rdd = sc.textFile("./data/outages.csv")
     lines_rdd = raw_lines_rdd.mapPartitionsWithIndex(remove_header)
     validation_rdd = (
@@ -114,6 +119,42 @@ def main():
         .sortByKey()
     )
     print(f"Resolved outage counts by zone: {final_rdd.collect()}")
+    print()
+
+    # ----------- Part D ------------
+    data = [
+        (201, "North", 1480.00),
+        (202, "South", 925.50),
+        (203, "North", 1710.25),
+        (204, "East", 2480.00),
+        (205, "South", 1195.75),
+        (206, "Central", 3450.50),
+        (207, "East", 1890.00),
+        (208, "West", 1325.25),
+    ]
+    schema = ["bill_id", "zone", "bill_amount"]
+    df = spark.createDataFrame(data=data, schema=schema)
+    print(f"Dataframe: {df.collect()}")
+    print()
+    print(f"Schema: {df.schema}")
+    print()
+    stats_df = (
+        df.groupBy(df.zone)
+        .agg(
+            F.count(df.bill_id).alias("bill_count"),
+            F.round(F.sum(df.bill_amount), 2).alias("total_revenue"),
+            F.round(F.avg(df.bill_amount), 2).alias("average_bill"),
+        )
+        .sort(F.col("total_revenue").desc())
+    )
+    print(f"Stats grouped by zone: {stats_df.collect()}")
+    print()
+    print(stats_df.explain())
+
+    """
+    HashAggregate: This operator performed groupby aggregations
+    Sort: This operator sorts aggregated rows in descending order of total revenue
+    """
     spark.stop()
 
 
