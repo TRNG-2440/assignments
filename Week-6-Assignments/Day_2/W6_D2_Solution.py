@@ -41,7 +41,7 @@ print("The operations that are transformations are .filter() and .map()")
 print("The operations that are actions are .count() and .take()")
 
 print("------- Part C -------")
-outages = spark.sparkContext.textFile("Day_2/data/outages.csv")
+outages = spark.sparkContext.textFile("data/outages.csv")
 header = outages.first()
 outages_no_header = outages.filter(lambda row: row != header)
 
