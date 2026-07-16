@@ -10,6 +10,7 @@ spark = (
 spark.sparkContext.setLogLevel("ERROR")
 
 # read outages.csv and remove headers
+# must be in Day 2 directory
 outages_with_header = spark.sparkContext.textFile("data/outages.csv")
 header = outages_with_header.first()
 outages = outages_with_header.filter(lambda row:row != header)
