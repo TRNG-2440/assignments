@@ -3,23 +3,6 @@ from pyspark.sql.functions import col, count, sum as spark_sum, avg, round
 import os
 import sys
 
-def parse_and_filter(row):
-    # Split the CSV row by commas
-    columns = row.split(",")
-    
-    # Ensure there are enough columns to parse (assuming zone is col 0, status is col 1)
-    if len(columns) < 2:
-        return None
-        
-    zone = columns[0].strip()
-    status = columns[1].strip().upper()
-    
-    # Step 3: Remove blank zones and retain only RESOLVED outages
-    if zone != "" and status == "RESOLVED":
-        return (zone, status)
-    
-    return None
-
 def main()->None:
     # Automatically point PySpark to the Python executable currently running this script
     os.environ['PYSPARK_PYTHON'] = sys.executable
