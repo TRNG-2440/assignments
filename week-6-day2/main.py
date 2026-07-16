@@ -92,7 +92,6 @@ def main():
     print(f"First 3 peak readings: {new_rdd.take(3)}")
     print()
     """
-    parallelize: Narrow Transformation
     filter: Narrow Transformation
     map: Narrow Transformation
     count: Action
