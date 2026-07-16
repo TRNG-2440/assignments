@@ -47,6 +47,8 @@ def part_b(spark: SparkSession, rdd: RDD[dict[str, Any]]) -> RDD[dict[str, Any]]
         return is_valid
 
     valid_rdd: RDD[dict[str, Any]] = rdd.filter(validate)
+    #force an action so that the accumulators run
+    valid_rdd.collect()
     print("missing_cities:", missing_city_acc.value)
     print("invalid_ages:", invalid_age_acc.value)
     print("invalid_bills:", invalid_bill_acc.value)
