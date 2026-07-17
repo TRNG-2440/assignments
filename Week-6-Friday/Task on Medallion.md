@@ -1,4 +1,5 @@
-# Databricks Medallion Architecture Assignment  
+# Databricks Medallion Architecture Assignment
+
 ## Hospital Appointment and Revenue Analytics
 
 ### Environment
@@ -19,7 +20,7 @@ You may use different paths, but keep the RAW, Bronze, Silver, and Gold layers c
 
 ---
 
-# Business Scenario
+## Business Scenario
 
 A multi-specialty hospital receives appointment data from web, mobile, and call-center systems. The source data contains duplicate appointments, invalid values, inconsistent text, invalid dates, incorrect doctor mappings, and billing errors.
 
@@ -32,9 +33,9 @@ Management needs a reliable medallion pipeline that:
 
 ---
 
-# Files Provided
+## Files Provided
 
-## 1. `hospital_appointments_raw.csv`
+### 1. `hospital_appointments_raw.csv`
 
 Contains **60 source records** with intentionally incorrect data.
 
@@ -73,7 +74,7 @@ Contains the following sheets:
 
 ---
 
-# Expected Architecture
+## Expected Architecture
 
 ```text
 CSV + Excel source files
@@ -114,9 +115,9 @@ CSV + Excel source files
 
 ---
 
-# Part A — Workspace and File Setup
+## Part A — Workspace and File Setup
 
-## Question 1
+### Question 1
 
 Create the following folder structure:
 
@@ -131,7 +132,7 @@ medallion_hospital/
 
 Upload the CSV and Excel files into the `input` folder.
 
-## Question 2
+### Question 2
 
 Create a new notebook named:
 
@@ -147,7 +148,7 @@ Add a Markdown cell containing:
 - Source file names
 - Brief business objective
 
-## Question 3
+### Question 3
 
 Define reusable path variables for all layers.
 
@@ -164,9 +165,9 @@ gold_path
 
 ---
 
-# Part B — RAW Layer
+## Part B — RAW Layer
 
-## Question 4
+### Question 4
 
 Copy the original CSV and Excel files from the input location into the RAW layer without changing their content.
 
@@ -178,19 +179,19 @@ The RAW layer must preserve:
 - Original records
 - Original incorrect values
 
-## Question 5
+### Question 5
 
 Display the files available in the RAW layer and prove that both source files were copied successfully.
 
-## Question 6
+### Question 6
 
 Explain in a Markdown cell why the RAW layer should not contain business transformations.
 
 ---
 
-# Part C — Bronze Layer
+## Part C — Bronze Layer
 
-## Question 7
+### Question 7
 
 Read `hospital_appointments_raw.csv` into a Spark DataFrame.
 
@@ -198,7 +199,7 @@ Use options appropriate for a header-based CSV file.
 
 Initially load source columns in a way that prevents invalid values from being silently lost.
 
-## Question 8
+### Question 8
 
 Read all Excel sheets required for the assignment.
 
@@ -213,7 +214,7 @@ data_dictionary
 
 Use a method supported by your workspace. A Python Excel library may be used to read the workbook and then convert each sheet to a Spark DataFrame.
 
-## Question 9
+### Question 9
 
 Add the following audit columns to the appointment Bronze DataFrame:
 
@@ -225,11 +226,11 @@ bronze_ingestion_date
 record_hash
 ```
 
-## Question 10
+### Question 10
 
 The `record_hash` should be created from the source business columns. It must help detect exact duplicate records.
 
-## Question 11
+### Question 11
 
 Write the appointment Bronze DataFrame and all Excel reference DataFrames to the Bronze layer.
 
@@ -245,7 +246,7 @@ bronze_data_dictionary
 
 Use Delta format when supported. Otherwise, use Parquet and clearly document the choice.
 
-## Question 12
+### Question 12
 
 Show:
 
@@ -256,11 +257,11 @@ Show:
 
 ---
 
-# Part D — Silver Data Quality and Transformation
+## Part D — Silver Data Quality and Transformation
 
 Perform the following transformations.
 
-## Question 13 — Trim and standardize text
+### Question 13 — Trim and standardize text
 
 Apply trimming and case standardization to:
 
@@ -283,7 +284,7 @@ Expected examples:
 "dr. meera iyer" → "Dr. Meera Iyer"
 ```
 
-## Question 14 — Standardize appointment status
+### Question 14 — Standardize appointment status
 
 Join with `status_mapping` and derive:
 
@@ -295,7 +296,7 @@ include_in_utilization
 
 Unmapped statuses must be marked as rejected or assigned a clear validation failure.
 
-## Question 15 — Convert and validate appointment dates
+### Question 15 — Convert and validate appointment dates
 
 Convert `appointment_date` to a valid date.
 
@@ -312,7 +313,7 @@ appointment_day
 
 Invalid dates must not be accepted as valid.
 
-## Question 16 — Convert numeric columns
+### Question 16 — Convert numeric columns
 
 Convert these columns safely:
 
@@ -325,7 +326,7 @@ amount_paid
 
 Rows that cannot be converted must be flagged.
 
-## Question 17 — Validate age
+### Question 17 — Validate age
 
 Valid age range:
 
@@ -335,7 +336,7 @@ Valid age range:
 
 Flag negative ages and unrealistic ages.
 
-## Question 18 — Validate gender
+### Question 18 — Validate gender
 
 Accepted values:
 
@@ -347,7 +348,7 @@ O
 
 Any other value must be rejected or marked invalid.
 
-## Question 19 — Standardize department values
+### Question 19 — Standardize department values
 
 Map known aliases where appropriate.
 
@@ -359,7 +360,7 @@ Cardio → Cardiology
 
 After standardization, the department must exist in `department_targets`.
 
-## Question 20 — Validate doctor details
+### Question 20 — Validate doctor details
 
 Join the appointment data with `doctor_master`.
 
@@ -372,7 +373,7 @@ Validate that:
 
 Use the master doctor name and department in the clean output.
 
-## Question 21 — Handle duplicate records
+### Question 21 — Handle duplicate records
 
 Create rules for:
 
@@ -381,7 +382,7 @@ Create rules for:
 
 For duplicate appointment IDs, keep one deterministic record and reject the remaining records. Document the ordering rule used.
 
-## Question 22 — Handle null values
+### Question 22 — Handle null values
 
 Apply appropriate rules:
 
@@ -391,14 +392,14 @@ Apply appropriate rules:
 - Blank payment mode → allowed only when amount paid is `0`
 - Missing required master-data match → reject
 
-## Question 23 — Validate consultation fee
+### Question 23 — Validate consultation fee
 
 Rules:
 
 - Must be numeric
 - Must be greater than or equal to zero
 
-## Question 24 — Validate discount
+### Question 24 — Validate discount
 
 Rules:
 
@@ -406,7 +407,7 @@ Rules:
 0 <= discount_pct <= 100
 ```
 
-## Question 25 — Calculate expected amount
+### Question 25 — Calculate expected amount
 
 Create:
 
@@ -422,7 +423,7 @@ consultation_fee × (1 - discount_pct / 100)
 
 For non-billable statuses, expected paid amount should normally be zero.
 
-## Question 26 — Validate amount paid
+### Question 26 — Validate amount paid
 
 Flag:
 
@@ -433,7 +434,7 @@ Flag:
 
 Use a small tolerance for decimal comparison.
 
-## Question 27 — Validate payment mode
+### Question 27 — Validate payment mode
 
 Accepted paid transaction modes:
 
@@ -446,7 +447,7 @@ NET_BANKING
 
 Blank is allowed only when no amount was paid.
 
-## Question 28 — Validate phone number
+### Question 28 — Validate phone number
 
 A valid phone number must contain exactly 10 numeric digits.
 
@@ -458,7 +459,7 @@ Create a masked phone field for the Silver layer, for example:
 
 Do not expose the full phone number in Gold reports.
 
-## Question 29 — Create validation columns
+### Question 29 — Create validation columns
 
 Create at least:
 
@@ -477,7 +478,7 @@ Example:
 INVALID_AGE|INVALID_PHONE
 ```
 
-## Question 30 — Split valid and rejected data
+### Question 30 — Split valid and rejected data
 
 Create:
 
@@ -494,7 +495,7 @@ The rejected dataset must retain:
 - Bronze ingestion timestamp
 - Silver processing timestamp
 
-## Question 31 — Silver output
+### Question 31 — Silver output
 
 Write both clean and rejected datasets into the Silver layer.
 
@@ -513,11 +514,11 @@ Bronze count = Clean Silver count + Rejected Silver count
 
 ---
 
-# Part E — Gold Layer: Report-Ready Outputs
+## Part E — Gold Layer: Report-Ready Outputs
 
 Create the following Gold outputs from clean Silver data.
 
-## Question 32 — Department monthly performance
+### Question 32 — Department monthly performance
 
 Create a monthly department-level report with:
 
@@ -555,7 +556,7 @@ PARTIALLY_ACHIEVED
 NOT_ACHIEVED
 ```
 
-## Question 33 — Doctor performance report
+### Question 33 — Doctor performance report
 
 Create a doctor-level report with:
 
@@ -580,7 +581,7 @@ Rank doctors within each department by:
 1. Net revenue
 2. Completed appointments
 
-## Question 34 — Daily operational trend
+### Question 34 — Daily operational trend
 
 Create a daily report:
 
@@ -594,7 +595,7 @@ no_show_appointments
 net_revenue
 ```
 
-## Question 35 — Source-system performance
+### Question 35 — Source-system performance
 
 Create a source-system report:
 
@@ -609,7 +610,7 @@ net_revenue
 average_revenue
 ```
 
-## Question 36 — Data-quality summary
+### Question 36 — Data-quality summary
 
 Create a Gold quality report containing:
 
@@ -635,7 +636,7 @@ Include at least these quality categories:
 - Invalid phone
 - Invalid status
 
-## Question 37 — Top business insights
+### Question 37 — Top business insights
 
 Using the Gold outputs, answer these questions:
 
@@ -652,9 +653,9 @@ Using the Gold outputs, answer these questions:
 
 ---
 
-# Part F — Technical Requirements
+## Part F — Technical Requirements
 
-## Question 38
+### Question 38
 
 Use Spark transformations wherever practical.
 
@@ -682,13 +683,13 @@ rank or dense_rank
 Window
 ```
 
-## Question 39
+### Question 39
 
 Avoid collecting the full source dataset to the driver.
 
 Small reference sheets may be converted through Python when necessary, but the appointment transformations and aggregations must be performed using Spark.
 
-## Question 40
+### Question 40
 
 Make the pipeline rerunnable.
 
@@ -702,7 +703,7 @@ append with deduplication
 run-specific paths
 ```
 
-## Question 41
+### Question 41
 
 Add Markdown documentation before each major layer:
 
@@ -721,7 +722,7 @@ Explain:
 - Main transformations
 - Validation performed
 
-## Question 42
+### Question 42
 
 At the end of the notebook, print or display a control summary:
 
@@ -737,7 +738,7 @@ Pipeline status
 
 ---
 
-# Deliverables
+## Deliverables
 
 Submit:
 
@@ -751,5 +752,3 @@ Submit:
 8. A short document containing the ten business insights.
 9. A brief explanation of the medallion architecture used.
 10. The final reconciliation result.
-
----
