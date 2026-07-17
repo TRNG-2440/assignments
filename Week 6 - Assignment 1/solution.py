@@ -1,18 +1,39 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import count, sum, avg, round, col
-
-
 import os
 
-# Declare configuratins by instantiating spark object
-spark = (
-  SparkSession.builder 
-  .appName("Smart Energy Utility Analytics")
-  .master("local[*]")
+# Setup Spark configurations using class
+class SparkClass:
+  def __init__(self, appName: str = "Smart Energy Utility Analytics", master: str = "local[*]"):
+    self.appName = appName
+    self.master = master
+  
+  # Configurations used to instantiate spark object
+  def Configure(self):
+   
+    # Declare configuratins by instantiating spark object
+   self.spark = (
+   SparkSession.builder 
+  .appName(self.appName)
+  .master(self.master)
   .getOrCreate()
-)
+  )
+ 
+  # Return spark object
+  def GetSpark(self) -> SparkSession:
+    return self.spark
+  
+# Instantiate class object
+s = SparkClass()
+
+# Execute spark configurations
+s.Configure()
+
+# Instantiate spark object
+spark = s.GetSpark()
+
 # Streamline sparkContext command
-sc = spark.sparkContext
+sc = s.GetSpark().sparkContext
 
 # Alert user of any error
 sc.setLogLevel("ERROR")
@@ -167,8 +188,6 @@ metrics.show()
 
 # Provides execution plan spark will use to execute metrics dataframe.
 metrics.explain()
-
-
 
 # Stop spark session
 spark.stop()
