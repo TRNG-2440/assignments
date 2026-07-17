@@ -45,10 +45,14 @@ print(df.head())
 # Part 4 — Filter
 print(f'\n{'-' * 20} Part 4 — Filter{'-' * 20}\n')
 
-# Display rows that correspond to electronics and are over $500 in revenue
-highAmountElectronics = df[(df["category"] == "Electronics") & (df["revenue"] > 500)]
-print(f"Electronics transactions with revenue > 500: {len(highAmountElectronics)}")
-print(highAmountElectronics)
+# Declare electronic data frame that contains elentronics with revenue greater than $500
+electronicDataFrame = df[(df["category"] == "Electronics") & (df["revenue"] > 500)]
+
+# Display size of electronic data frame
+print(f"Electronics transactions with revenue > 500: {len(electronicDataFrame)}")
+
+# Display entire electronic data frame
+print(electronicDataFrame)
 
 # Determine amount of transactions in airport or mall
 airportOrMall = df[df["store"].isin(["Airport", "Mall"])].shape[0]
