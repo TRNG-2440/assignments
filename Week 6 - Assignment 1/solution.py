@@ -1,4 +1,6 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import count, sum, avg, round, col
+
 
 import os
 
@@ -31,7 +33,7 @@ print(f'Master Name: {sc.master}\n')
 print(f'Default Paralellism: {sc.defaultParallelism}\n')
 
 # Display master name
-print(f'CPU Count: {os.cpu_count}\n')
+print(f'CPU Count: {os.cpu_count()}\n')
 
 # Display Part B
 print(f'\n{20 * '-'} Part B {20 * '-'}\n')
@@ -118,5 +120,56 @@ print('\nSort by key: ',sortedCountsRDD.collect())
 countsRDD.sortBy(lambda x: x[1], ascending=False)
 print('\nSort by value in descending order: ',sortedCountsRDD.collect())
 
+# Display Part D
+print(f'\n{20 * '-'} Part D {20 * '-'}\n')
+
+# Declare list tuple of billing data
+billingTuple = [
+(201, "North", 1480.00),
+(202, "South", 925.50),
+(203, "North", 1710.25),
+(204, "East", 2480.00),
+(205, "South", 1195.75),
+(206, "Central", 3450.50),
+(207, "East", 1890.00),
+(208, "West", 1325.25)
+]
+
+# Declare billing dataframe
+billingDF = spark.createDataFrame(
+  billingTuple,
+  ["bill_id", "zone", "bill_amount"]
+)
+
+# Display billing dataframe
+print(f'Display billing dataframe: {billingDF.collect()}')
+
+print()
+
+# Display billing schema
+print("Display billing schema:")
+billingDF.printSchema()
+
+# Group by zone and calculate bill count, total revenue and average bill.
+metrics = (
+    billingDF
+    .groupBy("zone")
+    .agg(
+        count("*").alias("bill_count"),
+        round(sum("bill_amount"), 2).alias("total_revenue"),
+        round(avg("bill_amount"), 2).alias("average_bill")
+    )
+    .orderBy(col("total_revenue").desc())
+)
+
+# Reveal metrics table
+metrics.show()
+
+# Provides execution plan spark will use to execute metrics dataframe.
+metrics.explain()
+
+
+
 # Stop spark session
 spark.stop()
+
