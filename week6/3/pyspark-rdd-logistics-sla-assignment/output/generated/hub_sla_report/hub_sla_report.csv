@@ -1,0 +1,6 @@
+hub_id,city,region,manager,target,delivered_count,on_time,delay_hours,delivery_charge,on_time_pct,avg_delay,total_charge,sla_gap,target_status
+HUB-HYD,Hyderabad,South-Central,Suresh,91.0,3,3,0,3780.42,1.0,0.0,3780.42,90.0,Not Met
+HUB-PUN,Pune,West,Rahul,89.0,7,6,-4.0,7195.98,0.8571428571428571,-0.5714285714285714,7195.98,88.14285714285714,Not Met
+HUB-CBE,Coimbatore,South,Meena,92.0,10,6,-45.0,14009.61,0.6,-4.5,14009.61,91.4,Not Met
+HUB-BLR,Bengaluru,South,Divya,93.0,5,2,-54.0,2807.8100000000004,0.4,-10.8,2807.8100000000004,92.6,Not Met
+HUB-CHE,Chennai,South,Arun,90.0,13,5,-94.0,10626.600000000002,0.38461538461538464,-7.230769230769231,10626.600000000002,89.61538461538461,Not Met

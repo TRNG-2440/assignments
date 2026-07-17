@@ -1,0 +1,15 @@
+event_id,event_date,shipment_id,hub_id,service_type,status,promised_hours,actual_hours,distance_km,weight_kg,delivery_charge,Valid,RejectedReason
+EVT-1001,2026-07-01,SHP-5001,HUB-BLR,EXPRESS,FAILED,72.0,74.0,944.0,16.21,1857.37,False,Delivery failed for some reason
+EVT-1009,2026-07-09,SHP-5009,HUB-CHE,SAME_DAY,RETURNED,48.0,58.0,790.0,4.58,1329.4,False,Delivery was returned
+EVT-1010,2026-07-10,SHP-5010,HUB-CHE,STANDARD,FAILED,72.0,86.0,135.0,13.02,363.68,False,Delivery failed for some reason
+EVT-1015,2026-07-15,SHP-5015,HUB-CBE,STANDARD,FAILED,72.0,-5.0,986.0,9.27,1189.63,False,Delivery failed for some reason
+EVT-1017,2026-07-02,SHP-5017,HUB-PUN,EXPRESS,RETURNED,24.0,8.0,742.0,3.07,1138.97,False,Delivery was returned
+EVT-1031,2026-07-01,SHP-5031,HUB-BLR,SAME_DAY,RETURNED,24.0,8.0,237.0,20.25,462.52,False,Delivery was returned
+EVT-1032,2026-07-02,SHP-5032,HUB-HYD,SAME_DAY,UNKNOWN,72.0,36.0,1001.0,26.58,1546.86,False,Unknown deliver status
+EVT-1036,2026-07-06,SHP-5036,HUB-CHE,EXPRESS,RETURNED,36.0,11.0,708.0,23.62,1184.63,False,Delivery was returned
+EVT-1037,2026-07-07,SHP-5037,HUB-BLR,EXPRESS,FAILED,72.0,89.0,978.0,17.69,1350.51,False,Delivery failed for some reason
+EVT-1038,2026-07-08,SHP-5038,HUB-PUN,SAME_DAY,RETURNED,24.0,13.0,382.0,2.41,596.21,False,Delivery was returned
+EVT-1044,2026-07-14,SHP-5044,HUB-PUN,SAME_DAY,RETURNED,48.0,35.0,706.0,3.63,799.45,False,Delivery was returned
+EVT-1047,2026-07-02,SHP-5047,HUB-CHE,SAME_DAY,FAILED,36.0,52.0,201.0,1.7,-500.0,False,Delivery failed for some reason
+EVT-1055,2026-07-10,SHP-5055,HUB-CHE,EXPRESS,FAILED,24.0,8.0,187.0,16.82,408.25,False,Delivery failed for some reason
+EVT-1060,2026-07-15,SHP-5060,HUB-HYD,SAME_DAY,FAILED,36.0,27.0,91.0,25.7,406.7,False,Delivery failed for some reason
