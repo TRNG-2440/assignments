@@ -1,0 +1,2 @@
+The broadcast variable was used in enrich() where we broadcasted the service charge percentages for each department so that all executors can access it.
+The accumulators were used within validate() where they were used to count up all the invalid records within the data.
