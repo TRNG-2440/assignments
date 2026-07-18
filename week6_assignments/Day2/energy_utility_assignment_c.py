@@ -71,7 +71,7 @@ def remove_header(partition_index, iterator):
     if partition_index == 0:
         next(iterator, None)
 
-    yield from iterator #returning all the rest of the lines
+    yield from iterator #looping under the hood and returning all the rest of the lines
 
 def parse_rows(line):
     cols = next(csv.reader([line]))
