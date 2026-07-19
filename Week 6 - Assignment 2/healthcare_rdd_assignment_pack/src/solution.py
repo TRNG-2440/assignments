@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 from enum import Enum
-from pyspark.sql.functions import count, sum, avg, round, col
 
 # Payment status enum
 class PaymentStatus(Enum):
@@ -104,6 +103,20 @@ def ParseRow(row: str) -> dict:
   return dictionary
 
 # ---------------------------------------------------------------------
+# Perform service charge calculations for Part C
+def Service_Charge_Calculations(s, service_charge_map):
+
+  # Calculate service charge percentage of each department
+  percentage = service_charge_map.value.get(s["department"],0.0)
+
+  # Service charge = bill_amount * (percentage of service charge)
+  s["service_charge"] = round(s["bill_amount"] * percentage, 2)
+
+  # Total Amount = bill_amount + service_charge
+  s["total_amount"] = round(s["bill_amount"] + s["service_charge"], 2)
+
+  return s
+# ---------------------------------------------------------------------
 
 # Main function
 def main():
@@ -138,8 +151,7 @@ def main():
   # Remove header
   healthCareRdd = healthCareRDD.filter(lambda x: x != header)
 
-  # Print result of part A
-  print(f'\n{20 * '-'} Result: {20 * '-'}\n')
+  # Print results
   print(healthCareRdd.take(10))
 
    # Display Part B - Data Validation Using Accumulators
@@ -183,7 +195,18 @@ def main():
     "Neurology": 0.15,
     "General Medicine": 0.05,
 }
+  
+  # Broadcast service_charge_map
+  service_charge_map = sc.broadcast(service_charge_map)
+
+  # Produce dictionary that contains all the broadcasted charges
+  Charges = healthCareRdd.map(lambda x: Service_Charge_Calculations(x, service_charge_map))
+
+  # Print charges
+  print(Charges.collect())
 
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
   main()
+
+
