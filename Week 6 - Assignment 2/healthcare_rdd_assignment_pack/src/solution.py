@@ -139,7 +139,7 @@ def main():
   healthCareRDD = sc.textFile("data/healthcare_patient_visits.csv")
 
   # Declare copy of origin healthCareRdd containing raw data
-  RawRDD = healthCareRDD
+  RawRDD = healthCareRDD.copy()
 
   # Declare header
   header = healthCareRDD.first()
@@ -151,7 +151,7 @@ def main():
   healthCareRdd = healthCareRdd.map(ParseRow)
 
   # Cache the valid parsed RDD
-  ealthCareRdd = healthCareRdd.filter(Validate).cache()
+  healthCareRdd = healthCareRdd.filter(Validate).cache()
 
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
