@@ -138,7 +138,7 @@ def main():
   # Remove header
   healthCareRdd = healthCareRDD.filter(lambda x: x != header)
 
-   # Display Part A - RDD Creation
+   # Display Part B - Data Validation Using Accumulators
   print(f'\n{20 * '-'} Part B {20 * '-'}\n')
 
   # Instantiate ValidatorClass object
