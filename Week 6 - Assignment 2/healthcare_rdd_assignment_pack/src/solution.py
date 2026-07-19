@@ -9,7 +9,6 @@ class PaymentStatus(Enum):
     CANCELLED = "CANCELLED"
 
 # ---------------------------------------------------------------------
-
 # Build class containing Spark configuration
 class SparkClass:
 
@@ -33,6 +32,51 @@ class SparkClass:
   def GetSpark(self) -> SparkSession:
     return self.spark
 
+# ---------------------------------------------------------------------
+# Build class that keeps track of RDD validity
+
+class ValidatorClass:
+   
+   # Paramaterized constructor
+   def __init__(self,sc):
+    # Declare accumulators - count # of missing values and invalid columns
+    self.missingCity = sc.accumulator(0)   
+    self.invalidAge = sc.accumulator(0)
+    self.invalidBill = sc.accumulator(0)
+    self.invalidStatus = sc.accumulator(0)
+    self.invalidTotal = sc.accumulator(0)
+
+   # Determine if there are any error or mistakes present in each column
+   def Validate(self, v):
+    
+    # Determine if condition is valid
+    isValid = True
+
+    # If value is missing, increment counter and assign false to isValid
+    if not v["city"]:
+      self.missingCity.add(1); 
+      isValid = False
+
+    # If age is 0 or less, increment counter and assign false to isValid
+    if v["age"] <= 0:
+        self.invalidAge.add(1); 
+        isValid = False
+
+    # If bill_amount is 0 or less, increment counter and assign false to isValid
+    if v["bill_amount"] <= 0:
+        self.invalidBill.add(1); 
+        isValid = False
+
+    # If payment_status is not the following: PAID, PENDING or CANCELLED, increment counter and assign false to isValid
+    if v["payment_status"] not in {s.value for s in PaymentStatus}:
+        self.invalidStatus.add(1); 
+        isValid = False
+
+    # Determine if any check failed
+    if not isValid:
+        self.invalidTotal.add(1)
+
+    return isValid
 # ---------------------------------------------------------------------
 # Parse every row into a dictionary
 def ParseRow(row: str) -> dict:
@@ -61,59 +105,6 @@ def ParseRow(row: str) -> dict:
 
 # ---------------------------------------------------------------------
 
-# Determine if there are any error or mistakes present in each column
-def Validate(r):
-    
-    # Instantiate class object
-    s = SparkClass()
-
-    # Execute spark configurations
-    s.Configure()
-
-    # Instantiate spark object
-    spark = s.GetSpark()
-
-    # Instantiate spark context object
-    sc = spark.sparkContext
-
-    # Declare accumulators - count # of missing values and invalid columns
-    missingCity = sc.accumulator(0)   
-    invalidAge = sc.accumulator(0)
-    invalidBill = sc.accumulator(0)
-    invalidStatus = sc.accumulator(0)
-    invalidTotal = sc.accumulator(0)
-    
-    # Determine if condition is valid
-    isValid = True
-
-    # If value is missing, increment counter and assign false to isValid
-    if not r["city"]:
-        missingCity.add(1); 
-        isValid = False
-
-    # If age is 0 or less, increment counter and assign false to isValid
-    if r["age"] <= 0:
-        invalidAge.add(1); 
-        isValid = False
-
-    # If bill_amount is 0 or less, increment counter and assign false to isValid
-    if r["bill_amount"] <= 0:
-        invalidBill.add(1); 
-        isValid = False
-
-    # If payment_status is not the following: PAID, PENDING or CANCELLED, increment counter and assign false to isValid
-    if r["payment_status"] not in {s.value for s in PaymentStatus}:
-        invalidStatus.add(1); 
-        isValid = False
-
-    # Determine if any check failed
-    if not isValid:
-        invalidTotal.add(1)
-
-    return isValid
-
-# ---------------------------------------------------------------------
-
 # Main function
 def main():
 
@@ -139,7 +130,7 @@ def main():
   healthCareRDD = sc.textFile("data/healthcare_patient_visits.csv")
 
   # Declare copy of origin healthCareRdd containing raw data
-  RawRDD = healthCareRDD.copy()
+  RawRDD = healthCareRDD
 
   # Declare header
   header = healthCareRDD.first()
@@ -147,11 +138,35 @@ def main():
   # Remove header
   healthCareRdd = healthCareRDD.filter(lambda x: x != header)
 
-  # Parse every row into a dictionary
+   # Display Part A - RDD Creation
+  print(f'\n{20 * '-'} Part B {20 * '-'}\n')
+
+  # Instantiate ValidatorClass object
+  vc = ValidatorClass(sc)
+
+   # Parse every row into a dictionary
   healthCareRdd = healthCareRdd.map(ParseRow)
 
   # Cache the valid parsed RDD
-  healthCareRdd = healthCareRdd.filter(Validate).cache()
+  healthCareRdd = healthCareRdd.filter(vc.Validate).cache()
+
+  # Display valid records
+  print("Total data rows:", healthCareRdd.count())
+
+  # Display total missing cities
+  print("Total missing cities:", vc.missingCity.value)
+
+  # Display total invalid ages 
+  print("Total invalid ages:", vc.invalidAge.value)
+
+  # Display total invalid bills 
+  print("Total invalid bills:", vc.invalidBill.value)
+
+  # Display total invalid statuses
+  print("Total invalid statuses:", vc.invalidStatus.value)
+
+  # Display # of total invalid rows detected
+  print("Total invalid rows:", vc.invalidTotal.value)
 
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
