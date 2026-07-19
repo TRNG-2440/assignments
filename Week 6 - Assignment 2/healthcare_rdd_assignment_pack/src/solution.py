@@ -138,6 +138,10 @@ def main():
   # Remove header
   healthCareRdd = healthCareRDD.filter(lambda x: x != header)
 
+  # Print result of part A
+  print(f'\n{20 * '-'} Result: {20 * '-'}\n')
+  print(healthCareRdd.take(10))
+
    # Display Part B - Data Validation Using Accumulators
   print(f'\n{20 * '-'} Part B {20 * '-'}\n')
 
@@ -167,6 +171,18 @@ def main():
 
   # Display # of total invalid rows detected
   print("Total invalid rows:", vc.invalidTotal.value)
+
+  # Display Part C - Broadcast Variable
+  print(f'\n{20 * '-'} Part C {20 * '-'}\n')
+
+  # Declare service charge map
+  service_charge_map = {
+    "Cardiology": 0.18,
+    "Orthopedics": 0.12,
+    "Dermatology": 0.08,
+    "Neurology": 0.15,
+    "General Medicine": 0.05,
+}
 
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
