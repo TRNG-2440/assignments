@@ -109,11 +109,11 @@ def Service_Charge_Calculations(s, service_charge_map):
   # Calculate service charge percentage of each department
   percentage = service_charge_map.value.get(s["department"],0.0)
 
-  # Service charge = bill_amount * (percentage of service charge)
+  # service_charge = bill_amount * (percentage of service charge)
   s["service_charge"] = round(s["bill_amount"] * percentage, 2)
 
-  # Total Amount = bill_amount + service_charge
-  s["total_amount"] = round(s["bill_amount"] + s["service_charge"], 2)
+  # final_amount = bill_amount + service_charge
+  s["final_amount"] = round(s["bill_amount"] + s["service_charge"], 2)
 
   return s
 # ---------------------------------------------------------------------
@@ -204,6 +204,57 @@ def main():
 
   # Print charges
   print(Charges.collect())
+
+  # Display Part D - Transformations to Perform
+  print(f'\n{20 * '-'} Part D {20 * '-'}\n')
+
+  # Count # of paid charges using filter tool
+  paymentsMade = Charges.filter(lambda c : c["payment_status"] == "PAID")
+
+  # Display # of payments made
+  print(f'# of payments paid: {paymentsMade.count()}')
+
+  # Count # of cancelled charges using filter tool
+  canceledPayments = Charges.filter(lambda c : c["payment_status"] == "CANCELLED")
+
+  # Display # of canceled payments
+  print(f'# of canceled payments: {canceledPayments.count()}')
+
+  # Implement operation to determine distinct cities
+  distinctCities = Charges.map(lambda d : d["city"]).distinct()
+
+  # Implement operation to determine distinct department
+  distinctDepartments = Charges.map(lambda d : d["department"]).distinct()
+
+  # Display distinct cities 
+  print("Distinct cities:", distinctCities.collect())
+
+  # Display distinct departments 
+  print("Distinct departments:", distinctDepartments.collect())
+
+  # Determine total city revenue using reduce by key
+  totalCityRevenue = (
+    paymentsMade
+    .map(lambda r: (r["city"], r["final_amount"]))  
+    .reduceByKey(lambda x, y: x + y)
+)
+  # Display total amount of revenue per city
+  print("Total amount of revenue per city:", totalCityRevenue.collect())
+
+  # Determine total department revenue using reduce by key
+  totalDepartmentRevenue = (
+    paymentsMade
+    .map(lambda r: (r["department"], r["final_amount"]))
+    .reduceByKey(lambda a, b: a + b)
+)
+  
+  # Display total amount of revenue per city
+  print("Total amount of revenue per department:", totalDepartmentRevenue.collect())
+ 
+  # Add newline
+  print()
+
+
 
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
