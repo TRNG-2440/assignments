@@ -172,11 +172,11 @@ def main():
    # Display Part B - Data Validation Using Accumulators
   print(f'\n{20 * '-'} Part B {20 * '-'}\n')
 
-  # Instantiate ValidatorClass object
-  vc = ValidatorClass(sc)
-
    # Parse every row into a dictionary
   healthCareRDD = healthCareRDD.map(ParseRow)
+
+  # Instantiate ValidatorClass object
+  vc = ValidatorClass(sc)
 
   # Cache the valid parsed RDD
   healthCareRDD = healthCareRDD.filter(vc.Validate).cache()
@@ -338,8 +338,6 @@ def main():
 )
   # 9) What are all distinct cities and departments?
   print(healthCareRDD.map(lambda r: r["city"]).distinct().collect())
-
-  print(healthCareRDD.map(lambda r: r["department"]).distinct().collect())
 
   # 10) Which department has the highest average patient rating?
   averageRating = (
