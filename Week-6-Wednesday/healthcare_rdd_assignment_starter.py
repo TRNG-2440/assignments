@@ -175,10 +175,10 @@ def main() -> None:
 
         print("\nTags using flatMap:")
         print(
-            enriched_rdd
+            enriched_rdd  # pyright: ignore[reportCallIssue]
             .flatMap(lambda r: [f"city:{r['city']}", f"dept:{r['department']}", f"type:{r['visit_type']}"])
             .map(lambda tag: (tag, 1))
-            .reduceByKey(lambda a, b: a + b)
+            .reduceByKey(lambda a, b: a + b)  # pyright: ignore[reportArgumentType]
             .sortByKey()
             .collect()
         )
