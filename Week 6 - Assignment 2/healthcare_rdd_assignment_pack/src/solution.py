@@ -250,6 +250,33 @@ def main():
   
   # Display total amount of revenue per city
   print("Total amount of revenue per department:", totalDepartmentRevenue.collect())
+
+  # Display Part E - Data Validation Using Accumulators
+  print(f'\n{20 * '-'} Part E {20 * '-'}\n')
+
+  # Change name of Charges
+  VisitsRDD = Charges
+
+  # Visit per city using countByValue
+  print("\nVisits by city:", VisitsRDD.map(lambda r: r["city"]).countByValue())
+
+  # Visits per department using countByValue
+  print("\nVisits by dept:", VisitsRDD.map(lambda r: r["department"]).countByValue())
+  
+  # Total revenue of final amounts using reduce
+  totalFinal = VisitsRDD.map(lambda r: r["final_amount"]).reduce(lambda a, b: a + b)
+
+ # Display total revenue of final amounts
+  print("\nTotal final_amount : $", totalFinal)
+
+  # Count total # of visits using an accumulator
+  visits = sc.accumulator(0)
+
+  # Count total # of visits using foreach
+  Charges.foreach(lambda r: visits.add(1))
+
+  # Print total # of visits using foreach
+  print("\nTotal # of visit:", visits.value)  
  
   # Add newline
   print()
