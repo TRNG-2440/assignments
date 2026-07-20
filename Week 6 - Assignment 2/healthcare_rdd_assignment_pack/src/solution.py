@@ -95,9 +95,13 @@ def ParseRow(row: str) -> dict:
 
   # Perform static cast and tokenization on each individual value 
   dictionary["age"] = int(dictionary["age"])
+
   dictionary["bill_amount"] = float(dictionary["bill_amount"])
+
   dictionary["rating"] = int(dictionary["rating"])
+
   dictionary["payment_status"] = dictionary["payment_status"].strip().upper()
+  
   dictionary["city"] = dictionary["city"].strip()
 
   return dictionary
@@ -295,7 +299,7 @@ def main():
   print(healthCareRDD.map(lambda r: r["department"]).countByValue())
 
   # 5) What is the final revenue by city?
-  paymentsMade = healthCareRDD.filter(lambda r: r["payment_status"] == "PAID")
+  paymentsMade = Charges.filter(lambda r: r["payment_status"] == "PAID")
   print(
     paymentsMade
     .map(lambda r: (r["city"], r["final_amount"]))
