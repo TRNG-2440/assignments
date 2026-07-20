@@ -1,0 +1,4 @@
+event_id,event_date,shipment_id,hub_id,service_type,status,promised_hours,actual_hours,distance_km,weight_kg,delivery_charge,class
+EVT-1008,2026-07-08,SHP-5008,,SAME_DAY,DELIVERED,72,107,758,1.53,1007.7,Element is empty
+EVT-1015,2026-07-15,SHP-5015,HUB-CBE,STANDARD,FAILED,72,-5,986,9.27,1189.63,Hours not valid
+EVT-1032,2026-07-02,SHP-5032,HUB-HYD,SAME_DAY,UNKNOWN,72,36,1001,26.58,1546.86,Status not valid

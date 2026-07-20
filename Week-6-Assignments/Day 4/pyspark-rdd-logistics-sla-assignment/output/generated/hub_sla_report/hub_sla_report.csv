@@ -1,0 +1,6 @@
+hub_id,on_time_pct,avg_delay,total_charge,sla_gap,target_status
+HUB-CHE,61.54,12.8,10626.6,28.46,FAIL
+HUB-BLR,60.0,7.5,2807.81,33.0,FAIL
+HUB-CBE,40.0,14.33,14009.61,52.0,FAIL
+HUB-PUN,14.29,6.83,7195.98,74.71,FAIL
+HUB-HYD,0.0,11.0,3780.42,91.0,FAIL
