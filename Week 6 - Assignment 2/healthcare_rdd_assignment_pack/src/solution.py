@@ -149,10 +149,10 @@ def main():
   header = healthCareRDD.first()
 
   # Remove header
-  healthCareRdd = healthCareRDD.filter(lambda x: x != header)
+  healthCareRDD = healthCareRDD.filter(lambda x: x != header)
 
   # Print results
-  print(healthCareRdd.take(10))
+  print(healthCareRDD.take(10))
 
    # Display Part B - Data Validation Using Accumulators
   print(f'\n{20 * '-'} Part B {20 * '-'}\n')
@@ -161,13 +161,13 @@ def main():
   vc = ValidatorClass(sc)
 
    # Parse every row into a dictionary
-  healthCareRdd = healthCareRdd.map(ParseRow)
+  healthCareRDD = healthCareRDD.map(ParseRow)
 
   # Cache the valid parsed RDD
-  healthCareRdd = healthCareRdd.filter(vc.Validate).cache()
+  healthCareRDD = healthCareRDD.filter(vc.Validate).cache()
 
   # Display valid records
-  print("Total data rows:", healthCareRdd.count())
+  print("Total data rows:", healthCareRDD.count())
 
   # Display total missing cities
   print("Total missing cities:", vc.missingCity.value)
@@ -200,7 +200,7 @@ def main():
   service_charge_map = sc.broadcast(service_charge_map)
 
   # Produce dictionary that contains all the broadcasted charges
-  Charges = healthCareRdd.map(lambda x: Service_Charge_Calculations(x, service_charge_map))
+  Charges = healthCareRDD.map(lambda x: Service_Charge_Calculations(x, service_charge_map))
 
   # Print charges
   print(Charges.collect())
@@ -273,13 +273,73 @@ def main():
   visits = sc.accumulator(0)
 
   # Count total # of visits using foreach
-  Charges.foreach(lambda r: visits.add(1))
+  VisitsRDD.foreach(lambda r: visits.add(1))
 
   # Print total # of visits using foreach
   print("\nTotal # of visit:", visits.value)  
+  
+  # Display Part D - Transformations to Perform
+  print(f'\n{20 * '-'} Part F {20 * '-'}\n')
+
+  # 1) How many total data rows are available?
+  print("\nHow many total data rows are available?:", healthCareRDD.count()) 
+  
+  # 2) How many valid and invalid records are present?
+  print("\nValid:", healthCareRDD.count())             
+  print("\nInvalid:", vc.invalidTotal.value)   
+
+  # 3) How many visits happened in each city?
+  print(healthCareRDD.map(lambda r: r["city"]).countByValue())
+
+  # 4) How many visits happened in each department?
+  print(healthCareRDD.map(lambda r: r["department"]).countByValue())
+
+  # 5) What is the final revenue by city?
+  paymentsMade = healthCareRDD.filter(lambda r: r["payment_status"] == "PAID")
+  print(
+    paymentsMade
+    .map(lambda r: (r["city"], r["final_amount"]))
+    .reduceByKey(lambda x, y: x + y)
+    .collect()
+)
+  
+  # 6) What is the final revenue by department?
+  print(
+    paymentsMade
+    .map(lambda r: (r["department"], r["final_amount"]))
+    .reduceByKey(lambda x, y: x + y)
+    .collect()
+)
+  # 7) Which top 3 paid visits generated the highest final amount?
+  print(paymentsMade.takeOrdered(3, key=lambda r: -r["final_amount"]))
+
+  # 8) Which departments handled emergency visits?
+  print(
+    healthCareRDD
+    .filter(lambda r: r["visit_type"] == "Emergency")
+    .map(lambda r: r["department"])
+    .distinct()
+    .collect()
+)
+  # 9) What are all distinct cities and departments?
+  print(healthCareRDD.map(lambda r: r["city"]).distinct().collect())
+
+  print(healthCareRDD.map(lambda r: r["department"]).distinct().collect())
+
+  # 10) Which department has the highest average patient rating?
+  averageRating = (
+    healthCareRDD
+    .map(lambda r: (r["department"], (r["rating"], 1)))
+    .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
+    .mapValues(lambda t: t[0] / t[1])
+)
+  
+  print(averageRating.sortBy(lambda kv: kv[1], ascending=False).first())
  
   # Add newline
   print()
+
+
 
 
 
