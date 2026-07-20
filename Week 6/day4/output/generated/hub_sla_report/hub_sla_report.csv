@@ -1,0 +1,6 @@
+hub_id,hub_city,region,manager,sla_target_pct,delivered_count,on_time_count,on_time_pct,avg_delay_hours,total_delivery_charge,sla_gap,target_status
+HUB-CHE,Chennai,South,Arun,90.0,13,8,61.54,4.92,10626.6,-28.46,MISSED
+HUB-BLR,Bengaluru,South,Divya,93.0,5,3,60.0,3.0,2807.81,-33.0,MISSED
+HUB-CBE,Coimbatore,South,Meena,92.0,10,4,40.0,8.6,14009.61,-52.0,MISSED
+HUB-PUN,Pune,West,Rahul,89.0,7,1,14.29,5.86,7195.98,-74.71,MISSED
+HUB-HYD,Hyderabad,South-Central,Suresh,91.0,3,0,0.0,11.0,3780.42,-91.0,MISSED
