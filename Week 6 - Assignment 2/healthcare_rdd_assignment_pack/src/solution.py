@@ -1,6 +1,17 @@
 from pyspark.sql import SparkSession
 from enum import Enum
 
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Any, Dict
+
+os.environ.setdefault(
+    "PYSPARK_SUBMIT_ARGS",
+    "--conf spark.ui.showConsoleProgress=false pyspark-shell",
+)
+
 # Payment status enum
 class PaymentStatus(Enum):
     PAID = "PAID"
@@ -337,7 +348,7 @@ def main():
     .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
     .mapValues(lambda t: t[0] / t[1])
 )
-  
+  # Display average rating 
   print(averageRating.sortBy(lambda kv: kv[1], ascending=False).first())
  
   # Add newline
