@@ -40,8 +40,8 @@ def part_b(spark: SparkSession) -> None:
     print(f"Peak-reading count: {peak_rdd.count()}")
     print(f"First three peak readings: {peak_rdd.take(3)}")
     print(
-        "Transformations: parallelize, filter, map, sortByKey (lazy). "
-        "Actions: count, take (trigger execution)."
+        "Transformations: parallelize, filter, map. "
+        "Actions: count, take."
     )
     print()
 
