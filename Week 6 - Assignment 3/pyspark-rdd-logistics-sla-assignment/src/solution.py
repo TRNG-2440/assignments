@@ -1,4 +1,7 @@
+import csv
+
 from pathlib import Path
+
 from pyspark.sql import SparkSession 
 
 # ----------------------------------------------------------------------------------------------------
@@ -75,7 +78,7 @@ def Classify(row):
     
     return ("valid", row, None)
 
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 # Turn delivery in (hub,metrics) pair
 def HubMetrics(row):
@@ -117,7 +120,7 @@ def HubMetrics(row):
     )
     return (row["hub_id"], metricsTuple)
 
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 # Add values of both hub tuples together
 def AddMetrics(a, b):
@@ -131,14 +134,94 @@ def AddMetrics(a, b):
         a[3] + b[3]     # Total delivery charge
     )
 
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 # Load `hub_master.csv` and prepare `(hub_id, (city, region, manager, target))`
 def HubMasterPair(line):
     value = line.split(",")
     return (value[0], (value[1], value[2], value[3], float(value[4])))
 
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+# Calculate on-time percentage, average delay, total charge, SLA gap and target status.
+def CalculateKPIs(row):
+
+    # Determine hub id for each individual row
+    hubID = row[0]
+
+    # row[1][0]: (delivered, onTime, delayedHours, totalCharge)
+    delivered, onTime, delayedHours, totalCharge = row[1][0]
+
+    # row[1][1]: (city, region, manager, target)
+    city, region, manager, target = row[1][1]
+
+    # On-time percentage = (onTime / delivered) * 100
+    onTimePercentage = (onTime / delivered) * 100
+
+    # Average delay hours
+    averageDelay = delayedHours / delivered
+
+    # how far above/below the SLA target
+    sla_gap = onTimePercentage - target
+
+    # If onTimePercentage surpassed target then goal is achieved
+    if onTimePercentage >= target:
+        targetStatus = "MET"
+    else:
+        targetStatus = "MISSED"
+
+    return {
+        "hub_id": hubID,
+        "city": city,
+        "region": region,
+        "manager": manager,
+        "delivered_count": delivered,
+        "on_time_count": onTime,
+        "on_time_percentage": round(onTimePercentage, 2),
+        "avg_delay": round(averageDelay, 2),
+        "total_charge": round(totalCharge, 2),
+        "sla_target_percentage": target,
+        "sla_gap": round(sla_gap, 2),
+        "target_status": targetStatus,
+    }
+
+# -------------------------------------------------------------------------------
+
+# Save the final report and rejected records in the exact specified locations. 
+# Use Python `csv.writer` or `DictWriter` after collecting the final small 
+# result so it works on Windows without native Hadoop utilities.
+def WriteFile(sortKpiRDD, rejectedEventsRDD):
+   directory = Path(__file__).resolve().parent.parent
+   
+   # Declare hub_sla_report_path and rejected_delivery_events_path
+   hub_sla_report_path = directory / "output" / "generated" /"hub_sla_report" / "hub_sla_report.csv"
+   rejected_delivery_events_path = directory / "output" / "generated" /"rejected_delivery_events" / "rejected_delivery_events.csv"
+
+   # Create folders for hub_sla_report_path and rejected_delivery_events_path if they currently don't exist
+   hub_sla_report_path.parent.mkdir(parents=True, exist_ok=True)
+   rejected_delivery_events_path.parent.mkdir(parents=True, exist_ok=True)
+
+   # Convert from RDD to list
+   hubReportList = sortKpiRDD.collect()
+   rejectedEventsList = rejectedEventsRDD.collect()  
+
+   # Write final SLA report
+   with open(hub_sla_report_path, "w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=list(hubReportList[0].keys()))
+    writer.writeheader()
+    writer.writerows(hubReportList)
+
+    # Write rejected record report
+   with open(rejected_delivery_events_path, "w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=list(rejectedEventsList[0].keys()))
+    writer.writeheader()
+    writer.writerows(rejectedEventsList)
+
+    # Confirm results were successfully written
+    print("Saved:", hub_sla_report_path)
+    print("Saved:", rejected_delivery_events_path)
+
+# -------------------------------------------------------------------------------
 def main():
 
   #  ----------- Q1. Input path validation ----------- 
@@ -280,7 +363,7 @@ def main():
   hubMetricsPairRDD = deliveredShipmentsRDD.map(HubMetrics)
 
   # Display hubMetricsPairRDD
-  print("Pair RDD sample:", hubMetricsPairRDD.take(5)) 
+  print("\nPair RDD sample:", hubMetricsPairRDD.take(5)) 
   
    #  ------------------- Q8. Aggregate by hub --------------------
 
@@ -300,7 +383,7 @@ def main():
     AddMetrics,      # Combine totals from partitions
 )
   # Display hub level totals
-  print("Hub totals:", hubTotalsRDD.take(5))
+  print("\nHub totals:", hubTotalsRDD.take(5))
 
   #  ----------- Q9. Load and prepare the master Pair RDD ------------
 
@@ -310,12 +393,47 @@ def main():
   PairMasterRDD = hubMasterRDD.map(HubMasterPair)
 
   # Display pair master RDD
-  print("Pair Master RDD:", PairMasterRDD.take(5))
+  print("\nPair Master RDD:", PairMasterRDD.take(5))
 
   #  ----------- Q10. Join transactional and master data -------------
 
   # Display Q10
-  print(f'\n{20 * '-'} Q10. Join transactional and master data   {20 * '-'}\n')
+  print(f'\n{20 * '-'} Q10. Join transactional and master data {20 * '-'}\n')
+
+  # Execute inner join on hub_id
+  joinedRDD = hubTotalsRDD.join(PairMasterRDD)
+
+  print("\nJoined sample:", joinedRDD.take(3))
+
+#  -----------  Q11. Calculate final KPIs -------------
+
+  # Display Q11
+  print(f'\n{20 * '-'} Calculate final KPIs {20 * '-'}\n')
+
+  # Calculate KPI metrics
+  kpiRDD = joinedRDD.map(CalculateKPIs)
+
+  # Print KPI sample
+  print("\nKPI sample:", kpiRDD.take(3))    
+
+#  -----------  Q12. Sort the final report -------------
+
+  # Display Q12
+  print(f'\n{20 * '-'} Sort the final report {20 * '-'}\n')
+
+  # Sort hubs by `on_time_pct` from highest to lowest.
+  sortKpiRDD = kpiRDD.sortBy(lambda row: row['on_time_percentage'], ascending = False)
+
+  # Display sorted result
+  print(f'\nSort hubs by `on_time_pct` from highest to lowest: {sortKpiRDD.collect()}')
+
+#  -----------  Q13. Save the required output files -------------
+
+  # Display Q13
+  print(f'\n{20 * '-'} Sort the final report {20 * '-'}\n')
+
+  
+  WriteFile(sortKpiRDD, rejectedEventsRDD)
 
 
 if __name__ == "__main__":
