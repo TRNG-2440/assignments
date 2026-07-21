@@ -19,10 +19,8 @@ class SparkClass:
          .getOrCreate()
       )
 
-   return self.spark
+      return self.spark
       
-  
-
 # ----------------------------------------------------------------------------------------------------
 
 # Declare variable that holds directory of data folder
@@ -34,9 +32,6 @@ def ValidatePath(DataDirectory : Path):
   hubMasterPath = DataDirectory / "hub_master.csv"
 
   # Determine if delivery_events.csv and or hub_master.csv is missing from directory (.../pyspark-rdd-logistics-sla-assignment/data)
-
-  # isMissing = [str(p) for p in (delivery_events_path, hub_master_path) if not p.is_file()]
-
   missingPaths = []
   for path in (deliveryEventsPath, hubMasterPath):
     if not path.is_file():
@@ -50,19 +45,19 @@ def ValidatePath(DataDirectory : Path):
 # Turn raw CSV text into a dictionary
 def ParsePartition(lines):
     for line in lines:
-        parts = line.split(",")
+        value = line.split(",")
         yield {
-            "event_id": parts[0],
-            "event_date": parts[1],
-            "shipment_id": parts[2],
-            "hub_id": parts[3],
-            "service_type": parts[4],
-            "status": parts[5],
-            "promised_hours": float(parts[6]),
-            "actual_hours": float(parts[7]),
-            "distance_km": float(parts[8]),
-            "weight_kg": float(parts[9]),
-            "delivery_charge": float(parts[10]),
+            "event_id": value[0],
+            "event_date": value[1],
+            "shipment_id": value[2],
+            "hub_id": value[3],
+            "service_type": value[4],
+            "status": value[5],
+            "promised_hours": float(value[6]),
+            "actual_hours": float(value[7]),
+            "distance_km": float(value[8]),
+            "weight_kg": float(value[9]),
+            "delivery_charge": float(value[10]),
         }
 
 # ----------------------------------------------------------------------------------------------------
@@ -102,10 +97,15 @@ def HubMetrics(row):
        delayedHours = actualHours - promisedHours
 
    # Declare metrics such as:
+
    # - quantity of delivery
+
    # - quantity of times delivery was on time 
+
    # - delayedHours
+
    # - deivery cost
+   
     metricsTuple = (
         1,                          # Quantity of delivery
 
@@ -128,28 +128,36 @@ def AddMetrics(a, b):
 
         a[2] + b[2],    # Quantity of delayed hours
 
-        a[3] + b[3],    # Total delivery charge
+        a[3] + b[3]     # Total delivery charge
     )
 
+# ----------------------------------------------------------------------------------------------------
 
+# Load `hub_master.csv` and prepare `(hub_id, (city, region, manager, target))`
+def HubMasterPair(line):
+    value = line.split(",")
+    return (value[0], (value[1], value[2], value[3], float(value[4])))
 
 # ----------------------------------------------------------------------------------------------------
 def main():
 
   #  ----------- Q1. Input path validation ----------- 
 
-  # Display section
+  # Display Q1
   print(f'\n{20 * '-'}  Q1. Input path validation  {20 * '-'}\n')
 
   ValidatePath(Path(__file__).resolve().parent.parent / "data")
 
   #  ----------- Q2. Load data using RDDs ----------- 
 
-  # Display section
+  # Display Q2
   print(f'\n{20 * '-'}  Q2. Load data using RDDs  {20 * '-'}\n')
 
+  # Instantiate spark class object
+  s = SparkClass()
+
   # Instantiate spark object
-  spark = (SparkSession.builder.appName("logistics-sla-assignment").master("local[*]").getOrCreate())
+  spark = s.Configure()
 
   # Instantiate spark context object
   sc = spark.sparkContext
@@ -163,16 +171,18 @@ def main():
   # Display deliveryRDD
   print(f' Display delivery RDD: ({deliveryRDD.take(5)}')
 
+  # Newline
   print()
 
   # Display hubMasterRDD
   print(f' Display hubMaster RDD:  ({hubMasterRDD.take(5)}')
 
+  # Newline
   print()
 
   #  ----------- Q3. Remove headers and blank rows ----------- 
 
-  # Display section
+  # Display Q3
   print(f'\n{20 * '-'}  Q3. Remove headers and blank rows  {20 * '-'}\n')
 
   # Declare header for deliveryRDD
@@ -190,16 +200,18 @@ def main():
    # Display deliveryRDD
   print(f' Display delivery RDD after mapping: ({deliveryRDD.take(5)}')
 
+  # Newline
   print()
 
   # Display hubMasterRDD
   print(f' Display hubMaster RDD after mapping:  ({hubMasterRDD.take(5)}')
 
+  # Newline
   print()
 
   #  ----------- Q4. Parse and validate events ----------- 
   
-  # Display section
+  # Display Q4
   print(f'\n{20 * '-'}  QQ4. Parse and validate events  {20 * '-'}\n')
 
   # Parse rows into dictionary
@@ -219,7 +231,7 @@ def main():
 
   #  ----------- Q5. Split valid and rejected records ----------- 
 
-  # Display section
+  # Display Q5
   print(f'\n{20 * '-'}  Q5. Split valid and rejected records  {20 * '-'}\n')
 
   # RDD of clean event dictionaries
@@ -232,7 +244,7 @@ def main():
         "rejection_reason": x[2],
     }
 )
-  
+
   # Display first 3 valid results
   print("\nValid events sample:", validEventsRDD.take(3))
 
@@ -247,7 +259,7 @@ def main():
 
   #  ----------- Q6. Filter business-eligible records ----------- 
 
-  # Display section
+  # Display Q6
   print(f'\n{20 * '-'}  Q6. Filter business-eligible records  {20 * '-'}\n')
 
   # Declare RDD which contains all delivery shipments
@@ -261,7 +273,7 @@ def main():
 
  #  ------------------- Q7. Create the Pair RDD --------------------
 
-  # Display section
+  # Display Q7
   print(f'\n{20 * '-'}  Q7. Create the Pair RDD  {20 * '-'}\n')
 
   # Perform operation to determine HubMetrics
@@ -272,10 +284,11 @@ def main():
   
    #  ------------------- Q8. Aggregate by hub --------------------
 
-  # Display section
-  print(f'\n{20 * '-'}  Q8. Aggregate by hu  {20 * '-'}\n')
+  # Display Q8
+  print(f'\n{20 * '-'}  Q8. Aggregate by hub  {20 * '-'}\n')
 
-  zeroValues = (0.0, 0.0, 0.0)
+  # Add tuple of zeros
+  zeroValues = (0,0, 0.0, 0.0)
 
   # Declare RDD that stores hub-level totals
   hubTotalsRDD = hubMetricsPairRDD.aggregateByKey(
@@ -287,7 +300,22 @@ def main():
     AddMetrics,      # Combine totals from partitions
 )
   # Display hub level totals
-  print("Hub totals:", hubTotalsRDD.collect())
+  print("Hub totals:", hubTotalsRDD.take(5))
+
+  #  ----------- Q9. Load and prepare the master Pair RDD ------------
+
+  # Display Q9
+  print(f'\n{20 * '-'}  Q9. Load and prepare the master Pair RDD  {20 * '-'}\n')
+
+  PairMasterRDD = hubMasterRDD.map(HubMasterPair)
+
+  # Display pair master RDD
+  print("Pair Master RDD:", PairMasterRDD.take(5))
+
+  #  ----------- Q10. Join transactional and master data -------------
+
+  # Display Q10
+  print(f'\n{20 * '-'} Q10. Join transactional and master data   {20 * '-'}\n')
 
 
 if __name__ == "__main__":
