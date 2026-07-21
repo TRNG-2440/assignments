@@ -222,6 +222,31 @@ def WriteFile(sortKpiRDD, rejectedEventsRDD):
     print("Saved:", rejected_delivery_events_path)
 
 # -------------------------------------------------------------------------------
+
+# Read both saved files after writing and print their contents
+def ReadFile():
+
+    # Declare root file directory
+    directory = Path(__file__).resolve().parent.parent
+
+    # Declare hub_sla_report_path and rejected_delivery_events_path
+    hub_sla_report_path = directory / "output" / "generated" / "hub_sla_report" / "hub_sla_report.csv"
+    rejected_delivery_events_path = directory / "output" / "generated" / "rejected_delivery_events" / "rejected_delivery_events.csv"
+
+    # Read hub_sla_report_path.csv and display results
+    print("\n-------- Hub SLA Report --------\n")
+    with open(hub_sla_report_path, newline="") as f:
+       for row in csv.DictReader(f):
+          print(row)
+    
+    # Read rejected_delivery_events.csv and display results
+    print("\n----- Rejected Delivery Events -----")
+    with open(rejected_delivery_events_path, newline="") as f:
+        for row in csv.DictReader(f):
+            print(row)
+
+
+# -------------------------------------------------------------------------------
 def main():
 
   #  ----------- Q1. Input path validation ----------- 
@@ -430,11 +455,20 @@ def main():
 #  -----------  Q13. Save the required output files -------------
 
   # Display Q13
-  print(f'\n{20 * '-'} Sort the final report {20 * '-'}\n')
+  print(f'\n{20 * '-'} Save the required output files {20 * '-'}\n')
 
-  
+  # Save the final report and rejected records in the exact specified locations. 
+  # Use Python `csv.writer` or `DictWriter` after collecting the final small 
+  # result so it works on Windows without native Hadoop utilities.
   WriteFile(sortKpiRDD, rejectedEventsRDD)
 
+#  -----------  Q14. Save the required output files -------------
+
+  # Display Q14
+  print(f'\n{20 * '-'} Reload and verify saved output {20 * '-'}\n')
+
+  # Read both saved files after writing and print their contents
+  ReadFile()
 
 if __name__ == "__main__":
   main()
