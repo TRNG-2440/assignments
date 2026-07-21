@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import csv
-import os
+import os, sys
 import shutil
 from pathlib import Path
 from typing import Any, Dict
@@ -65,6 +65,9 @@ def main() -> None:
     project_dir = Path(__file__).resolve().parent
     csv_path = project_dir / "healthcare_patient_visits.csv"
     spark_csv_path = prepare_spark_input(csv_path)
+    # Automatically point PySpark to the Python executable currently running this script
+    os.environ['PYSPARK_PYTHON'] = sys.executable
+    os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
     spark = create_spark()
     sc = spark.sparkContext

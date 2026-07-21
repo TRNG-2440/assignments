@@ -1,0 +1,4 @@
+raw_data,reason
+"EVT-1008,2026-07-08,SHP-5008,,SAME_DAY,DELIVERED,72,107,758,1.53,1007.7","Missing essential keys (event_id, shipment_id, or hub_id)"
+"EVT-1015,2026-07-15,SHP-5015,HUB-CBE,STANDARD,FAILED,72,-5,986,9.27,1189.63",Data type or value error: Numeric fields cannot be negative
+"EVT-1047,2026-07-02,SHP-5047,HUB-CHE,SAME_DAY,FAILED,36,52,201,1.7,-500",Data type or value error: Numeric fields cannot be negative
