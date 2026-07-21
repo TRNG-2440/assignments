@@ -2,6 +2,28 @@ from pathlib import Path
 from pyspark.sql import SparkSession 
 
 # ----------------------------------------------------------------------------------------------------
+# Class containing all spark logic
+class SparkClass:
+   
+   # Paramaterized Constructor
+   def __init__(self, appName: str = "logistics-sla-assignment", master: str = "local[*]"):
+      self.appName = appName
+      self.master = master
+
+   # Contains all Spark configurations
+   def Configure(self) -> SparkSession:
+      self.spark = (
+         SparkSession.builder
+         .appName(self.appName)
+         .master(self.master)
+         .getOrCreate()
+      )
+
+   return self.spark
+      
+  
+
+# ----------------------------------------------------------------------------------------------------
 
 # Declare variable that holds directory of data folder
 def ValidatePath(DataDirectory : Path):
@@ -58,6 +80,8 @@ def Classify(row):
     
     return ("valid", row, None)
 
+# ----------------------------------------------------------------------------------------------------
+
 # Turn delivery in (hub,metrics) pair
 def HubMetrics(row):
     
@@ -79,16 +103,34 @@ def HubMetrics(row):
 
    # Declare metrics such as:
    # - quantity of delivery
-   # - quantity of times delivery was on time, 
+   # - quantity of times delivery was on time 
    # - delayedHours
    # - deivery cost
     metricsTuple = (
         1,                          # Quantity of delivery
+
         1 if isOnTime else 0,       # Number of times delivery was on time
+
         delayedHours,               # Hours delayed
+
         row["delivery_charge"],     # Delivery charge
     )
     return (row["hub_id"], metricsTuple)
+
+# ----------------------------------------------------------------------------------------------------
+
+# Add values of both hub tuples together
+def AddMetrics(a, b):
+    return (
+        a[0] + b[0],    # Quantity of deliveries
+
+        a[1] + b[1],    # Quantity of deliveries made on time
+
+        a[2] + b[2],    # Quantity of delayed hours
+
+        a[3] + b[3],    # Total delivery charge
+    )
+
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -208,10 +250,13 @@ def main():
   # Display section
   print(f'\n{20 * '-'}  Q6. Filter business-eligible records  {20 * '-'}\n')
 
+  # Declare RDD which contains all delivery shipments
   deliveredShipmentsRDD = validEventsRDD.filter(lambda row: row["status"] == "DELIVERED")
 
+  # Print first 3 of deliveredShipmentsRDD
   print("\nDelivered Shipments sample:", deliveredShipmentsRDD.take(3))
 
+ # Determine quantity of deliveredShipmentsRDD
   print("\nDelivered Shipments count:", deliveredShipmentsRDD.count()) 
 
  #  ------------------- Q7. Create the Pair RDD --------------------
@@ -225,22 +270,25 @@ def main():
   # Display hubMetricsPairRDD
   print("Pair RDD sample:", hubMetricsPairRDD.take(5)) 
   
-  
+   #  ------------------- Q8. Aggregate by hub --------------------
 
+  # Display section
+  print(f'\n{20 * '-'}  Q8. Aggregate by hu  {20 * '-'}\n')
 
- 
+  zeroValues = (0.0, 0.0, 0.0)
 
- 
+  # Declare RDD that stores hub-level totals
+  hubTotalsRDD = hubMetricsPairRDD.aggregateByKey(
+     
+    zeroValues,      # Starting value of each hub
 
+    AddMetrics,      # Add a row to the hub total
 
+    AddMetrics,      # Combine totals from partitions
+)
+  # Display hub level totals
+  print("Hub totals:", hubTotalsRDD.collect())
 
-
-
-
-
-
-
-  
 
 if __name__ == "__main__":
   main()
