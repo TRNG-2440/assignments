@@ -46,21 +46,65 @@ def ParsePartition(lines):
 # ----------------------------------------------------------------------------------------------------
 # Check validity of dictionary produced by ParsePartition(lines)
 def Classify(row):
+    
     if row["hub_id"] == "":
         return ("rejected", row, "Missing hub_id")
+    
     if row["actual_hours"] < 0:
         return ("rejected", row, "Negative actual_hours")
+    
     if row["delivery_charge"] < 0:
         return ("rejected", row, "Negative delivery_charge")
+    
     return ("valid", row, None)
+
+# Turn delivery in (hub,metrics) pair
+def HubMetrics(row):
+    
+    # Amount of time delivery was supposed to take
+    promisedHours = row["promised_hours"]   
+
+    # Amount of time delivery actually took
+    actualHours = row["actual_hours"]   
+
+    # Determine if actual hours is less than promised hours
+    isOnTime = actualHours <= promisedHours
+    
+    # If delivery was on time, notate there was no delay
+    if isOnTime:
+       delayedHours = 0
+
+    else:
+       delayedHours = actualHours - promisedHours
+
+   # Declare metrics such as:
+   # - quantity of delivery
+   # - quantity of times delivery was on time, 
+   # - delayedHours
+   # - deivery cost
+    metricsTuple = (
+        1,                          # Quantity of delivery
+        1 if isOnTime else 0,       # Number of times delivery was on time
+        delayedHours,               # Hours delayed
+        row["delivery_charge"],     # Delivery charge
+    )
+    return (row["hub_id"], metricsTuple)
+
 
 # ----------------------------------------------------------------------------------------------------
 def main():
 
   #  ----------- Q1. Input path validation ----------- 
+
+  # Display section
+  print(f'\n{20 * '-'}  Q1. Input path validation  {20 * '-'}\n')
+
   ValidatePath(Path(__file__).resolve().parent.parent / "data")
 
   #  ----------- Q2. Load data using RDDs ----------- 
+
+  # Display section
+  print(f'\n{20 * '-'}  Q2. Load data using RDDs  {20 * '-'}\n')
 
   # Instantiate spark object
   spark = (SparkSession.builder.appName("logistics-sla-assignment").master("local[*]").getOrCreate())
@@ -86,6 +130,9 @@ def main():
 
   #  ----------- Q3. Remove headers and blank rows ----------- 
 
+  # Display section
+  print(f'\n{20 * '-'}  Q3. Remove headers and blank rows  {20 * '-'}\n')
+
   # Declare header for deliveryRDD
   deiveryHeader = deliveryRDD.first()
 
@@ -110,6 +157,9 @@ def main():
 
   #  ----------- Q4. Parse and validate events ----------- 
   
+  # Display section
+  print(f'\n{20 * '-'}  QQ4. Parse and validate events  {20 * '-'}\n')
+
   # Parse rows into dictionary
   ParsedRDD = deliveryRDD.mapPartitions(ParsePartition)
   
@@ -127,6 +177,9 @@ def main():
 
   #  ----------- Q5. Split valid and rejected records ----------- 
 
+  # Display section
+  print(f'\n{20 * '-'}  Q5. Split valid and rejected records  {20 * '-'}\n')
+
   # RDD of clean event dictionaries
   validEventsRDD = ClassifiedRDD.filter(lambda x: x[0] == "valid").map(lambda x: x[1])
 
@@ -139,18 +192,39 @@ def main():
 )
   
   # Display first 3 valid results
-  print("Valid events sample:", validEventsRDD.take(3))
+  print("\nValid events sample:", validEventsRDD.take(3))
 
   # Display first 3 rejected results
-  print("Rejected events sample:", rejectedEventsRDD.take(3))
+  print("\nRejected events sample:", rejectedEventsRDD.take(3))
 
   # Display # of valid rows
-  print("Valid count:", validEventsRDD.count())
+  print("\nValid count:", validEventsRDD.count())
 
   # Display # of rejected rows
-  print("Rejected count:", rejectedEventsRDD.count()) 
+  print("\nRejected count:", rejectedEventsRDD.count()) 
 
+  #  ----------- Q6. Filter business-eligible records ----------- 
 
+  # Display section
+  print(f'\n{20 * '-'}  Q6. Filter business-eligible records  {20 * '-'}\n')
+
+  deliveredShipmentsRDD = validEventsRDD.filter(lambda row: row["status"] == "DELIVERED")
+
+  print("\nDelivered Shipments sample:", deliveredShipmentsRDD.take(3))
+
+  print("\nDelivered Shipments count:", deliveredShipmentsRDD.count()) 
+
+ #  ------------------- Q7. Create the Pair RDD --------------------
+
+  # Display section
+  print(f'\n{20 * '-'}  Q7. Create the Pair RDD  {20 * '-'}\n')
+
+  # Perform operation to determine HubMetrics
+  hubMetricsPairRDD = deliveredShipmentsRDD.map(HubMetrics)
+
+  # Display hubMetricsPairRDD
+  print("Pair RDD sample:", hubMetricsPairRDD.take(5)) 
+  
   
 
 
