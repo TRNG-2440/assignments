@@ -51,7 +51,10 @@ def main():
         lambda line: line != hub_header and line.strip()!="")
 
 
-
+#Requirement: Use `mapPartitions()` to parse CSV rows and `map()` 
+# to classify each row as valid or rejected. Cache the classified RDD.
+    hub_rdd = hub_rdd.mapPartitions()
+    
 
 if __name__ == "__main__":
     main()

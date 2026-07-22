@@ -1,0 +1,6 @@
+is_valid,record,raw_line,error_reasons
+False,,"EVT-1008,2026-07-08,SHP-5008,,SAME_DAY,DELIVERED,72,107,758,1.53,1007.7",['Hub City not in master hub list.']
+False,,"EVT-1015,2026-07-15,SHP-5015,HUB-CBE,STANDARD,FAILED,72,-5,986,9.27,1189.63",['Actual hours less than 0.']
+False,,"EVT-1023,2026-07-08,SHP-5023,HUB-HYD,STANDARD,IN_TRANSIT,72,73,1263,0,1364.4",['Item ways 0 or less than 0.']
+False,,"EVT-1032,2026-07-02,SHP-5032,HUB-HYD,SAME_DAY,UNKNOWN,72,36,1001,26.58,1546.86","[""Status 'Unknown' is invalid""]"
+False,,"EVT-1047,2026-07-02,SHP-5047,HUB-CHE,SAME_DAY,FAILED,36,52,201,1.7,-500",['Delivery charge less than 0.']
