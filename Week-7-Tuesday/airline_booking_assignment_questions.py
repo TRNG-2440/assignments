@@ -986,7 +986,10 @@ q52_df.show()
 # COMMAND ----------
 # TODO Question 53
 # Write your PySpark solution below.
-
+seat_class_df = bookings_df.select("seat_class").distinct()
+airline_codes_df = airline_df.select("airline_code").distinct()
+seat_airline_combinations_df = seat_class_df.crossJoin(airline_codes_df)
+seat_airline_combinations_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -999,7 +1002,9 @@ q52_df.show()
 # COMMAND ----------
 # TODO Question 54
 # Write your PySpark solution below.
-
+reordered_new_bookings_df = new_bookings_df.select(*reversed(new_bookings_df.columns))
+full_bookings_df = bookings_df.unionByName(reordered_new_bookings_df)
+full_bookings_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1165,7 +1170,12 @@ spark.sql(
 # COMMAND ----------
 # TODO Question 62
 # Write your PySpark solution below.
-
+display(  # pyright: ignore[reportUndefinedVariable]
+    sql_airline_aggregation_df.select(
+        "airline_code",
+        F.col("total_fares").alias("total_fare")
+    ).orderBy("airline_code")
+)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1178,7 +1188,16 @@ spark.sql(
 # COMMAND ----------
 # TODO Question 63
 # Write your PySpark solution below.
+sql_airline_aggregation_df.write.mode("overwrite").saveAsTable("airline_aggregation")
 
+saved_airline_aggregation_df = spark.table("airline_aggregation")
+saved_airline_aggregation_df.show()
+
+spark.sql("""
+    SELECT airline_code, total_fares, avg_fare
+    FROM airline_aggregation
+    ORDER BY total_fares DESC
+""").show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1191,7 +1210,7 @@ spark.sql(
 # COMMAND ----------
 # TODO Question 64
 # Write your PySpark solution below.
-
+sql_airline_aggregation_df.explain(mode = "formatted")
 
 # COMMAND ----------
 # MAGIC %md
@@ -1204,7 +1223,9 @@ spark.sql(
 # COMMAND ----------
 # TODO Question 65
 # Write your PySpark solution below.
-
+small_bookings_df = bookings_df.limit(5) # transformation
+print(f"Bookings subset row count: {small_bookings_df.count()}") # 5 - action 
+small_bookings_df.collect() # action - stores result in driver memory
 
 # COMMAND ----------
 # MAGIC %md
@@ -1217,4 +1238,8 @@ spark.sql(
 # COMMAND ----------
 # TODO Question 66
 # Write your PySpark solution below.
+sql_airline_aggregation_df.coalesce(1)
 
+"""
+Using a single partition removes parallelism which is a large benefit of using Spark to process big data. 
+"""
