@@ -1,0 +1,4 @@
+event_id,event_date,shipment_id,hub_id,service_type,status,promised_hours,actual_hours,distance_km,weight_kg,delivery_charge,rejection_reason
+EVT-1008,2026-07-08,SHP-5008,,SAME_DAY,DELIVERED,72.0,107.0,758.0,1.53,1007.7,Missing hub_id
+EVT-1015,2026-07-15,SHP-5015,HUB-CBE,STANDARD,FAILED,72.0,-5.0,986.0,9.27,1189.63,Negative actual_hours
+EVT-1047,2026-07-02,SHP-5047,HUB-CHE,SAME_DAY,FAILED,36.0,52.0,201.0,1.7,-500.0,Negative delivery_charge
