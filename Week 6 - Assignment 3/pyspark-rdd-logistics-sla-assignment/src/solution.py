@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 # Class containing all spark logic
 class SparkClass:
    
-   # Paramaterized Constructor
+   # Parameterized Constructor
    def __init__(self, appName: str = "logistics-sla-assignment", master: str = "local[*]"):
       self.appName = appName
       self.master = master
@@ -29,7 +29,7 @@ class SparkClass:
 # Declare variable that holds directory of data folder
 def ValidatePath(DataDirectory : Path):
 
-  # Check that `delivery_events.csv` and `hub_master.csv` exist. Raise a meaningful `FileNotFoundError` when a file is absent.
+  # Check that `delivery_events.csv` and `hub_master.csv` in designated directories
   deliveryEventsPath = DataDirectory / "delivery_events.csv"
   
   hubMasterPath = DataDirectory / "hub_master.csv"
@@ -45,6 +45,7 @@ def ValidatePath(DataDirectory : Path):
     raise FileNotFoundError(f"Required input file(s) not found: {', '.join(missingPaths)}")
 
 # ----------------------------------------------------------------------------------------------------
+
 # Turn raw CSV text into a dictionary
 def ParsePartition(lines):
     for line in lines:
@@ -136,14 +137,14 @@ def AddMetrics(a, b):
 
 # -------------------------------------------------------------------------------
 
-# Load `hub_master.csv` and prepare `(hub_id, (city, region, manager, target))`
+# Turn hub master rows into pairs
 def HubMasterPair(line):
     value = line.split(",")
     return (value[0], (value[1], value[2], value[3], float(value[4])))
 
 # -------------------------------------------------------------------------------
 
-# Calculate on-time percentage, average delay, total charge, SLA gap and target status.
+# Calculate KPI metrics
 def CalculateKPIs(row):
 
     # Determine hub id for each individual row
@@ -187,9 +188,7 @@ def CalculateKPIs(row):
 
 # -------------------------------------------------------------------------------
 
-# Save the final report and rejected records in the exact specified locations. 
-# Use Python `csv.writer` or `DictWriter` after collecting the final small 
-# result so it works on Windows without native Hadoop utilities.
+# Write "Hub sla report" and "Rejected delivery events report" to their own file paths
 def WriteFile(sortKpiRDD, rejectedEventsRDD):
    directory = Path(__file__).resolve().parent.parent
    
@@ -401,7 +400,7 @@ def main():
 
     AddMetrics,      # Combine totals from partitions
 )
-  # Display hub level totals
+  # Display hub totals
   print("\nHub totals:", hubTotalsRDD.take(5))
 
   #  ----------- Q9. Load and prepare the master Pair RDD ------------
@@ -451,9 +450,7 @@ def main():
   # Display Q13
   print(f'\n{20 * '-'} Save the required output files {20 * '-'}\n')
 
-  # Save the final report and rejected records in the exact specified locations. 
-  # Use Python `csv.writer` or `DictWriter` after collecting the final small 
-  # result so it works on Windows without native Hadoop utilities.
+  # Write "Hub sla report" and "Rejected delivery events report" to their own file paths
   WriteFile(sortKpiRDD, rejectedEventsRDD)
 
 #  -----------  Q14. Save the required output files -------------
