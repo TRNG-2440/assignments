@@ -10,6 +10,7 @@
 # MAGIC Run the setup cell and complete each TODO cell.
 
 # COMMAND ----------
+from math import trunc
 from pyspark.sql import functions as F
 from pyspark.sql import SparkSession
 import os
@@ -675,6 +676,13 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 34
 # Write your PySpark solution below.
+cast_df = (
+    bookings_df
+    .withColumn("booking_id", F.col("booking_id").cast("string"))
+    .withColumn("satisfaction_score", F.col("satisfaction_score").cast("integer"))
+    .withColumn("ticket_amount", F.col("ticket_amount").cast("decimal(10,2)"))
+)
+cast_df.printSchema()
 
 
 # COMMAND ----------
@@ -688,7 +696,12 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 35
 # Write your PySpark solution below.
-
+date_df = (
+    bookings_df
+    .withColumn("booking_date", F.to_date(F.col("booking_date"), "yyyy-MM-dd"))
+    .withColumn("travel_date", F.to_date(F.col("travel_date"), "yyyy-MM-dd"))
+)
+date_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -701,7 +714,11 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 36
 # Write your PySpark solution below.
-
+date_df.withColumn(
+    "current_date", F.current_date()
+).withColumn(
+    "current_timestamp", F.current_timestamp()
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -714,7 +731,13 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 37
 # Write your PySpark solution below.
-
+(
+    date_df
+    .withColumn("year", F.year(F.col("travel_date")))
+    .withColumn("month", F.month(F.col("travel_date")))
+    .withColumn("day_of_month", F.dayofmonth(F.col("travel_date")))
+    .withColumn("day_of_week", F.dayofweek(F.col("travel_date")))
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -727,7 +750,10 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 38
 # Write your PySpark solution below.
-
+date_df.withColumn(
+    "travel_date_formatted",
+    F.date_format(F.col("travel_date"), "dd-MMM-yyyy"),
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -740,7 +766,10 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 39
 # Write your PySpark solution below.
-
+date_df.select(
+    F.datediff(F.col("travel_date"), F.col("booking_date")).alias("booking_lead_time"),
+    F.months_between(F.current_date(), F.col("booking_date")).alias("months_elapsed"),
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -753,7 +782,11 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 40
 # Write your PySpark solution below.
-
+date_df.select(
+    F.add_months(F.col("travel_date"), 2).alias("travel_plus_2_months"),
+    F.date_add(F.col("travel_date"), 7).alias("travel_plus_7_days"),
+    F.date_sub(F.col("travel_date"), 3).alias("travel_minus_3_days"),
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -766,7 +799,14 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 41
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.count("*").alias("booking_count"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.avg("ticket_amount").alias("average_fare"),
+    F.min("ticket_amount").alias("minimum_fare"),
+    F.max("ticket_amount").alias("maximum_fare"),
+    F.countDistinct("airline_code").alias("airline_count")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -779,7 +819,17 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 42
 # Write your PySpark solution below.
-
+airline_report_df = (
+    bookings_df.groupBy("airline_code")
+    .agg(
+        F.count("*").alias("booking_count"),
+        F.sum("ticket_amount").alias("total_fare"),
+        F.avg("ticket_amount").alias("average_fare"),
+        F.min("ticket_amount").alias("minimum_fare"),
+        F.max("ticket_amount").alias("maximum_fare")
+    )
+)
+airline_report_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -792,7 +842,14 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 43
 # Write your PySpark solution below.
-
+seat_report_df = (
+    bookings_df.groupBy("seat_class")
+    .agg(
+        F.collect_list("booking_status").alias("booking_statuses"),
+        F.collect_set("payment_mode").alias("payment_modes"),
+    )
+)
+seat_report_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -805,7 +862,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 44
 # Write your PySpark solution below.
-
+bookings_df.orderBy(F.col("ticket_amount").asc()).show()
+bookings_df.orderBy(F.col("ticket_amount").desc()).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -818,7 +876,7 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 45
 # Write your PySpark solution below.
-
+bookings_df.orderBy(F.col("airline_code").asc(), F.col("ticket_amount").desc()).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -831,7 +889,7 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 46
 # Write your PySpark solution below.
-
+bookings_df.orderBy(F.col("ticket_amount").desc()).limit(5).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -844,7 +902,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 47
 # Write your PySpark solution below.
-
+q47_df = bookings_df.join(airline_df, on = "airline_code", how = "inner")
+q47_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -857,7 +916,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 48
 # Write your PySpark solution below.
-
+q48_df = bookings_df.join(airline_df, on="airline_code", how="left")
+q48_df.filter(F.col("airline_name").isNull()).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -870,7 +930,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 49
 # Write your PySpark solution below.
-
+q49_df = bookings_df.join(airline_df, on="airline_code", how="right")
+q49_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -883,7 +944,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 50
 # Write your PySpark solution below.
-
+q50_df = bookings_df.join(airline_df, on = "airline_code", how = "full")
+q50_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -896,7 +958,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 51
 # Write your PySpark solution below.
-
+q51_df = bookings_df.join(airline_df, on = "airline_code", how = "left_semi")
+q51_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -909,7 +972,8 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 52
 # Write your PySpark solution below.
-
+q52_df = bookings_df.join(airline_df, on = "airline_code", how = "left_anti")
+q52_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -948,6 +1012,9 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 55
 # Write your PySpark solution below.
+bookings_df.createOrReplaceTempView("bookings")
+airline_df.createOrReplaceTempView("airlines")
+route_df.createOrReplaceTempView("routes")
 
 
 # COMMAND ----------
@@ -961,6 +1028,15 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 56
 # Write your PySpark solution below.
+spark.sql(
+    """
+    SELECT *
+    FROM bookings
+    WHERE booking_status = 'CONFIRMED'
+      AND ticket_amount > 8000
+    ORDER BY ticket_amount DESC
+    """
+).show(truncate=False)
 
 
 # COMMAND ----------
@@ -974,7 +1050,16 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 57
 # Write your PySpark solution below.
-
+spark.sql(
+    """
+    SELECT
+        UPPER(TRIM(passenger_name)) AS upper_name,
+        LOWER(TRIM(passenger_name)) AS lower_name,
+        INITCAP(TRIM(passenger_name)) AS capitalized_name,
+        LENGTH(TRIM(passenger_name)) AS name_length
+    FROM bookings
+    """
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -987,6 +1072,18 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 58
 # Write your PySpark solution below.
+spark.sql(
+    """
+    SELECT 
+    ticket_amount,
+    CASE WHEN ticket_amount >= 10000 THEN 'PREMIUM'
+    WHEN ticket_amount >= 6000 THEN 'STANDARD'
+    ELSE 'BUDGET'
+    END AS fare_category
+    FROM 
+    bookings
+    """
+).show()
 
 
 # COMMAND ----------
@@ -1000,7 +1097,14 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 59
 # Write your PySpark solution below.
-
+spark.sql(
+    """
+    SELECT 
+    COALESCE(promo_discount, 0) AS final_discount
+    FROM 
+    bookings
+    """
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1013,7 +1117,20 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 60
 # Write your PySpark solution below.
-
+sql_airline_aggregation_df = spark.sql(
+    """
+    SELECT
+        airline_code,
+        COUNT(DISTINCT booking_id) AS n_bookings,
+        SUM(ticket_amount) AS total_fares,
+        AVG(ticket_amount) AS avg_fare,
+        MIN(ticket_amount) AS minimum_fare,
+        MAX(ticket_amount) AS maximum_fare
+    FROM bookings
+    GROUP BY airline_code
+    """
+)
+sql_airline_aggregation_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1026,7 +1143,16 @@ bookings_df.withColumn(
 # COMMAND ----------
 # TODO Question 61
 # Write your PySpark solution below.
-
+spark.sql(
+    """
+    SELECT *
+    FROM bookings b
+    JOIN airlines a
+      ON b.airline_code = a.airline_code
+    JOIN routes r
+      ON b.route_code = r.route_code
+    """
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
