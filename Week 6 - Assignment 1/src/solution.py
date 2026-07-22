@@ -11,7 +11,7 @@ class SparkClass:
   # Configurations used to instantiate spark object
   def Configure(self):
    
-    # Declare configurations by instantiating spark object
+   # Declare configurations by instantiating spark object
    self.spark = (
    SparkSession.builder 
   .appName(self.appName)
