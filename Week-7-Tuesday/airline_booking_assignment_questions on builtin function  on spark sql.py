@@ -11,6 +11,21 @@
 
 # COMMAND ----------
 from pyspark.sql import functions as F
+from pyspark.sql import SparkSession
+import os
+
+spark = (
+        SparkSession.builder
+        .appName("HealthcarePatientVisitRDD")
+        .master("local[4]")
+        .config("spark.driver.host", "127.0.0.1")
+        .config("spark.driver.bindAddress", "127.0.0.1")
+        .config("spark.ui.showConsoleProgress", "false")
+        .config("spark.local.dir", "C:/spark-temp" if os.name == "nt" else "/tmp/spark-temp")
+        .config("spark.sql.warehouse.dir", "C:/spark-warehouse" if os.name == "nt" else "/tmp/spark-warehouse")
+        .getOrCreate()
+    )
+spark.sparkContext.setLogLevel("ERROR")
 
 columns = [
     "booking_id",
@@ -57,10 +72,6 @@ airline_df = spark.createDataFrame(airlines, airline_columns)
 route_df = spark.createDataFrame(routes, route_columns)
 new_bookings_df = spark.createDataFrame(new_bookings, columns)
 
-print("Main dataset row count (includes one intentional duplicate):", bookings_df.count())
-bookings_df.printSchema()
-display(bookings_df)
-
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 1 — DataFrame inspection
@@ -68,6 +79,9 @@ display(bookings_df)
 # MAGIC Display the complete booking DataFrame without truncating long values. Print the schema and count the total records.
 # MAGIC 
 # MAGIC **Functions/concepts:** `show, printSchema, count`
+print("Main dataset row count (includes one intentional duplicate):", bookings_df.count())
+bookings_df.printSchema()
+bookings_df.show(truncate = False)
 
 # COMMAND ----------
 # TODO Question 1
