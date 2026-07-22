@@ -39,7 +39,7 @@ def ValidatePath(DataDirectory : Path):
   for path in (deliveryEventsPath, hubMasterPath):
     if not path.is_file():
         missingPaths.append(str(path))
-
+        
   # If there are missing paths than throw FileNotFoundError exception
   if missingPaths:
     raise FileNotFoundError(f"Required input file(s) not found: {', '.join(missingPaths)}")
@@ -224,27 +224,21 @@ def WriteFile(sortKpiRDD, rejectedEventsRDD):
 # -------------------------------------------------------------------------------
 
 # Read both saved files after writing and print their contents
-def ReadFile():
+def ReadFile(hub_sla_report_path : Path, rejected_delivery_events_path: Path) -> tuple:
 
-    # Declare root file directory
-    directory = Path(__file__).resolve().parent.parent
-
-    # Declare hub_sla_report_path and rejected_delivery_events_path
-    hub_sla_report_path = directory / "output" / "generated" / "hub_sla_report" / "hub_sla_report.csv"
-    rejected_delivery_events_path = directory / "output" / "generated" / "rejected_delivery_events" / "rejected_delivery_events.csv"
+    # Declare variable used to read file contents
+    hub_sla_report = ""
+    rejected_delivery_events = ""
 
     # Read hub_sla_report_path.csv and display results
-    print("\n-------- Hub SLA Report --------\n")
-    with open(hub_sla_report_path, newline="") as f:
-       for row in csv.DictReader(f):
-          print(row)
+    with open(hub_sla_report_path, newline="") as file:
+       hub_sla_report = list(csv.DictReader(file))
     
     # Read rejected_delivery_events.csv and display results
-    print("\n----- Rejected Delivery Events -----")
-    with open(rejected_delivery_events_path, newline="") as f:
-        for row in csv.DictReader(f):
-            print(row)
+    with open(rejected_delivery_events_path, newline="") as file:
+        rejected_delivery_events = list(csv.DictReader(file))
 
+    return (hub_sla_report, rejected_delivery_events)
 
 # -------------------------------------------------------------------------------
 def main():
@@ -467,8 +461,47 @@ def main():
   # Display Q14
   print(f'\n{20 * '-'} Reload and verify saved output {20 * '-'}\n')
 
+  # Declare root file directory
+  directory = Path(__file__).resolve().parent.parent
+
+  # Declare hub_sla_report_path and rejected_delivery_events_path
+  hub_sla_report_path = directory / "output" / "generated" / "hub_sla_report" / "hub_sla_report.csv"
+  rejected_delivery_events_path = directory / "output" / "generated" / "rejected_delivery_events" / "rejected_delivery_events.csv"
+
   # Read both saved files after writing and print their contents
-  ReadFile()
+  (hub_sla_report, rejected_delivery_events) = ReadFile(hub_sla_report_path, rejected_delivery_events_path)
+
+  # Print hubReport results
+  print(f'\n-------- Hub SLA Report --------\n{hub_sla_report}')
+
+  # Print rejectionReport results
+  print(f'\n----- Rejected Delivery Events -----\n{rejected_delivery_events}')
+
+  #  -----------  Q15.Reconciliation check -------------
+
+  # Display Q15
+  print(f'\n{20 * "-"} Reconciliation check {20 * "-"}\n')
+
+  # Display results of reconciliation check
+  print(f"\nDelivery Event row quantity:     {deliveryRDD.count()}")
+
+  print(f"\nValid Event row quantity:        {validEventsRDD.count()}")
+
+  print(f"\nRejected Event row quantity:     {rejectedEventsRDD.count()}")
+
+  print(f"\nValid Events + Rejected Events:  {validEventsRDD.count() + rejectedEventsRDD.count()}")
+
+  # Determine if sum of validEventsRDD rows and rejectedEventsRDD rows equate to total delivery count
+  if (validEventsRDD.count() + rejectedEventsRDD.count()) == deliveryRDD.count():
+     print(f'\n{40 * "-"}')
+     print(f'\nResult: Reconciliation check is valid\n')
+    
+  else:
+     print(f'\n{40 * "-"}')
+     print(f'\nResult: Reconciliation check is invalid\n')
+
+  # Terminate spark 
+  spark.stop()
 
 if __name__ == "__main__":
   main()
