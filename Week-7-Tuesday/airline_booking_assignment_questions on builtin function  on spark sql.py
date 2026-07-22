@@ -183,9 +183,9 @@ bookings_df.select(F.col("passenger_name"), F.col("ticket_amount")).show()
 # TODO Question 4
 # Write your PySpark solution below.
 bookings_df.select(
-    F.col("passenger").alias("traveller_name"),
+    F.col("passenger_name").alias("traveller_name"),
     F.col("ticket_amount").alias("fare")
-)
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -200,8 +200,8 @@ bookings_df.select(
 # Write your PySpark solution below.
 (
     bookings_df
-    .withColumn("gross_amount", F.col("ticket_amount") + F.coalesce(F.col("promo_discount"), 0))
-)
+    .withColumn("gross_amount", F.col("ticket_amount") + F.coalesce(F.col("promo_discount"), F.lit(0)))
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -214,7 +214,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 6
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .withColumnRenamed("booking_status", "reservation_status")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -227,7 +230,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 7
 # Write your PySpark solution below.
-
+q7_df = (
+    bookings_df.drop("services", "payment_mode")
+)
+q7_df.show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -240,7 +246,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 8
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .filter(F.col("ticket_amount") > 8000)
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -253,7 +262,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 9
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .where(F.col("ticket_amount") > 8000)
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -266,7 +278,16 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 10
 # Write your PySpark solution below.
-
+(
+    bookings_df.filter(
+        (F.col("booking_status") == "CONFIRMED")
+        & (
+            (F.col("seat_class") == "Business")
+            | (F.col("seat_class") == "Premium Economy")
+        )
+        & (F.col("ticket_amount") > 9000)
+    )
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -279,7 +300,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 11
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .filter(F.col("airline_code").isin(["SKY", "NVA", "ORB"]))
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -292,7 +316,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 12
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .filter(F.col("baggage_kg").between(10, 18))
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -305,7 +332,7 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 13
 # Write your PySpark solution below.
-
+bookings_df.select("seat_class").distinct().show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -318,7 +345,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 14
 # Write your PySpark solution below.
-
+print(
+    "Row count after dedup:",
+    bookings_df.dropDuplicates(subset=["booking_id"]).count()
+)
 
 # COMMAND ----------
 # MAGIC %md
@@ -331,7 +361,10 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 15
 # Write your PySpark solution below.
-
+(
+    bookings_df
+    .withColumn("passenger_name", F.initcap(F.trim(F.col("passenger_name"))))
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -344,7 +377,11 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 16
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.upper(F.col("passenger_name")).alias("upper_name"),
+    F.lower(F.col("passenger_name")).alias("lower_name"),
+    F.initcap(F.col("passenger_name")).alias("capialized_name")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -357,7 +394,9 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 17
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.length(F.trim(F.col("passenger_name")))
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -370,7 +409,9 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 18
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.substring(F.col("passenger_name"), 1, 5).alias("first_five_char")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -383,7 +424,9 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 19
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.concat(F.lit("BOOK-"), F.col("booking_code").cast("int"))
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -396,7 +439,15 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 20
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.concat_ws(
+        " - ",
+        "passenger_name",
+        "airline_code",
+        "route_code",
+        "seat_class"
+    ).alias("booking_summary")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -409,7 +460,9 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 21
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.regexp_replace("passenger_name", "  ", " ")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -422,7 +475,9 @@ bookings_df.select(
 # COMMAND ----------
 # TODO Question 22
 # Write your PySpark solution below.
-
+bookings_df.select(
+    F.split("route_code", "-").alias("split_code")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
