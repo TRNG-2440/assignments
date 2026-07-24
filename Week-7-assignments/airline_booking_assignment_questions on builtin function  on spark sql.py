@@ -16,6 +16,7 @@ from pyspark.sql import functions as F, SparkSession
 from pyspark.sql.functions import col, count, sum as spark_sum, avg, round
 import os
 import sys
+import time
 
 # Setting path variables for my local machine
 os.environ['PYSPARK_PYTHON'] = sys.executable
@@ -76,9 +77,19 @@ airline_df = spark.createDataFrame(airlines, airline_columns)
 route_df = spark.createDataFrame(routes, route_columns)
 new_bookings_df = spark.createDataFrame(new_bookings, columns)
 
-print("Main dataset row count (includes one intentional duplicate):", bookings_df.count())
-bookings_df.printSchema()
+# commenting out the following 3 lines of included code, in order to speed up execution of question steps here
+#print("Main dataset row count (includes one intentional duplicate):", bookings_df.count())
+#bookings_df.printSchema()
 #display(bookings_df)
+
+# CACHING BEFORE ASSIGNMENT START
+caching = True
+if caching:
+    bookings_df.cache() # caching for faster execution during later steps
+    airline_df.cache() # caching for faster execution during later steps
+timer_start = time.perf_counter()
+# Caching control ends
+
 
 # COMMAND ----------
 # MAGIC %md
@@ -91,8 +102,6 @@ bookings_df.printSchema()
 # COMMAND ----------
 # TODO Question 1
 # Write your PySpark solution below.
-
-bookings_df.cache() # caching for faster execution during later steps
 
 print("\nQuestion 1\n")
 bookings_df.show(truncate=False)
@@ -315,7 +324,8 @@ bookings_df.select(
 print("\nQuestion 14\n")
 print("Count before cleaning = ", bookings_df.count())
 
-bookings_df.unpersist() # Uncaching the df, as I will be reassigning it
+if caching:
+    bookings_df.unpersist() # Uncaching the df, as I will be reassigning it
 
 bookings_df = bookings_df.dropDuplicates(["booking_id"])
 print("Count after cleaning =  ", bookings_df.count())
@@ -338,7 +348,8 @@ bookings_df = bookings_df.withColumn(
     F.initcap(F.trim(F.col("passenger_name")))
 )
 
-bookings_df.cache() # Recaching the df for faster operations
+if caching:
+    bookings_df.cache() # Recaching the df for faster operations
 
 bookings_df.select(F.col("passenger_name")).show()
 
@@ -438,14 +449,16 @@ bookings_df.select(
 # Write your PySpark solution below.
 print("\nQuestion 21\n")
 
-bookings_df.unpersist() # Uncaching the df, as I will be reassigning it
+if caching:
+    bookings_df.unpersist() # Uncaching the df, as I will be reassigning it
 
 bookings_df = bookings_df.withColumn(
     "passenger_name",
     F.regexp_replace(F.col("passenger_name"), r"\s{2,}", " ")
 )
 
-bookings_df.cache() # Recaching the df for faster operations
+if caching:
+    bookings_df.cache() # Recaching the df for faster operations
 
 bookings_df.select(
     "passenger_name"
@@ -585,6 +598,7 @@ bookings_df.select(
 # TODO Question 28
 # Write your PySpark solution below.
 print("\nQuestion 28\n")
+# TODO: Finish this, I don't see a tax rate variable anywhere
 bookings_df.select(
     #""
 ).show(truncate=False)
@@ -601,10 +615,13 @@ bookings_df.select(
 # TODO Question 29
 # Write your PySpark solution below.
 print("\nQuestion 29\n")
-bookings_df.select(
-    #""
-).show(truncate=False)
-
+conditional_bookings_df = bookings_df.withColumn(
+    "fare_category",
+    F.when(F.col("ticket_amount") >= 10000, "PREMIUM")
+    .when(F.col("ticket_amount") >= 6000, "STANDARD")
+    .otherwise("BUDGET")
+)
+conditional_bookings_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -619,9 +636,19 @@ bookings_df.select(
 # Write your PySpark solution below.
 print("\nQuestion 30\n")
 bookings_df.select(
-    #""
+    F.col("booking_id"),
+    F.col("passenger_name"),
+    F.col("promo_discount")
 ).filter(
-    #""
+    F.col("promo_discount").isNotNull()
+).show(truncate=False)
+
+bookings_df.select(
+    F.col("booking_id"),
+    F.col("passenger_name"),
+    F.col("promo_discount")
+).filter(
+    F.col("promo_discount").isNull()
 ).show(truncate=False)
 
 # COMMAND ----------
@@ -636,6 +663,8 @@ bookings_df.select(
 # TODO Question 31
 # Write your PySpark solution below.
 print("\nQuestion 31\n")
+bookings_df.fillna({"promo_discount": 0}
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -649,6 +678,9 @@ print("\nQuestion 31\n")
 # TODO Question 32
 # Write your PySpark solution below.
 print("\nQuestion 32\n")
+print(f"Bookings without dropping: {bookings_df.count()}")
+dropped_row_count = bookings_df.dropna(subset=["satisfaction_score"]).count()
+print(f"Bookings with dropping null sat scores: {bookings_df.count() - dropped_row_count}")
 
 # COMMAND ----------
 # MAGIC %md
@@ -662,6 +694,10 @@ print("\nQuestion 32\n")
 # TODO Question 33
 # Write your PySpark solution below.
 print("\nQuestion 33\n")
+bookings_df.select((
+        F.coalesce(F.col("promo_discount"), F.lit(0.00))
+    ).alias("final_discount")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -676,6 +712,26 @@ print("\nQuestion 33\n")
 # Write your PySpark solution below.
 print("\nQuestion 34\n")
 
+if caching:
+    bookings_df.unpersist() # Uncaching, changes made to df
+
+bookings_df = bookings_df.withColumn(
+    "booking_id",
+    F.col("booking_id").cast("string")
+).withColumn(
+    "booking_id",
+    F.col("satisfaction_score").cast("integer")
+).withColumn(
+    "booking_id",
+    F.col("ticket_amount").cast("decimal(10,2)")
+)
+
+bookings_df.select(
+    F.col("booking_id"),
+    F.col("satisfaction_score"),
+    F.col("ticket_amount")
+).show(truncate=False)
+
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 35 — Date functions
@@ -689,6 +745,22 @@ print("\nQuestion 34\n")
 # Write your PySpark solution below.
 print("\nQuestion 35\n")
 
+bookings_df = bookings_df.withColumn(
+        "booking_date", F.to_date(F.col("booking_date"))
+    ).withColumn(
+        "travel_date", F.to_date(F.col("travel_date"))
+    )
+
+if caching:
+    bookings_df.cache() # Recaching after 2 changes
+
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "booking_date",
+    "travel_date"
+).show(truncate=False)
+
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 36 — Date functions
@@ -701,6 +773,16 @@ print("\nQuestion 35\n")
 # TODO Question 36
 # Write your PySpark solution below.
 print("\nQuestion 36\n")
+bookings_df.withColumn(
+    "current_date", F.current_date()
+).withColumn(
+    "current_timestamp", F.current_timestamp()
+).select(
+    "booking_id",
+    "passenger_name",
+    "current_date",
+    "current_timestamp"
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -714,6 +796,14 @@ print("\nQuestion 36\n")
 # TODO Question 37
 # Write your PySpark solution below.
 print("\nQuestion 37\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    F.year("travel_date").alias("travel_year"),
+    F.month("travel_date").alias("travel_month"),
+    F.dayofmonth("travel_date").alias("travel_day_of_month"),
+    F.dayofweek("travel_date").alias("travel_day_of_week")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -727,6 +817,12 @@ print("\nQuestion 37\n")
 # TODO Question 38
 # Write your PySpark solution below.
 print("\nQuestion 38\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "travel_date",
+    F.date_format("travel_date", "dd-MM-yyyy").alias("formatted_travel_date")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -740,6 +836,13 @@ print("\nQuestion 38\n")
 # TODO Question 39
 # Write your PySpark solution below.
 print("\nQuestion 39\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "booking_date",
+    F.datediff(F.current_date(), F.col("booking_date")).alias("days_since_booked"),
+    F.round(F.months_between(F.current_date(), F.col("booking_date")), 0).alias("months_between")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -753,6 +856,23 @@ print("\nQuestion 39\n")
 # TODO Question 40
 # Write your PySpark solution below.
 print("\nQuestion 40\n")
+bookings_df.withColumn(
+    "travel_plus_2_months",
+    F.add_months("travel_date", 2)
+).withColumn(
+    "travel_plus_7_days",
+    F.date_add("travel_date", 7)
+).withColumn(
+    "travel_minus_3_days",
+    F.date_sub("travel_date", 3)
+).select(
+    "booking_id",
+    "passenger_name",
+    "travel_date",
+    "travel_plus_2_months",
+    "travel_plus_7_days",
+    "travel_minus_3_days"
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -766,6 +886,14 @@ print("\nQuestion 40\n")
 # TODO Question 41
 # Write your PySpark solution below.
 print("\nQuestion 41\n")
+bookings_df.select(
+    F.count("*").alias("booking_count"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.avg("ticket_amount").alias("average_fare"),
+    F.min("ticket_amount").alias("minumum_fare"),
+    F.max("ticket_amount").alias("maximum_fare"),
+    F.count_distinct("airline_code").alias("distinct_airline_count")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -779,6 +907,13 @@ print("\nQuestion 41\n")
 # TODO Question 42
 # Write your PySpark solution below.
 print("\nQuestion 42\n")
+bookings_df.groupby("airline_code").agg(
+    F.count("*").alias("booking_count"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.avg("ticket_amount").alias("average_fare"),
+    F.min("ticket_amount").alias("minumum_fare"),
+    F.max("ticket_amount").alias("maximum_fare"),
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -792,6 +927,10 @@ print("\nQuestion 42\n")
 # TODO Question 43
 # Write your PySpark solution below.
 print("\nQuestion 43\n")
+bookings_df.groupBy("seat_class").agg(
+    F.collect_list("booking_status"),
+    F.collect_set("payment_mode")
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -805,6 +944,21 @@ print("\nQuestion 43\n")
 # TODO Question 44
 # Write your PySpark solution below.
 print("\nQuestion 44\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "ticket_amount"
+).orderBy(
+    F.col("ticket_amount").asc()
+).show(truncate=False)
+
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "ticket_amount"
+).orderBy(
+    F.col("ticket_amount").desc()
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -818,6 +972,15 @@ print("\nQuestion 44\n")
 # TODO Question 45
 # Write your PySpark solution below.
 print("\nQuestion 45\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "airline_code",
+    "ticket_amount"
+).orderBy(
+    F.col("airline_code").asc(),
+    F.col("ticket_amount").desc()
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -831,6 +994,14 @@ print("\nQuestion 45\n")
 # TODO Question 46
 # Write your PySpark solution below.
 print("\nQuestion 46\n")
+bookings_df.select(
+    "booking_id",
+    "passenger_name",
+    "airline_code",
+    "ticket_amount"
+).orderBy(
+    F.col("ticket_amount").desc()
+).limit(5).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -844,6 +1015,16 @@ print("\nQuestion 46\n")
 # TODO Question 47
 # Write your PySpark solution below.
 print("\nQuestion 47\n")
+bookings_df.join(
+    airline_df, on="airline_code", how="inner"
+).select(
+    "booking_id",
+    "passenger_name",
+    "airline_code",
+    "airline_name",
+    "headquarters",
+    "service_tier"
+).limit(15).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -857,6 +1038,16 @@ print("\nQuestion 47\n")
 # TODO Question 48
 # Write your PySpark solution below.
 print("\nQuestion 48\n")
+bookings_df.join(
+    airline_df, on="airline_code", how="left"
+).select(
+    "booking_id",
+    "passenger_name",
+    "airline_code",
+    "airline_name",
+).filter(
+    airline_df["airline_name"].isNull()
+).limit(15).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -870,6 +1061,17 @@ print("\nQuestion 48\n")
 # TODO Question 49
 # Write your PySpark solution below.
 print("\nQuestion 49\n")
+bookings_df.join(
+    airline_df,
+    on="airline_code",
+    how= "right"
+).select(
+    "booking_id",
+    "airline_code",
+    "airline_name",
+).filter(
+    bookings_df["booking_id"].isNull()
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -883,6 +1085,17 @@ print("\nQuestion 49\n")
 # TODO Question 50
 # Write your PySpark solution below.
 print("\nQuestion 50\n")
+bookings_df.join(
+    airline_df,
+    on="airline_code",
+    how= "full_outer"
+).select(
+    "booking_id",
+    "airline_code",
+    "airline_name",
+).filter(
+    bookings_df["booking_id"].isNull() | airline_df['airline_name'].isNull()
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1097,4 +1310,9 @@ print("\nQuestion 66\n")
 if bookings_df.is_cached:
     print("Final Uncaching bookings df")
     bookings_df.unpersist()
+if airline_df.is_cached:
+    print("Final Uncaching airline df")
+    airline_df.unpersist()
+print(f"Caching = {caching}\nTime elapsed = {time.perf_counter() - timer_start}")
+
 spark.stop()
