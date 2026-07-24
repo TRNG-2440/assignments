@@ -444,11 +444,12 @@ bookings_df = bookings_df.withColumn(
     "passenger_name",
     F.regexp_replace(F.col("passenger_name"), r"\s{2,}", " ")
 )
+
+bookings_df.cache() # Recaching the df for faster operations
+
 bookings_df.select(
     "passenger_name"
 ).show(truncate=False)
-
-
 
 # COMMAND ----------
 # MAGIC %md
@@ -481,6 +482,26 @@ bookings_df.select(
 # Write your PySpark solution below.
 print("\nQuestion 23\n")
 
+# names with "an"
+bookings_df.select(
+    "passenger_name"
+).filter(
+    F.lower("passenger_name").contains("an")
+).distinct().show(truncate=False)
+
+# origin cities starting with "B"
+bookings_df.select(
+    "origin_city"
+).filter(
+    F.lower("origin_city").startswith("b")
+).distinct().show(truncate=False)
+
+# destination cities ending with "i"
+bookings_df.select(
+    "destination_city"
+).filter(
+    F.lower("destination_city").endswith("i")
+).distinct().show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -494,6 +515,12 @@ print("\nQuestion 23\n")
 # TODO Question 24
 # Write your PySpark solution below.
 print("\nQuestion 24\n")
+bookings_df.select(
+    "ticket_amount",
+    F.round(F.col("ticket_amount")/3, 2).alias("rounded_off"),
+    F.ceiling(F.col("ticket_amount")/3).alias("ceilinged"),
+    F.floor(F.col("ticket_amount")/3).alias("floored")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -507,6 +534,11 @@ print("\nQuestion 24\n")
 # TODO Question 25
 # Write your PySpark solution below.
 print("\nQuestion 25\n")
+bookings_df.select(
+    "ticket_amount",
+    F.abs(F.lit(7000.0) - F.col("ticket_amount")).alias("difference_from_7000")
+).show(truncate=False)
+
 
 # COMMAND ----------
 # MAGIC %md
@@ -520,6 +552,10 @@ print("\nQuestion 25\n")
 # TODO Question 26
 # Write your PySpark solution below.
 print("\nQuestion 26\n")
+bookings_df.select(
+    "baggage_kg",
+    F.pow("baggage_kg", 2).alias("squared")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -533,6 +569,9 @@ print("\nQuestion 26\n")
 # TODO Question 27
 # Write your PySpark solution below.
 print("\nQuestion 27\n")
+bookings_df.select(
+    F.sqrt("baggage_kg").alias("square_root")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -546,6 +585,9 @@ print("\nQuestion 27\n")
 # TODO Question 28
 # Write your PySpark solution below.
 print("\nQuestion 28\n")
+bookings_df.select(
+    #""
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -559,6 +601,10 @@ print("\nQuestion 28\n")
 # TODO Question 29
 # Write your PySpark solution below.
 print("\nQuestion 29\n")
+bookings_df.select(
+    #""
+).show(truncate=False)
+
 
 # COMMAND ----------
 # MAGIC %md
@@ -572,6 +618,11 @@ print("\nQuestion 29\n")
 # TODO Question 30
 # Write your PySpark solution below.
 print("\nQuestion 30\n")
+bookings_df.select(
+    #""
+).filter(
+    #""
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -844,7 +895,7 @@ print("\nQuestion 50\n")
 # COMMAND ----------
 # TODO Question 51
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 51\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -857,7 +908,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 52
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 52\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -870,7 +921,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 53
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 53\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -883,7 +934,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 54
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 54\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -896,7 +947,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 55
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 55\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -909,7 +960,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 56
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 56\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -922,7 +973,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 57
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 57\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -935,7 +986,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 58
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 58\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -948,7 +999,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 59
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 59\n")
 
 # COMMAND ----------
 # MAGIC %md
@@ -961,7 +1012,7 @@ print("\nQuestion \n")
 # COMMAND ----------
 # TODO Question 60
 # Write your PySpark solution below.
-print("\nQuestion \n")
+print("\nQuestion 60\n")
 
 # COMMAND ----------
 # MAGIC %md
