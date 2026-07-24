@@ -135,12 +135,12 @@ display(bookings_df.select(F.col("passenger_name"), F.col("ticket_amount")))
 # TODO Question 4
 # Write your PySpark solution below.
 
-bookings_df = bookings_df.withColumns(
+renamed_alias_df = bookings_df.withColumns(
     {"traveller_name": F.col("passenger_name").alias("traveller_name"),
      "fare": F.col("ticket_amount").alias("fare")
      }
 )
-display(bookings_df)
+display(renamed_alias_df)
 
 # COMMAND ----------
 # MAGIC %md
@@ -169,8 +169,8 @@ display(bookings_df)
 # TODO Question 6
 # Write your PySpark solution below.
 
-bookings_df = bookings_df.withColumnRenamed("booking_status", "reservation_status")
-display(bookings_df)
+renamed_df = bookings_df.withColumnRenamed("booking_status", "reservation_status")
+display(renamed_df)
 
 # COMMAND ----------
 # MAGIC %md
@@ -229,7 +229,7 @@ display(bookings_df.where(F.col("ticket_amount") > 8000))
 # TODO Question 10
 # Write your PySpark solution below.
 
-display(bookings_df.where((bookings_df.ticket_amount > 9000) & ((F.col("seat_class").isin("Business", "Premium Economy")) & (F.col("reservation_status") == "CONFIRMED"))))
+display(bookings_df.where((bookings_df.ticket_amount > 9000) & ((F.col("seat_class").isin("Business", "Premium Economy")) & (F.col("booking_status") == "CONFIRMED"))))
 
 # COMMAND ----------
 # MAGIC %md
@@ -732,10 +732,10 @@ display(bookings_df)
 
 aggregated_df = bookings_df.agg(
     F.count("*").alias("booking_count"),
-    F.sum("fare").alias("total_fare"),
-    F.avg("fare").alias("average_fare"),
-    F.min("fare").alias("minimum_fare"),
-    F.max("fare").alias("maximum_fare"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.avg("ticket_amount").alias("average_fare"),
+    F.min("ticket_amount").alias("minimum_fare"),
+    F.max("ticket_amount").alias("maximum_fare"),
     F.countDistinct("airline_code").alias("distinct_airline_count")
 )
 display(aggregated_df)
@@ -754,10 +754,10 @@ display(aggregated_df)
 
 airline_report_df = bookings_df.groupBy("airline_code").agg(
     F.count("*").alias("booking_count"),
-    F.avg("fare").alias("average_fare"),
-    F.sum("fare").alias("total_fare"),
-    F.min("fare").alias("minimum_fare"),
-    F.max("fare").alias("maximum_fare")
+    F.avg("ticket_amount").alias("average_fare"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.min("ticket_amount").alias("minimum_fare"),
+    F.max("ticket_amount").alias("maximum_fare")
 )
 display(airline_report_df)
 
@@ -946,7 +946,15 @@ display(cross_join_df)
 # TODO Question 54
 # Write your PySpark solution below.
 
-bookings_df = bookings_df.unionByName(new_bookings_df)
+
+reordered_new_bookings_df = new_bookings_df.withColumn(
+    "route_code", F.split(F.col("route_code"), "-")
+).select(
+    "payment_mode", "satisfaction_score", "booking_status", "services", "promo_discount",
+    "seat_class", "destination_city", "origin_city", "travel_date", "booking_date",
+    "baggage_kg", "ticket_amount", "route_code", "airline_code", "passenger_name", "booking_id"
+)
+bookings_df = bookings_df.unionByName(reordered_new_bookings_df, allowMissingColumns=True)
 display(bookings_df)
 
 
@@ -981,8 +989,8 @@ route_df.createOrReplaceTempView("routes")
 confirmed_bookings_df = spark.sql("""
     SELECT *
     FROM bookings
-    WHERE status = 'confirmed' AND fare > 8000
-    ORDER BY fare DESC
+    WHERE booking_status = 'CONFIRMED' AND ticket_amount > 8000
+    ORDER BY ticket_amount DESC
 """)
 display(confirmed_bookings_df)
 
