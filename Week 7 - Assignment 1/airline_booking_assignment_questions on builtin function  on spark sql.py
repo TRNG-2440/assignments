@@ -607,7 +607,6 @@ bookings_df.select(
 # Write your PySpark solution below.
 
 # If fare >= 10,000 make premium, if fare >= 6,000 make standard, otherwise make budget
-
 bookings_df.select(
    F.col("ticket_amount"),
    F.when(F.col("ticket_amount") >= 10000, "PREMIUM"),
@@ -723,11 +722,24 @@ datesDF.printSchema()
 # MAGIC 
 # MAGIC Add current_date and current_timestamp columns.
 # MAGIC 
-# MAGIC **Functions/concepts:** `current_date, current_timestamp`
+# MAGIC
 
 # COMMAND ----------
 # TODO Question 36
 # Write your PySpark solution below.
+
+# Include current_date and current_timestamp
+bookings_df.withColumn(
+   "current_date",
+   F.current_date()
+).withColumn(
+   "current_timestamp",
+   F.current_timestamp()
+).select(
+   "booking_id",
+   "current_date",
+   "current_timestamp"
+).show(truncate = False)
 
 
 # COMMAND ----------
@@ -742,6 +754,13 @@ datesDF.printSchema()
 # TODO Question 37
 # Write your PySpark solution below.
 
+# Determine travel year, month, day of month and day of week
+datesDF.select( F.col("travel_data"),
+   F.year(F.col("travel_date")).alias("travel_year"),
+   F.month(F.col("travel_date")).alias("travel_month"),
+   F.dayofmonth(F.col("travel_date")).alias("travel_day"),
+   F.dayofweek(F.col("travel_date")).alias("travel_dayofweek")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -755,6 +774,12 @@ datesDF.printSchema()
 # TODO Question 38
 # Write your PySpark solution below.
 
+# Format travel_date as dd-MM-yyyy
+bookings_df.select(
+   F.date_format(F.to_date(F.col("travel_date"), "yyyy-MM-dd"),
+    "dd-MM-yyyy"
+    ).alias("travel_date_formatted")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -768,6 +793,12 @@ datesDF.printSchema()
 # TODO Question 39
 # Write your PySpark solution below.
 
+datesDF.select(
+   "booking_date",
+   "travel_date",
+   F.datediff(F.col("travel_date"), F.col("booking_date")).alias("lead_time_in_days"),
+   F.months_between(F.current_date(), F.col("booking_date")).alias("months_since_booking")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -781,6 +812,12 @@ datesDF.printSchema()
 # TODO Question 40
 # Write your PySpark solution below.
 
+datesDF.select(
+   F.col("travel_date"),
+   F.add_months(F.col("travel_date"),2).alias("travel_plus_2_months"),
+   F.date_add(F.col("travel_date"), 7).alias("travel_plus_7_days"),
+   F.date_sub(F.col("travel_date"),3).alias("travel_minute_3_days")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -793,6 +830,16 @@ datesDF.printSchema()
 # COMMAND ----------
 # TODO Question 41
 # Write your PySpark solution below.
+
+bookings_df.agg(
+    F.count("*").alias("booking_count"),
+    F.sum("ticket_amount").alias("total_fare"),
+    F.round(F.avg("ticket_amount"), 2).alias("average_fare"),
+    F.min("ticket_amount").alias("minimum_fare"),
+    F.max("ticket_amount").alias("maximum_fare"),
+    F.countDistinct("airline_code").alias("distinct_airlines")
+).show(truncate = False)
+
 
 
 # COMMAND ----------
@@ -807,6 +854,14 @@ datesDF.printSchema()
 # TODO Question 42
 # Write your PySpark solution below.
 
+# Gregate rows based on airline_code
+bookings_df.groupBy("airline_code").agg(
+   F.count("*").alias("booking_count"),
+   F.sum(F.avg("ticket_amount"), 2).alias("average_fare"),
+   F.min("ticket_amount").alias("minimum_fare"),
+   F.max("ticket_amount").alias("maximum_fare"),
+   F.countDistinct("airline_code").alias("distinct_airlines")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -820,6 +875,11 @@ datesDF.printSchema()
 # TODO Question 43
 # Write your PySpark solution below.
 
+# Display all the values per group and all the distinct values per group
+bookings_df.groupBy("seat_class").agg(
+   F.collect_list("booking_status").alias("all_statuses"),
+   F.collect_set("payment_mode").alias("unique_payment_modes")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -833,6 +893,9 @@ datesDF.printSchema()
 # TODO Question 44
 # Write your PySpark solution below.
 
+# Sorted ticket_amount in ascending and descending order
+bookings_df.select(F.col("ticket_amount").alias("ascending_ticket_amount")).orderBy(F.col("ticket_amount").asc()).show(truncate = False)
+bookings_df.select(F.col("ticket_amount").alias("descending_ticket_amount")).orderBy(F.col("ticket_amount").desc()).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -846,6 +909,9 @@ datesDF.printSchema()
 # TODO Question 45
 # Write your PySpark solution below.
 
+# Sorted airline_code in ascending and descending order
+bookings_df.select(F.col("airline_code").alias("ascending_ticket_amount")).orderBy(F.col("airline_code").asc()).show(truncate = False)
+bookings_df.select(F.col("airline_code").alias("ascending_ticket_amount")).orderBy(F.col("airline_code").desc()).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -859,6 +925,8 @@ datesDF.printSchema()
 # TODO Question 46
 # Write your PySpark solution below.
 
+# Display the top 5 more expensive bookings
+bookings_df.select(F.col("ticket_amount")).orderBy(F.col("ticket_amount").desc()).limit(5).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -872,7 +940,18 @@ datesDF.printSchema()
 # TODO Question 47
 # Write your PySpark solution below.
 
+# Join bookings_df with airline_df
+join_df = bookings_df.join(airline_df, bookings_df["airline_code"] == airline_df["airline_code"])
 
+join_df.show(truncate = False)
+
+"""
+Alternative method:
+
+join_df = bookings_df.join(airline_df, on = "airline_code")
+join_df.show(truncate = False)
+
+"""
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 48 — Joins
@@ -885,6 +964,9 @@ datesDF.printSchema()
 # TODO Question 48
 # Write your PySpark solution below.
 
+# Perform a left join with bookings_df with airline_df
+left_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] == airline_df["airline_code"], how = "left")
+left_join_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -898,6 +980,8 @@ datesDF.printSchema()
 # TODO Question 49
 # Write your PySpark solution below.
 
+full_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] ==  airline_df["airline_code"], how="right")
+full_join_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -911,6 +995,8 @@ datesDF.printSchema()
 # TODO Question 50
 # Write your PySpark solution below.
 
+full_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] ==  airline_df["airline_code"], how="full")
+full_join_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
