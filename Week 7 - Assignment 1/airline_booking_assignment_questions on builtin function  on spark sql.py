@@ -557,10 +557,17 @@ bookings_df.select(
 # MAGIC 
 # MAGIC **Functions/concepts:** `sqrt`
 
+
+
 # COMMAND ----------
 # TODO Question 27
 # Write your PySpark solution below.
 
+# Calculate square root of ticket amount
+bookings_df.select(
+   F.col("ticket_amount"),
+    F.round(F.sqrt(F.col("ticket_amount")), 2).alias("ticket_sqrt")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -570,10 +577,22 @@ bookings_df.select(
 # MAGIC 
 # MAGIC **Functions/concepts:** `arithmetic operators, when`
 
+
+
 # COMMAND ----------
 # TODO Question 28
 # Write your PySpark solution below.
 
+# Implement discounted amounts
+bookings_df.select(
+   F.col("ticket_amount"),
+   F.col("baggage_kg"),
+   (F.col("ticket_amount") * 1.18).alias("fare_plus_tax"),
+   (F.col("ticket_amount") - F.lit(100)).alias("fare_after_flat_discount"),
+   (F.col("ticket_amount") * 2).alias("double_baggage"),
+   F.when(F.col("baggage_kg") == 0, None).otherwise(F.col("ticket_amount") / F.col("baggage_kg"))
+   .alias("fare_per_kg")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -587,6 +606,14 @@ bookings_df.select(
 # TODO Question 29
 # Write your PySpark solution below.
 
+# If fare >= 10,000 make premium, if fare >= 6,000 make standard, otherwise make budget
+
+bookings_df.select(
+   F.col("ticket_amount"),
+   F.when(F.col("ticket_amount") >= 10000, "PREMIUM"),
+   F.when(F.col("ticket_amount") >= 6000, "STANDARD")
+   .otherwise("BUDGET").alias("fare_category")
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -600,6 +627,11 @@ bookings_df.select(
 # TODO Question 30
 # Write your PySpark solution below.
 
+# Display records when promo_discount is null
+bookings_df.select(F.col("promo_discount").isNull()).show(truncate = False)
+
+# Display records when promo_discount is not null
+bookings_df.select(F.col("promo_discount").isNotNull()).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -613,6 +645,11 @@ bookings_df.select(
 # TODO Question 31
 # Write your PySpark solution below.
 
+# If promo_discount contain null value assign attribute to zero 
+bookings_df.fillna({"promo_discount": 0}).select(
+    "booking_id",
+    F.format_number(F.col("promo_discount"), 2).alias("promo_discount")
+).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -626,6 +663,8 @@ bookings_df.select(
 # TODO Question 32
 # Write your PySpark solution below.
 
+# Remove rows where satisfaction_score contains null value
+bookings_df.dropna(subset=["satisfaction_score"]).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -639,6 +678,8 @@ bookings_df.select(
 # TODO Question 33
 # Write your PySpark solution below.
 
+# Declare final_discount when promo_discount when available
+bookings_df.withColumn("final_discount", F.coalesce(F.col("promo_discount"), F.lit(0))).select("promo_discount", "final_discount").show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -652,6 +693,10 @@ bookings_df.select(
 # TODO Question 34
 # Write your PySpark solution below.
 
+castedDF = bookings_df.withColumn(
+   "booking_id", F.col("booking_id").cast("string")).withColumn("satisfaction_score", F.col("satisfaction_score").cast("integer")).withColumn("ticket_amount",F.col("ticket_amount").cast("decimal(10,2)"))
+
+castedDF.printSchema()
 
 # COMMAND ----------
 # MAGIC %md
@@ -665,6 +710,12 @@ bookings_df.select(
 # TODO Question 35
 # Write your PySpark solution below.
 
+# Convert booking_date and travel_date to DateType datatypes
+datesDF = bookings_df.withColumn("booking_date", F.to_date(F.col("booking_date"), "yyyy-MM-dd")).withColumn("travel_date",F.to_date("travel_date"), "yyyy-MM-dd")
+
+datesDF.select("booking_date","travel_date").show(truncate = False)
+
+datesDF.printSchema()
 
 # COMMAND ----------
 # MAGIC %md
