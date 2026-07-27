@@ -3,7 +3,7 @@
 ## customers.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | customer_id | string | string | Customer business key in `C######` format |
 | first_name | string | string | Given name |
 | last_name | string | string | Family name |
@@ -23,7 +23,7 @@
 ## products.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | product_id | string | string | Product key in `P#####` format |
 | product_name | string | string | Product name |
 | category | string | string | Main product category |
@@ -40,7 +40,7 @@
 ## orders.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | order_id | string | string | Order key in `O########` format |
 | customer_id | string | string | Customer reference |
 | order_date | string | timestamp | Order timestamp in multiple formats |
@@ -61,7 +61,7 @@
 ## order_items.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | order_item_id | string | string | Line key in `OI#########` format |
 | order_id | string | string | Order reference |
 | product_id | string | string | Product reference |
@@ -73,7 +73,7 @@
 ## payments.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | payment_id | string | string | Payment key |
 | order_id | string | string | Order reference |
 | payment_date | string | timestamp | Payment timestamp |
@@ -85,7 +85,7 @@
 ## shipments.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | shipment_id | string | string | Shipment key |
 | order_id | string | string | Order reference |
 | shipment_date | string | date | Ship date |
@@ -98,7 +98,7 @@
 ## returns.csv
 
 | Column | Raw type | Intended Silver type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | return_id | string | string | Return key |
 | order_id | string | string | Order reference |
 | product_id | string | string | Returned product |
