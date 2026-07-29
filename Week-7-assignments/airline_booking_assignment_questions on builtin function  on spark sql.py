@@ -13,7 +13,6 @@
 
 # Imports
 from pyspark.sql import functions as F, SparkSession
-from pyspark.sql.functions import col, count, sum as spark_sum, avg, round
 import os
 import sys
 import time
@@ -87,6 +86,7 @@ caching = True
 if caching:
     bookings_df.cache() # caching for faster execution during later steps
     airline_df.cache() # caching for faster execution during later steps
+    route_df.cache() # caching for faster execution during later steps
 timer_start = time.perf_counter()
 # Caching control ends
 
@@ -1109,6 +1109,15 @@ bookings_df.join(
 # TODO Question 51
 # Write your PySpark solution below.
 print("\nQuestion 51\n")
+bookings_df.join(
+    airline_df,
+    on="airline_code",
+    how="left_semi"
+).select(
+    "booking_id",
+    "passenger_name",
+    "airline_code"
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1122,6 +1131,15 @@ print("\nQuestion 51\n")
 # TODO Question 52
 # Write your PySpark solution below.
 print("\nQuestion 52\n")
+bookings_df.join(
+    airline_df,
+    on="airline_code",
+    how="left_anti"
+).select(
+    "booking_id",
+    "passenger_name",
+    "airline_code"
+).show()
 
 # COMMAND ----------
 # MAGIC %md
@@ -1135,6 +1153,9 @@ print("\nQuestion 52\n")
 # TODO Question 53
 # Write your PySpark solution below.
 print("\nQuestion 53\n")
+seat_class_df = bookings_df.select(F.col("seat_class")).distinct()
+airline_code_df = airline_df.select(F.col("airline_code")).distinct()
+airline_code_df.crossJoin(seat_class_df).show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1149,6 +1170,18 @@ print("\nQuestion 53\n")
 # Write your PySpark solution below.
 print("\nQuestion 54\n")
 
+print(f"Column count before appending: {bookings_df.count()}")
+
+if caching:
+    bookings_df.unpersist()
+
+bookings_df = bookings_df.unionByName(new_bookings_df)
+
+if caching:
+    bookings_df.cache()
+
+print(f"Column count after appending: {bookings_df.count()}")
+
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 55 — Spark SQL
@@ -1161,6 +1194,9 @@ print("\nQuestion 54\n")
 # TODO Question 55
 # Write your PySpark solution below.
 print("\nQuestion 55\n")
+bookings_df.createOrReplaceTempView("bookings")
+airline_df.createOrReplaceTempView("airlines")
+route_df.createOrReplaceTempView("routes")
 
 # COMMAND ----------
 # MAGIC %md
@@ -1174,6 +1210,12 @@ print("\nQuestion 55\n")
 # TODO Question 56
 # Write your PySpark solution below.
 print("\nQuestion 56\n")
+spark.sql("""
+    SELECT booking_id, passenger_name, ticket_amount
+    FROM bookings
+    WHERE ticket_amount > 8000
+    ORDER BY ticket_amount DESC
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1187,6 +1229,16 @@ print("\nQuestion 56\n")
 # TODO Question 57
 # Write your PySpark solution below.
 print("\nQuestion 57\n")
+spark.sql("""
+    SELECT 
+        passenger_name,
+        TRIM(passenger_name) AS trimmed_name,
+        UPPER(passenger_name) AS upper_name,
+        LOWER(passenger_name) AS lower_name,
+        INITCAP(passenger_name) AS initcap_name,
+        LENGTH(passenger_name) AS name_length
+    FROM bookings
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1200,6 +1252,16 @@ print("\nQuestion 57\n")
 # TODO Question 58
 # Write your PySpark solution below.
 print("\nQuestion 58\n")
+spark.sql("""
+    SELECT 
+        *,
+        CASE 
+            WHEN ticket_amount >= 10000 THEN 'PREMIUM'
+            WHEN ticket_amount >= 6000 THEN 'STANDARD'
+            ELSE 'BUDGET'
+        END AS fare_category
+    FROM bookings
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1213,6 +1275,12 @@ print("\nQuestion 58\n")
 # TODO Question 59
 # Write your PySpark solution below.
 print("\nQuestion 59\n")
+spark.sql("""
+    SELECT 
+        *,
+        COALESCE(promo_discount, 0) AS promo_discount_cleaned
+    FROM bookings
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1226,6 +1294,18 @@ print("\nQuestion 59\n")
 # TODO Question 60
 # Write your PySpark solution below.
 print("\nQuestion 60\n")
+spark.sql("""
+    SELECT 
+        airline_code,
+        COUNT(booking_id) AS total_bookings,
+        COUNT(DISTINCT passenger_name) AS unique_passengers,
+        SUM(ticket_amount) AS total_revenue,
+        AVG(ticket_amount) AS avg_fare,
+        MIN(ticket_amount) AS min_fare,
+        MAX(ticket_amount) AS max_fare
+    FROM bookings
+    GROUP BY airline_code
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1239,6 +1319,19 @@ print("\nQuestion 60\n")
 # TODO Question 61
 # Write your PySpark solution below.
 print("\nQuestion 61\n")
+joined_df = spark.sql("""
+    SELECT 
+        b.*,
+        a.airline_name,
+        a.service_tier,
+        r.route_name,
+        r.region,
+        r.distance_km
+    FROM bookings b
+    LEFT JOIN airlines a ON b.airline_code = a.airline_code
+    LEFT JOIN routes r ON b.route_code = r.route_code
+""")
+joined_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1252,6 +1345,17 @@ print("\nQuestion 61\n")
 # TODO Question 62
 # Write your PySpark solution below.
 print("\nQuestion 62\n")
+print("\nQuestion 62\n")
+sql_airline_aggregation_df = spark.sql("""
+    SELECT 
+        airline_code,
+        SUM(ticket_amount) AS total_fare
+    FROM bookings
+    GROUP BY airline_code
+""")
+
+# In Databricks, display() renders the interactive chart view configured in the UI
+#display(sql_airline_aggregation_df)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1266,6 +1370,12 @@ print("\nQuestion 62\n")
 # Write your PySpark solution below.
 print("\nQuestion 63\n")
 
+# This only runs in Databricks
+#sql_airline_aggregation_df.write.mode("overwrite").saveAsTable("airline_aggregation_managed")
+#
+#queried_table_df = spark.table("airline_aggregation_managed")
+#queried_table_df.show(truncate=False)
+
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 64 — Execution plan
@@ -1278,6 +1388,7 @@ print("\nQuestion 63\n")
 # TODO Question 64
 # Write your PySpark solution below.
 print("\nQuestion 64\n")
+sql_airline_aggregation_df.explain(mode="formatted")
 
 # COMMAND ----------
 # MAGIC %md
@@ -1291,6 +1402,17 @@ print("\nQuestion 64\n")
 # TODO Question 65
 # Write your PySpark solution below.
 print("\nQuestion 65\n")
+# Example Transformations (Lazy evaluation - no computation happens yet)
+transformed_df = bookings_df.filter("ticket_amount > 5000").select("booking_id", "ticket_amount")
+
+# Example Actions (Triggers computation and returns results)
+print("Running Actions:")
+record_count = transformed_df.count()
+print(f"Total count (Action): {record_count}")
+
+# Execute collect() on a small aggregated DF to pull records to the driver safely
+collected_data = sql_airline_aggregation_df.collect()
+print(f"Collected aggregated records (Action): {collected_data}")
 
 # COMMAND ----------
 # MAGIC %md
@@ -1304,15 +1426,32 @@ print("\nQuestion 65\n")
 # TODO Question 66
 # Write your PySpark solution below.
 print("\nQuestion 66\n")
+single_partition_df = sql_airline_aggregation_df.coalesce(1)
+print(f"Partition count after coalesce: {single_partition_df.rdd.getNumPartitions()}")
 
+"""
+EXPLANATION:
+DataFrame.coalesce(1) should never be used blindly on large production datasets for two primary reasons:
+
+1. Out-of-Memory (OOM) Errors: Coalescing to 1 partition forces all distributed data from across 
+   the cluster into a single executor node. If the dataset exceeds that node's memory capacity, 
+   it will crash with a java.lang.OutOfMemoryError.
+
+2. Loss of Parallelism: Distributed processing is Spark's core benefit. Collapsing down to 1 
+   partition forces Spark to operate strictly in single-threaded mode for downstream operations, 
+   rendering all other worker nodes in the cluster idle and bottlenecking execution speed.
+"""
 
 # Clear cache and stop spark
 if bookings_df.is_cached:
-    print("Final Uncaching bookings df")
+    print("\nFinal Uncaching bookings df")
     bookings_df.unpersist()
 if airline_df.is_cached:
     print("Final Uncaching airline df")
     airline_df.unpersist()
-print(f"Caching = {caching}\nTime elapsed = {time.perf_counter() - timer_start}")
+if route_df.is_cached:
+    print("Final Uncaching route df")
+    route_df.unpersist()
+print(f"\nCaching = {caching}\nTime elapsed = {time.perf_counter() - timer_start}")
 
 spark.stop()
