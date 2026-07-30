@@ -1010,7 +1010,9 @@ full_join_df.show(truncate = False)
 # TODO Question 51
 # Write your PySpark solution below.
 
+left_semi_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] == airline_df["airline_code"], how = "left_semi")
 
+left_semi_join_df.show(truncate = False)
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 52 — Joins
@@ -1023,7 +1025,10 @@ full_join_df.show(truncate = False)
 # TODO Question 52
 # Write your PySpark solution below.
 
+# Produce left anti join
+left_anti_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] == airline_df["airline_code"], how = "left_anti")
 
+left_anti_join_df.show(truncate = False)
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 53 — Joins
@@ -1036,6 +1041,10 @@ full_join_df.show(truncate = False)
 # TODO Question 53
 # Write your PySpark solution below.
 
+# Produce cross join
+cross_join_df = bookings_df.join(airline_df, bookings_df["airline_code"] == airline_df["airline_code"], how = "cross")
+
+cross_join_df.show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1049,6 +1058,33 @@ full_join_df.show(truncate = False)
 # TODO Question 54
 # Write your PySpark solution below.
 
+# Declare updated_bookings_df
+updated_bookings_df = new_bookings_df.select(
+    "payment_mode",
+    "seat_class",
+    "passenger_name",
+    "booking_id",
+    "airline_code",
+    "route_code",
+    "ticket_amount",
+    "baggage_kg",
+    "booking_date",
+    "travel_date",
+    "origin_city",
+    "destination_city",
+    "promo_discount",
+    "services",
+    "booking_status",
+    "satisfaction_score"
+)
+# Append by column name
+union_df = bookings_df.unionByName(updated_bookings_df)
+
+# Display count of union_df
+print(union_df.count()) 
+
+# Display content of union_df
+union_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1062,6 +1098,15 @@ full_join_df.show(truncate = False)
 # TODO Question 55
 # Write your PySpark solution below.
 
+# Create views for bookings_df, airline_df, and route_df 
+
+bookings_df.createOrReplaceTempView("bookings")
+airline_df.createOrReplaceTempView("airlines")
+route_df.createOrReplaceTempView("routes")
+
+spark.sql("SELECT * FROM bookings LIMIT 5").show(truncate = False)
+spark.sql("SELECT * FROM airlines LIMIT 5").show(truncate = False)
+spark.sql("SELECT * FROM routes LIMIT 5").show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1075,7 +1120,18 @@ full_join_df.show(truncate = False)
 # TODO Question 56
 # Write your PySpark solution below.
 
+bookings_df.where(F.col("ticket_amount") > 800 & (F.col("booking_status") == "CONFIRMED")).select(F.col("ticket_amount")).orderBy(F.col("ticket_amount").asc()).show(truncate = False)
 
+
+# Execute spark sql query which displays confirmed bookings above 8,000 displaying amount in descending order
+spark.sql(
+"""
+select * from bookings
+where booking_status = 'CONFIRMED'
+AND ticket_amount > 8000
+ORDER BY ticket_aount DESC
+"""
+)
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 57 — Spark SQL
@@ -1087,6 +1143,17 @@ full_join_df.show(truncate = False)
 # COMMAND ----------
 # TODO Question 57
 # Write your PySpark solution below.
+
+spark.sql("""
+    SELECT
+        passenger_name AS `Original name`,
+        TRIM(passenger_name) AS `Trimmed name`,
+        UPPER(TRIM(passenger_name)) AS `Upper name`,
+        LOWER(TRIM(passenger_name)) AS `Lower name`,
+        INITCAP(TRIM(passenger_name)) AS `Title name`,
+        LENGTH(TRIM(passenger_name)) AS `Length of name`
+    FROM bookings
+""").show(truncate=False)
 
 
 # COMMAND ----------
@@ -1101,6 +1168,18 @@ full_join_df.show(truncate = False)
 # TODO Question 58
 # Write your PySpark solution below.
 
+# Create a case to create same fare_category as Question #29
+spark.sql(
+"""
+SELECT
+FORMAT_NUMBER(ticket_amount, 2) AS ticket_amount,
+CASE
+WHEN ticket_amount >= 10000 THEN 'PREMIUM'
+WHEN ticket_amount >= 6000 THEN 'STANDARD'
+ELSE 'BUDGET'
+END AS fare_category
+FROM bookings
+""").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1114,6 +1193,11 @@ full_join_df.show(truncate = False)
 # TODO Question 59
 # Write your PySpark solution below.
 
+spark.sql(
+"""
+SELECT COALESCE(promo_discount,0) from bookings
+"""
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1127,6 +1211,22 @@ full_join_df.show(truncate = False)
 # TODO Question 60
 # Write your PySpark solution below.
 
+bookings_df.createOrReplaceTempView("bookings")
+
+Airline_aggregation_df = spark.sql("""
+    SELECT
+        airline_code,
+        COUNT(*) AS `Amount of bookings`,
+        ROUND(AVG(ticket_amount), 2) AS `Average ticket amount`,
+        ROUND(SUM(ticket_amount), 2) AS `Total ticket amount`,
+        ROUND(MIN(ticket_amount), 2) AS `Minimum ticket amount`,
+        ROUND(MAX(ticket_amount), 2) AS `Maximum ticket amount`
+    FROM bookings
+    GROUP BY airline_code
+    ORDER BY airline_code
+""")
+
+Airline_aggregation_df.show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1140,6 +1240,24 @@ full_join_df.show(truncate = False)
 # TODO Question 61
 # Write your PySpark solution below.
 
+# Join booking with airline and route views tables
+bookings_df.createOrReplaceTempView("bookings")
+airline_df.createOrReplaceTempView("airline")
+route_df.createOrReplaceTempView("route")
+
+joinDF = spark.sql(
+"""
+select 
+bookings.*,
+airline.airline_name
+from bookings
+join airline
+on bookings.airline_code = airline.airline_code
+join route
+on bookings.route_code = route.route_code
+
+"""
+).show(truncate = False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1153,6 +1271,10 @@ full_join_df.show(truncate = False)
 # TODO Question 62
 # Write your PySpark solution below.
 
+Airline_aggregation_df = Airline_aggregation_df.withColumnRenamed(
+    "Total ticket amount", "total_fare"
+)
+display(Airline_aggregation_df)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1165,6 +1287,7 @@ full_join_df.show(truncate = False)
 # COMMAND ----------
 # TODO Question 63
 # Write your PySpark solution below.
+
 
 
 # COMMAND ----------
