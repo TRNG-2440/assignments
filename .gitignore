@@ -3,7 +3,6 @@ __pycache__/
 *.py[codz]
 *$py.class
 .DS_Store
-*.ipynb
 
 # C extensions
 *.so
