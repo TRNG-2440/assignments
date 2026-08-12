@@ -1,0 +1,33 @@
+version: 2
+sources:
+  - name: olist_raw
+
+    database: DBT_BRAZIL
+    schema: OLIST_RAW
+
+    description: "Raw Data"
+
+    tables:
+      - name: customers
+        identifier: CUSTOMERS
+        description: "customer data"
+
+      - name: orders
+        identifier: ORDERS
+        description: "order data"
+
+      - name: order_items
+        identifier: ORDER_ITEMS
+        description: "order item data"
+
+      - name: products
+        identifier: PRODUCTS
+        description: "product data"
+
+      - name: order_payments
+        identifier: ORDER_PAYMENTS
+        description: "order payment data"
+
+      - name: product_category_translation
+        identifier: PRODUCT_CATEGORY_TRANSLATION
+        description: "product category translation data"
