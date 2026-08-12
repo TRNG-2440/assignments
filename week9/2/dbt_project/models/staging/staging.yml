@@ -1,0 +1,197 @@
+version: 2
+
+models:
+
+  - name: stg_customers
+    description: "Cleaned customer records, one row per order-level customer key"
+
+    columns:
+
+      - name: customer_id
+        description: "Order-level customer key"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_unique_id
+        description: "Stable identifier for the actual person across orders"
+        data_tests:
+          - not_null
+
+      - name: customer_state
+        description: "Two-letter Brazilian state code (UF)"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'AC'
+                  - 'AL'
+                  - 'AM'
+                  - 'AP'
+                  - 'BA'
+                  - 'CE'
+                  - 'DF'
+                  - 'ES'
+                  - 'GO'
+                  - 'MA'
+                  - 'MG'
+                  - 'MS'
+                  - 'MT'
+                  - 'PA'
+                  - 'PB'
+                  - 'PE'
+                  - 'PI'
+                  - 'PR'
+                  - 'RJ'
+                  - 'RN'
+                  - 'RO'
+                  - 'RR'
+                  - 'RS'
+                  - 'SC'
+                  - 'SE'
+                  - 'SP'
+                  - 'TO'
+
+
+  - name: stg_orders
+    description: "Cleaned order headers with lifecycle timestamps"
+
+    columns:
+
+      - name: order_id
+        description: "Unique order identifier"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Customer who placed the order"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+
+      - name: order_status
+        description: "Current stage of the order lifecycle"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'delivered'
+                  - 'shipped'
+                  - 'canceled'
+                  - 'unavailable'
+                  - 'invoiced'
+                  - 'processing'
+                  - 'created'
+                  - 'approved'
+
+      - name: order_purchase_timestamp
+        description: "When the order was placed"
+        data_tests:
+          - not_null
+
+
+  - name: stg_order_items
+    description: "Cleaned order line items, one row per product on an order"
+
+    columns:
+
+      - name: order_id
+        description: "Order the line belongs to"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+      - name: order_item_id
+        description: "Sequence number of the line within the order"
+        data_tests:
+          - not_null
+
+      - name: product_id
+        description: "Product sold on this line"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+
+      - name: price
+        description: "Item price in Brazilian Real"
+        data_tests:
+          - not_null
+
+
+  - name: stg_products
+    description: "Cleaned product master with category assigned"
+
+    columns:
+
+      - name: product_id
+        description: "Unique product identifier"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_category_name
+        description: "Portuguese category name, 'unknown' where the source is null"
+        data_tests:
+          - not_null
+
+
+  - name: stg_payments
+    description: "Cleaned payment records, one row per instrument used on an order"
+
+    columns:
+
+      - name: order_id
+        description: "Order the payment belongs to"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+      - name: payment_type
+        description: "Instrument used to pay"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'credit_card'
+                  - 'boleto'
+                  - 'voucher'
+                  - 'debit_card'
+                  - 'not_defined'
+
+      - name: payment_value
+        description: "Amount paid on this instrument"
+        data_tests:
+          - not_null
+
+
+  - name: stg_category_translation
+    description: "Portuguese to English product category lookup"
+
+    columns:
+
+      - name: product_category_name
+        description: "Portuguese category name"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_category_name_english
+        description: "English category name, title-cased for reporting"
+        data_tests:
+          - not_null

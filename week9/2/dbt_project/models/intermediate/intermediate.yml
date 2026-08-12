@@ -1,0 +1,41 @@
+version: 2
+
+models:
+
+  - name: int_order_items_enriched
+    description: >
+      Reusable order-item spine. One row per order line, joined to its order, customer,
+      product and English category name. Every mart builds on this model.
+
+    columns:
+
+      - name: order_item_key
+        description: "Surrogate key for the order line (order_id + order_item_id)"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Order the line belongs to"
+        data_tests:
+          - not_null
+
+      - name: customer_unique_id
+        description: "Stable identifier for the actual person"
+        data_tests:
+          - not_null
+
+      - name: product_category_name_english
+        description: "English category name, 'Unknown' where no translation exists"
+        data_tests:
+          - not_null
+
+      - name: order_status
+        description: "Current stage of the order lifecycle"
+        data_tests:
+          - not_null
+
+      - name: item_total_value
+        description: "Line revenue: price plus freight"
+        data_tests:
+          - not_null

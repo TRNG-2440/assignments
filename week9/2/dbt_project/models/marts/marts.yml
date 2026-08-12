@@ -1,0 +1,93 @@
+version: 2
+
+models:
+
+  - name: mart_category_performance
+    description: >
+      Sales performance by product category, delivered orders only. Answers which
+      categories contribute the highest sales.
+
+    columns:
+
+      - name: product_category_name_english
+        description: "English product category name"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: total_revenue
+        description: "Revenue for the category: sum of item price plus freight"
+        data_tests:
+          - not_null
+
+      - name: total_orders
+        description: "Distinct orders containing at least one item in the category"
+        data_tests:
+          - not_null
+
+
+  - name: mart_regional_performance
+    description: >
+      Sales performance by Brazilian state, classified into macro-regions using the
+      state_regions seed. Answers which geographical regions contribute the most business.
+
+    columns:
+
+      - name: customer_state
+        description: "Two-letter Brazilian state code (UF)"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: region_name
+        description: "Macro-region the state belongs to, from the state_regions seed"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'North'
+                  - 'Northeast'
+                  - 'Central-West'
+                  - 'Southeast'
+                  - 'South'
+
+      - name: total_revenue
+        description: "Revenue attributed to customers in the state"
+        data_tests:
+          - not_null
+
+
+  - name: mart_category_target_analysis
+    description: >
+      Actual category revenue measured against the business-maintained targets in the
+      category_targets seed. Answers which business areas are meeting or missing target.
+
+    columns:
+
+      - name: product_category_name_english
+        description: "English product category name"
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('mart_category_performance')
+                field: product_category_name_english
+
+      - name: target_status
+        description: "Whether the category met its revenue target"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'TARGET MET'
+                  - 'BELOW TARGET'
+                  - 'NO TARGET SET'
+
+      - name: revenue_variance
+        description: "Actual revenue minus target revenue; null where no target is set"
+
+      - name: priority_level
+        description: "Commercial priority from the seed; null where no target is set"
