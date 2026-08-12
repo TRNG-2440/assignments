@@ -1271,10 +1271,10 @@ on bookings.route_code = route.route_code
 # TODO Question 62
 # Write your PySpark solution below.
 
-Airline_aggregation_df = Airline_aggregation_df.withColumnRenamed(
+sql_airline_aggregation_df = Airline_aggregation_df.withColumnRenamed(
     "Total ticket amount", "total_fare"
 )
-display(Airline_aggregation_df)
+display(sql_airline_aggregation_df)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1288,7 +1288,14 @@ display(Airline_aggregation_df)
 # TODO Question 63
 # Write your PySpark solution below.
 
+# Declare new dataframe
+sql_airline_aggregation_df = Airline_aggregation_df
 
+# Write table to catelog
+sql_airline_aggregation_df.write.mode("overwrite").saveAsTable("sql_airline_aggregation")
+
+# Query table
+spark.table("sql_airline_aggregation").show(truncate=False)
 
 # COMMAND ----------
 # MAGIC %md
@@ -1302,6 +1309,8 @@ display(Airline_aggregation_df)
 # TODO Question 64
 # Write your PySpark solution below.
 
+# Add explain to idneitfy lineage
+sql_airline_aggregation_df.explain(mode="formatted")
 
 # COMMAND ----------
 # MAGIC %md
@@ -1316,6 +1325,19 @@ display(Airline_aggregation_df)
 # Write your PySpark solution below.
 
 
+# Examples from this assignment:
+filetered_df = bookings_df.filter(F.col("ticket_amount") > 8000)  
+selected_df = bookings_df.select("booking_id", "ticket_amount") 
+renamed_df = bookings_df.withColumnRenamed("booking_status", "reservation_status")  
+grouped_df = bookings_df.groupBy("airline_code").agg(F.sum("ticket_amount")) 
+sorted_df = bookings_df.orderBy(F.col("ticket_amount").desc()) 
+
+# Display # of rows
+print("Row count:", sql_airline_aggregation_df.count())
+
+# Display content
+print("Collected rows:", sql_airline_aggregation_df.collect())
+
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Question 66 — Partitions
@@ -1324,7 +1346,18 @@ display(Airline_aggregation_df)
 # MAGIC 
 # MAGIC **Functions/concepts:** `DataFrame.coalesce`
 
+
+
 # COMMAND ----------
 # TODO Question 66
 # Write your PySpark solution below.
 
+# TODO Question 66
+# Write your PySpark solution below.
+
+partition_df = sql_airline_aggregation_df.coalesce(1)
+
+print("Partitions before:", sql_airline_aggregation_df.rdd.getNumPartitions())
+print("Partitions after:", partition_df.rdd.getNumPartitions())
+
+partition_df.show(truncate=False)
