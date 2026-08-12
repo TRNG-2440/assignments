@@ -1,0 +1,65 @@
+version: 2
+
+seeds:
+
+  - name: category_targets
+    description: Annual sales targets by product category.
+
+    columns:
+
+      - name: product_category_name_english
+        description: "English product category name"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: target_revenue
+        description: "Annual revenue target for the category"
+        data_tests:
+          - not_null
+
+      - name: target_orders
+        description: "Annual order-count target for the category"
+        data_tests:
+          - not_null
+
+      - name: priority_level
+        description: "Commercial priority"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'HIGH'
+                  - 'MEDIUM'
+                  - 'LOW'
+
+
+  - name: state_regions
+    description: "Regions mapped to macro-region"
+
+    columns:
+
+      - name: customer_state
+        description: "Two-letter Brazilian state code"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: state_name
+        description: "Full state name"
+        data_tests:
+          - not_null
+
+      - name: region_name
+        description: "Official Brazilian macro-region the state belongs to"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'North'
+                  - 'Northeast'
+                  - 'Central-West'
+                  - 'Southeast'
+                  - 'South'

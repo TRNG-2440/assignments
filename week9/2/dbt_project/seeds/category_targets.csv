@@ -1,0 +1,11 @@
+product_category_name_english,target_revenue,target_orders,priority_level
+Health Beauty,1200000,9000,HIGH
+Watches Gifts,1100000,6000,HIGH
+Bed Bath Table,1300000,11000,HIGH
+Sports Leisure,1000000,8000,MEDIUM
+Computers Accessories,950000,7500,MEDIUM
+Furniture Decor,900000,8000,MEDIUM
+Housewares,700000,6500,MEDIUM
+Cool Stuff,600000,3500,LOW
+Auto,550000,4000,LOW
+Garden Tools,500000,4000,LOW
