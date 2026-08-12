@@ -1,0 +1,43 @@
+-- Reusable order-item spine: one row per order line, enriched with the order,
+-- customer and product/category context that the marts need.
+
+SELECT
+    OI.ORDER_ID || '-' || CAST(OI.ORDER_ITEM_ID AS VARCHAR) AS ORDER_ITEM_KEY,
+
+    OI.ORDER_ID,
+    OI.ORDER_ITEM_ID,
+
+    C.CUSTOMER_ID,
+    C.CUSTOMER_UNIQUE_ID,
+    C.CUSTOMER_STATE,
+    C.CUSTOMER_CITY,
+
+    OI.PRODUCT_ID,
+    OI.SELLER_ID,
+    P.PRODUCT_CATEGORY_NAME,
+    COALESCE(T.PRODUCT_CATEGORY_NAME_ENGLISH, 'Unknown') AS PRODUCT_CATEGORY_NAME_ENGLISH,
+
+    O.ORDER_STATUS,
+    O.ORDER_PURCHASE_TIMESTAMP,
+    O.ORDER_PURCHASE_DATE,
+    CAST(DATE_TRUNC('MONTH', O.ORDER_PURCHASE_TIMESTAMP) AS DATE) AS ORDER_PURCHASE_MONTH,
+    O.ORDER_DELIVERED_CUSTOMER_DATE,
+    O.ORDER_ESTIMATED_DELIVERY_DATE,
+
+    OI.PRICE,
+    OI.FREIGHT_VALUE,
+    OI.PRICE + OI.FREIGHT_VALUE AS ITEM_TOTAL_VALUE
+
+FROM {{ ref('stg_order_items') }} AS OI
+
+INNER JOIN {{ ref('stg_orders') }} AS O
+    ON OI.ORDER_ID = O.ORDER_ID
+
+INNER JOIN {{ ref('stg_customers') }} AS C
+    ON O.CUSTOMER_ID = C.CUSTOMER_ID
+
+LEFT JOIN {{ ref('stg_products') }} AS P
+    ON OI.PRODUCT_ID = P.PRODUCT_ID
+
+LEFT JOIN {{ ref('stg_category_translation') }} AS T
+    ON P.PRODUCT_CATEGORY_NAME = T.PRODUCT_CATEGORY_NAME

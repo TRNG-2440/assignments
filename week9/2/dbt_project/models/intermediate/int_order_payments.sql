@@ -1,0 +1,12 @@
+SELECT
+    ORDER_ID,
+
+    COUNT(*) AS PAYMENT_COUNT,
+    SUM(PAYMENT_VALUE) AS TOTAL_PAYMENT_VALUE,
+    MAX(PAYMENT_INSTALLMENTS) AS MAX_INSTALLMENTS,
+
+    -- The instrument carrying the largest share of the order value
+    MAX_BY(PAYMENT_TYPE, PAYMENT_VALUE) AS PRIMARY_PAYMENT_TYPE
+
+FROM {{ ref('stg_payments') }}
+GROUP BY ORDER_ID
