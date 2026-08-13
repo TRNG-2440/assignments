@@ -1,0 +1,4 @@
+order_id,customer_id,customer_name,product_category,order_amount,order_status,order_ts
+1001,C001,Ananya,Electronics,54000,PLACED,2026-08-12 09:10:00
+1002,C002,Ravi,Fashion,3200,PLACED,2026-08-12 09:15:00
+1003,C003,Meera,Home,7800,SHIPPED,2026-08-12 09:20:00

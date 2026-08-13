@@ -1,0 +1,4 @@
+order_id,customer_id,customer_name,product_category,order_amount,order_status,order_ts
+1004,C004,Arun,Electronics,22000,PLACED,2026-08-12 09:30:00
+1005,C001,Ananya,Home,4500,COMPLETED,2026-08-12 09:35:00
+1006,C005,Divya,Fashion,6800,CANCELLED,2026-08-12 09:40:00

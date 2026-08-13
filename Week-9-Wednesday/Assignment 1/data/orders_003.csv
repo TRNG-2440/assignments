@@ -1,0 +1,4 @@
+order_id,customer_id,customer_name,product_category,order_amount,order_status,order_ts
+1007,C006,Karthik,Electronics,18000,PLACED,2026-08-12 09:50:00
+1008,C002,Ravi,Home,9200,SHIPPED,2026-08-12 09:55:00
+1009,C007,Nisha,Fashion,5100,COMPLETED,2026-08-12 10:00:00
