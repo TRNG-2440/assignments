@@ -1,0 +1,33 @@
+version: 1
+sources:
+  - name: ecommerce_raw
+
+  database: ECOMMERCE_ASSIGNMENT_DB
+  schema: RAW
+
+  description: "raw ecommerce data from the github repo"
+
+  tables:
+    - name: customers
+      identifier: CUSTOMERS
+      description: "current customer master data"
+
+    - name: orders
+      identifier: ORDERS
+      description: "current order master data"
+
+    - name: order_items
+      identifier: ORDER_ITEMS
+      description: "current order items master data"
+
+    - name: products
+      identifier: PRODUCTS 
+      description: "current products master data"
+    
+    - name: order_payments
+      identifier: ORDER_PAYMENTS
+      description: "current order payments master data"
+    
+    - name: product_translations
+      identifier: PRODUCT_TRANSLATIONS
+      description: "current product translations master data"
