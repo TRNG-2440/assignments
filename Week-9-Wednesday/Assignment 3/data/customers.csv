@@ -1,0 +1,6 @@
+customer_id,customer_name,city,customer_segment,signup_date
+C001,Ananya,Bengaluru,PREMIUM,2026-06-01
+C002,Ravi,Chennai,STANDARD,2026-06-05
+C003,Meera,Hyderabad,PREMIUM,2026-06-10
+C004,Arun,Pune,STANDARD,2026-06-15
+C005,Divya,Bengaluru,STANDARD,2026-06-20
