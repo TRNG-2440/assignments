@@ -5,29 +5,29 @@ sources:
     database: DBT_BRAZIL
     schema: OLIST_RAW
 
-    description: "Raw Data"
+    description: "Raw Olist Brazilian e-commerce data, loaded from CSV with no transformation applied"
 
     tables:
       - name: customers
         identifier: CUSTOMERS
-        description: "customer data"
+        description: "One row per order-level customer key; customer_unique_id identifies the actual person"
 
       - name: orders
         identifier: ORDERS
-        description: "order data"
+        description: "Order headers with lifecycle status and delivery timestamps"
 
       - name: order_items
         identifier: ORDER_ITEMS
-        description: "order item data"
+        description: "Order line items; grain is order_id plus order_item_id"
 
       - name: products
         identifier: PRODUCTS
-        description: "product data"
+        description: "Product master with Portuguese category name and physical dimensions"
 
       - name: order_payments
         identifier: ORDER_PAYMENTS
-        description: "order payment data"
+        description: "One row per payment instrument used on an order; an order may have several"
 
       - name: product_category_translation
         identifier: PRODUCT_CATEGORY_TRANSLATION
-        description: "product category translation data"
+        description: "Lookup mapping Portuguese category names to English"

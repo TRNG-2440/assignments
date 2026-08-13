@@ -1,0 +1,19 @@
+snapshots:
+
+  - name: orders_snapshot
+    relation: source('olist_raw', 'orders')
+    description: >
+      Slowly-changing history of order records. Orders move through the lifecycle
+      created -> approved -> invoiced -> processing -> shipped -> delivered, and their
+      delivery timestamps fill in as they progress, so the source row for an order is
+      overwritten repeatedly. This snapshot preserves each version.
+
+    config:
+      schema: SNAPSHOTS
+      unique_key: order_id
+      strategy: check
+      check_cols:
+        - order_status
+        - order_approved_at
+        - order_delivered_carrier_date
+        - order_delivered_customer_date
