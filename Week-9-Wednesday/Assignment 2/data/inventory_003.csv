@@ -1,0 +1,4 @@
+event_id,product_id,product_name,warehouse_id,qty_on_hand,unit_price,event_ts
+8,P103,USB Hub,W02,48,1200,2026-08-12 10:00:00
+9,P104,Webcam,W02,38,3100,2026-08-12 10:01:00
+10,P105,Laptop Stand,W02,50,2100,2026-08-12 10:02:00

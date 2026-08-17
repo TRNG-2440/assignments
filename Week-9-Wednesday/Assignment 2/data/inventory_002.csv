@@ -1,0 +1,4 @@
+event_id,product_id,product_name,warehouse_id,qty_on_hand,unit_price,event_ts
+5,P101,Wireless Mouse,W01,105,850,2026-08-12 09:00:00
+6,P102,Keyboard,W01,82,1450,2026-08-12 09:01:00
+7,P105,Laptop Stand,W02,35,2100,2026-08-12 09:02:00

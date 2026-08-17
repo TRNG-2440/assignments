@@ -1,0 +1,5 @@
+event_id,product_id,product_name,warehouse_id,qty_on_hand,unit_price,event_ts
+1,P101,Wireless Mouse,W01,120,850,2026-08-12 08:00:00
+2,P102,Keyboard,W01,75,1450,2026-08-12 08:01:00
+3,P103,USB Hub,W02,60,1200,2026-08-12 08:02:00
+4,P104,Webcam,W02,45,3100,2026-08-12 08:03:00
