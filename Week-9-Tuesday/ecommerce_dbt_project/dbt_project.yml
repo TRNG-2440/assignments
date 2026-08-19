@@ -16,5 +16,9 @@ clean-targets:
 
 models:
   ecommerce_dbt_project:
-    example:
+    staging:
       +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
