@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: mart_category_sales
+    description: >
+      Product category sales performance. Answers which product categories
+      contribute the highest sales.
+    columns:
+      - name: product_category_name
+        description: "English product category, or unknown when a translation is missing."
+        tests:
+          - unique
+          - not_null
+      - name: order_count
+        description: "Number of distinct delivered orders that include this category."
+        tests:
+          - not_null
+      - name: item_count
+        description: "Number of delivered order items in this category."
+        tests:
+          - not_null
+      - name: total_sales
+        description: "Sum of item_price for the category. Primary sales KPI."
+        tests:
+          - not_null
+      - name: total_freight
+        description: "Sum of freight charges for the category."
+      - name: total_gmv
+        description: "Sum of item price plus freight for the category."
+      - name: sales_share_pct
+        description: "Category share of total sales, as a percentage."
+
+  - name: mart_region_performance
+    description: >
+      Sales by Brazilian geographic region and state. Combines delivered order
+      items with the region_classifications seed. Answers which geographical
+      regions contribute the most business.
+    columns:
+      - name: region_name
+        description: "Business region from the region_classifications seed, or Unknown."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - North
+                - Northeast
+                - Central-West
+                - Southeast
+                - South
+                - Unknown
+      - name: customer_state
+        description: "Two-letter Brazilian state code. Grain of this mart is region plus state."
+        tests:
+          - unique
+          - not_null
+      - name: order_count
+        description: "Number of distinct delivered orders from this state."
+        tests:
+          - not_null
+      - name: customer_count
+        description: "Number of distinct customers (customer_unique_id) from this state."
+        tests:
+          - not_null
+      - name: total_sales
+        description: "Sum of item_price for delivered orders from this state."
+        tests:
+          - not_null
+
+  - name: mart_customer_value
+    description: >
+      Customer lifetime value from delivered orders. Grain is customer_unique_id.
+      Answers which customers contribute the highest value.
+    columns:
+      - name: customer_unique_id
+        description: "Stable customer identifier across orders."
+        tests:
+          - unique
+          - not_null
+      - name: customer_city
+        description: "One city associated with the customer."
+      - name: customer_state
+        description: "One state associated with the customer."
+      - name: order_count
+        description: "Number of distinct delivered orders for the customer."
+        tests:
+          - not_null
+      - name: lifetime_value
+        description: "Sum of item_price across the customer's delivered orders."
+        tests:
+          - not_null
+      - name: avg_order_value
+        description: "Lifetime value divided by order count."

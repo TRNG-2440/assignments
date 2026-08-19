@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: int_order_item_details
+    description: >
+      Delivered order items enriched with customer, product, and English category
+      attributes. One row per order item. This is the reusable grain for the
+      category, region, and customer marts.
+    columns:
+      - name: order_id
+        description: "Order that contains this item."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: order_item_id
+        description: "Item sequence number within the order. Unique only together with order_id."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product sold on this line."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: customer_id
+        description: "Order-level customer key."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: customer_unique_id
+        description: "Stable customer identifier used for lifetime value."
+        tests:
+          - not_null
+      - name: customer_city
+        description: "Normalized customer city."
+      - name: customer_state
+        description: "Two-letter Brazilian state code."
+        tests:
+          - not_null
+      - name: order_status
+        description: "Order lifecycle status. This model keeps only delivered orders."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - delivered
+      - name: order_purchase_at
+        description: "Timestamp when the customer placed the order."
+      - name: product_category_name
+        description: "English category name when available, otherwise Portuguese or unknown."
+        tests:
+          - not_null
+      - name: item_price
+        description: "Item sale price used as the primary sales measure."
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Shipping charge allocated to this item."
+      - name: item_total
+        description: "Item price plus freight."

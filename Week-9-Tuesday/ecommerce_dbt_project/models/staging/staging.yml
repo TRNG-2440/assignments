@@ -1,3 +1,169 @@
-version: 1
+version: 2
 
 models:
+  - name: stg_customers
+    description: "Cleaned customer records. customer_id is unique per order; customer_unique_id identifies the actual person."
+    columns:
+      - name: customer_id
+        description: "Order-level customer key used to join to orders."
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: "Stable identifier for the real customer across orders."
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description: "Five-digit customer zip prefix stored as text."
+      - name: customer_city
+        description: "Normalized customer city name."
+      - name: customer_state
+        description: "Two-letter Brazilian state code."
+        tests:
+          - not_null
+
+  - name: stg_orders
+    description: "Cleaned order header records with standardized timestamps and status values."
+    columns:
+      - name: order_id
+        description: "Unique order identifier."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key to stg_customers.customer_id."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: order_status
+        description: "Current order lifecycle status."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - created
+                - approved
+                - invoiced
+                - processing
+                - shipped
+                - delivered
+                - canceled
+                - unavailable
+      - name: order_purchase_at
+        description: "Timestamp when the customer placed the order."
+      - name: order_approved_at
+        description: "Timestamp when payment was approved."
+      - name: order_delivered_carrier_at
+        description: "Timestamp when the order was handed to the carrier."
+      - name: order_delivered_customer_at
+        description: "Timestamp when the order was delivered to the customer."
+      - name: order_estimated_delivery_at
+        description: "Estimated delivery date promised to the customer."
+
+  - name: stg_order_items
+    description: "Cleaned order line items. One row per item within an order. item_price is the sales amount."
+    columns:
+      - name: order_id
+        description: "Foreign key to stg_orders.order_id."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: order_item_id
+        description: "Item sequence number within the order. Unique only together with order_id."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Foreign key to stg_products.product_id."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: seller_id
+        description: "Seller who fulfilled the item."
+      - name: shipping_limit_at
+        description: "Deadline for the seller to ship the item."
+      - name: item_price
+        description: "Item sale price used as the primary sales measure."
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Shipping charge allocated to this item."
+      - name: item_total
+        description: "Item price plus freight."
+
+  - name: stg_products
+    description: "Cleaned product catalog. Missing categories are labeled unknown."
+    columns:
+      - name: product_id
+        description: "Unique product identifier."
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: "Portuguese product category, or unknown when missing."
+        tests:
+          - not_null
+      - name: product_name_length
+        description: "Character length of the product name."
+      - name: product_description_length
+        description: "Character length of the product description."
+      - name: product_photos_qty
+        description: "Number of product photos."
+      - name: product_weight_g
+        description: "Product weight in grams."
+      - name: product_length_cm
+        description: "Product length in centimeters."
+      - name: product_height_cm
+        description: "Product height in centimeters."
+      - name: product_width_cm
+        description: "Product width in centimeters."
+
+  - name: stg_product_translations
+    description: "Portuguese to English product category name lookup."
+    columns:
+      - name: product_category_name
+        description: "Portuguese category name used to join to products."
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name_english
+        description: "English category name for reporting."
+        tests:
+          - not_null
+
+  - name: stg_order_payments
+    description: "Cleaned payment records. An order can have more than one payment row."
+    columns:
+      - name: order_id
+        description: "Foreign key to stg_orders.order_id."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_sequential
+        description: "Payment sequence number within the order."
+        tests:
+          - not_null
+      - name: payment_type
+        description: "Payment method used for this payment row."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - credit_card
+                - boleto
+                - voucher
+                - debit_card
+                - not_defined
+      - name: payment_installments
+        description: "Number of installments chosen by the customer."
+      - name: payment_value
+        description: "Amount paid on this payment row."
+        tests:
+          - not_null
